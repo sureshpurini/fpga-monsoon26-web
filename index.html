@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPGA-based Accelerator Design · Monsoon 2026 · IIIT Hyderabad</title>
+    <meta name="description"
+        content="Designing high-performance kernels on FPGAs with High-Level Synthesis (Vitis HLS) on the Alveo U50. Monsoon 2026, IIIT Hyderabad — instructor Suresh Purini.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header class="nav-bar">
+        <div class="container nav-inner">
+            <a href="#top" class="brand">FPGA · Accelerator Design</a>
+            <nav>
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#schedule">Schedule</a></li>
+                    <li><a href="#labs">Labs</a></li>
+                    <li><a href="#resources">Resources</a></li>
+                    <li><a href="#logistics">Logistics</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section id="top" class="hero">
+        <div class="hero-glow" aria-hidden="true"></div>
+        <div class="container hero-inner">
+            <p class="eyebrow">IIIT Hyderabad · Monsoon 2026</p>
+            <h1>FPGA-based Accelerator Design</h1>
+            <p class="hero-role">Designing high-performance kernels with High-Level Synthesis</p>
+            <p class="hero-tagline">
+                From a single line of C to a spatial datapath on real silicon. We build a
+                series of HLS kernels of increasing complexity on the AMD Alveo U50 — seeing
+                what happens under the hood, where performance stalls, and how to fix it.
+            </p>
+            <div class="hero-tags">
+                <span class="tag">High-Level Synthesis</span>
+                <span class="tag">Vitis HLS</span>
+                <span class="tag">Alveo U50</span>
+                <span class="tag">Systolic Arrays</span>
+                <span class="tag">Dynamic Programming</span>
+            </div>
+            <div class="hero-cta">
+                <!-- TODO: replace # with your Moodle course URL -->
+                <a href="#" class="button">Moodle (enrolled students)</a>
+                <a href="https://sureshpurini.github.io/" target="_blank" rel="noopener"
+                    class="button button-ghost">Instructor</a>
+            </div>
+        </div>
+    </section>
+
+    <main class="container">
+        <!-- Overview -->
+        <section id="overview" class="section reveal">
+            <span class="section-tag">01 — Overview</span>
+            <h2>About the Course</h2>
+            <p class="lead">
+                Special-purpose accelerators are how computing keeps scaling as general-purpose
+                gains slow. This course teaches you to design them productively — writing kernels
+                in C/C++ and using High-Level Synthesis to turn them into fast hardware on an FPGA.
+            </p>
+            <p>
+                We start from the simplest useful kernel and raise the complexity one obstacle at a
+                time: pipelining and initiation interval, memory banking and on-chip reuse, dataflow
+                and streaming, and finally spatial architectures — systolic arrays. Two research
+                papers anchor the arc: <em>Allo</em> (a composable programming model for spatial
+                accelerators) and <em>DP-HLS</em> (a framework for dynamic-programming kernels in
+                bioinformatics). Everything is hands-on: builds run on the department's cluster and
+                execute on a real AMD Alveo U50.
+            </p>
+            <div class="callout">
+                <strong>The one idea:</strong> a CPU streams a computation through <em>fixed</em>
+                hardware over time; an FPGA lays that same computation out in <em>space</em>. HLS is
+                the compiler that turns your C into that spatial layout — and this course is about
+                learning to guide it.
+            </div>
+            <div class="meta-row">
+                <span class="chip"><strong>Term</strong> · Monsoon 2026</span>
+                <span class="chip"><strong>Instructor</strong> · Suresh Purini</span>
+                <span class="chip"><strong>Prerequisites</strong> · C, Computer Architecture</span>
+                <!-- TODO: confirm credits / slot -->
+                <span class="chip"><strong>Credits</strong> · <span class="todo">TBD</span></span>
+            </div>
+        </section>
+
+        <!-- Schedule -->
+        <section id="schedule" class="section reveal">
+            <span class="section-tag">02 — Schedule</span>
+            <h2>Lecture Plan</h2>
+            <p>
+                A tentative 10-lecture arc. Slides and notes are posted on Moodle after each
+                lecture. Readings are the anchor papers (see <a href="#resources">Resources</a>).
+            </p>
+
+            <span class="block-label">Motivation</span>
+            <div class="table-wrap">
+                <table class="schedule">
+                    <thead>
+                        <tr><th>#</th><th>Topic</th><th>Reading</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="lnum">L1</td>
+                            <td class="ltopic">Why FPGAs, why HLS C, and how HLS builds hardware
+                                <span class="lblock">spatial vs temporal · C → CFG/DFG → schedule → datapath + FSM</span></td>
+                            <td class="reading">—</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <span class="block-label">FPGA optimization</span>
+            <div class="table-wrap">
+                <table class="schedule">
+                    <thead>
+                        <tr><th>#</th><th>Topic</th><th>Reading</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="lnum">L2</td>
+                            <td class="ltopic">The toolchain end-to-end, then the pipeline
+                                <span class="lblock">HLS → v++ → xclbin · host/XRT · pipelining &amp; initiation interval</span></td>
+                            <td class="reading">Allo §1–3</td>
+                        </tr>
+                        <tr>
+                            <td class="lnum">L3</td>
+                            <td class="ltopic">Why "just add pragmas" fails
+                                <span class="lblock">loop-carried dependencies · why II blows up · fixed vs floating point</span></td>
+                            <td class="reading">Allo Fig. 2</td>
+                        </tr>
+                        <tr>
+                            <td class="lnum">L4</td>
+                            <td class="ltopic">Memory: banking, partitioning, on-chip reuse
+                                <span class="lblock">array partitioning · tiling · the row-wise-product fix (223×)</span></td>
+                            <td class="reading">Allo §3, §5</td>
+                        </tr>
+                        <tr>
+                            <td class="lnum">L5</td>
+                            <td class="ltopic">Dataflow &amp; streaming: composing kernels
+                                <span class="lblock">DATAFLOW · FIFOs · interface unification across kernels</span></td>
+                            <td class="reading">Allo §3.2, §6</td>
+                        </tr>
+                        <tr>
+                            <td class="lnum">L6</td>
+                            <td class="ltopic">Systolic arrays
+                                <span class="lblock">processing elements · wavefront parallelism · building one from a vanilla kernel</span></td>
+                            <td class="reading">Allo §5, Table 2</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <span class="block-label">Compiler view</span>
+            <div class="table-wrap">
+                <table class="schedule">
+                    <thead>
+                        <tr><th>#</th><th>Topic</th><th>Reading</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="lnum">L7</td>
+                            <td class="ltopic">Under the ADL: MLIR &amp; schedule languages
+                                <span class="lblock">decoupling algorithm vs schedule · how Allo works end-to-end</span></td>
+                            <td class="reading">Allo §4–7</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <span class="block-label">Domain-specialized accelerators — DP-HLS</span>
+            <div class="table-wrap">
+                <table class="schedule">
+                    <thead>
+                        <tr><th>#</th><th>Topic</th><th>Reading</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="lnum">L8</td>
+                            <td class="ltopic">The 2-D dynamic-programming paradigm
+                                <span class="lblock">recurrences · traceback · mapping DP onto a linear systolic array</span></td>
+                            <td class="reading">DP-HLS §2–4</td>
+                        </tr>
+                        <tr>
+                            <td class="lnum">L9</td>
+                            <td class="ltopic">DP-HLS kernel internals
+                                <span class="lblock">PE function · arbitrary-precision types · traceback FSM · parallelism knobs</span></td>
+                            <td class="reading">DP-HLS §5</td>
+                        </tr>
+                        <tr>
+                            <td class="lnum">L10</td>
+                            <td class="ltopic">Variations, performance, wrap-up
+                                <span class="lblock">affine gaps · banding · vs RTL/GPU/CPU baselines · general vs specialized</span></td>
+                            <td class="reading">DP-HLS §6–7</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p style="margin-top:1.25rem; font-size:0.9rem; color:var(--ink-soft);">
+                <em>Schedule is tentative and will be refined as the semester progresses.</em>
+            </p>
+        </section>
+
+        <!-- Labs -->
+        <section id="labs" class="section reveal">
+            <span class="section-tag">03 — Labs &amp; Assignments</span>
+            <h2>Hands-on Work</h2>
+            <p>
+                Labs build the same kernel ladder as the lectures. You'll drive the flow with
+                <code>hlscribe</code>: C-simulation → synthesis → co-simulation → bitstream → run on
+                the U50. Assignments are distributed and submitted through GitHub Classroom
+                (link posted on Moodle).
+            </p>
+            <div class="cards">
+                <article class="card">
+                    <span class="kicker">Lab 1</span>
+                    <h4>Vector Add on the U50</h4>
+                    <p>The full flow end-to-end on the simplest useful kernel — from C-sim to running
+                        on real hardware.</p>
+                </article>
+                <article class="card soon">
+                    <span class="kicker">Coming</span>
+                    <h4>GEMM: the optimization ladder</h4>
+                    <p>Naive → pragma-only (and why it stalls) → row-wise product at II=1 → systolic
+                        array.</p>
+                </article>
+                <article class="card soon">
+                    <span class="kicker">Coming</span>
+                    <h4>Sequence alignment (DP-HLS)</h4>
+                    <p>A 2-D dynamic-programming kernel mapped to a linear systolic array on the U50.</p>
+                </article>
+            </div>
+        </section>
+
+        <!-- Resources -->
+        <section id="resources" class="section reveal">
+            <span class="section-tag">04 — Resources</span>
+            <h2>Papers &amp; Tools</h2>
+
+            <h3>Anchor papers</h3>
+            <ul class="reslist">
+                <li>
+                    <div class="rtitle">Allo: A Programming Model for Composable Accelerator Design</div>
+                    <div class="rmeta">Chen et al., PLDI 2024 · open access (CC-BY)</div>
+                    <div class="links">
+                        <a href="https://doi.org/10.1145/3656401" target="_blank" rel="noopener">DOI</a>
+                        <a href="https://github.com/cornell-zhang/allo" target="_blank" rel="noopener">Code</a>
+                    </div>
+                </li>
+                <li>
+                    <div class="rtitle">DP-HLS: An HLS Framework for Accelerating Dynamic Programming
+                        Algorithms in Bioinformatics</div>
+                    <div class="rmeta">Cao et al., 2024 · arXiv:2411.03398</div>
+                    <div class="links">
+                        <a href="https://arxiv.org/abs/2411.03398" target="_blank" rel="noopener">arXiv</a>
+                        <a href="https://github.com/TurakhiaLab/DP-HLS" target="_blank" rel="noopener">Code</a>
+                    </div>
+                </li>
+            </ul>
+
+            <h3 style="margin-top:1.75rem;">Tools &amp; references</h3>
+            <ul class="reslist">
+                <li>
+                    <div class="rtitle">AMD Vitis HLS — User Guide (UG1399) &amp; tutorials</div>
+                    <div class="rmeta">The HLS toolchain we use throughout the course</div>
+                    <div class="links">
+                        <a href="https://docs.amd.com/r/en-US/ug1399-vitis-hls" target="_blank" rel="noopener">Docs</a>
+                    </div>
+                </li>
+                <li>
+                    <div class="rtitle">hlscribe</div>
+                    <div class="rmeta">Scaffolding + build/DSE driver for the labs</div>
+                    <div class="links">
+                        <a href="https://github.com/CSG-AgenticAI/hlscribe" target="_blank" rel="noopener">GitHub</a>
+                    </div>
+                </li>
+                <li>
+                    <div class="rtitle">The HLS Blue Book (Fingeroff)</div>
+                    <div class="rmeta">Supplementary reading — provided to enrolled students on Moodle</div>
+                </li>
+            </ul>
+            <p style="margin-top:1rem; font-size:0.9rem; color:var(--ink-soft);">
+                Toolchain access, the U50 environment, and setup guides are on Moodle for enrolled
+                students.
+            </p>
+        </section>
+
+        <!-- Logistics -->
+        <section id="logistics" class="section reveal">
+            <span class="section-tag">05 — Logistics</span>
+            <h2>Course Logistics</h2>
+            <div class="logistics">
+                <div>
+                    <h3>At a glance</h3>
+                    <dl>
+                        <dt>Instructor</dt><dd>Suresh Purini</dd>
+                        <!-- TODO: fill these in -->
+                        <dt>Lectures</dt><dd><span class="todo">Days / time — TBD</span></dd>
+                        <dt>Venue</dt><dd><span class="todo">TBD</span></dd>
+                        <dt>Office hours</dt><dd><span class="todo">TBD</span></dd>
+                        <dt>TAs</dt><dd><span class="todo">TBD</span></dd>
+                        <dt>Announcements</dt><dd>via Moodle</dd>
+                    </dl>
+                </div>
+                <div>
+                    <h3>Grading <span class="todo" style="font-size:0.8rem;">(tentative)</span></h3>
+                    <table class="grade-table">
+                        <thead><tr><th>Component</th><th>Weight</th></tr></thead>
+                        <tbody>
+                            <!-- TODO: set your actual weights -->
+                            <tr><td>Labs / assignments</td><td>TBD</td></tr>
+                            <tr><td>Project</td><td>TBD</td></tr>
+                            <tr><td>Midterm</td><td>TBD</td></tr>
+                            <tr><td>Final</td><td>TBD</td></tr>
+                        </tbody>
+                    </table>
+                    <p style="margin-top:1rem; font-size:0.88rem;">
+                        Academic honesty: all submitted work must be your own; collaboration and tool
+                        policies are stated on Moodle.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>FPGA-based Accelerator Design · Monsoon 2026 · <a href="https://sureshpurini.github.io/"
+                    target="_blank" rel="noopener">Suresh Purini</a> · Computer Systems Group, IIIT
+                Hyderabad</p>
+        </div>
+    </footer>
+
+    <script>
+        // Reveal sections on scroll
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach((e) => {
+                if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); }
+            });
+        }, { threshold: 0.12 });
+        document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+    </script>
+</body>
+
+</html>
