@@ -79,6 +79,9 @@ a { color: var(--brand); }
 }
 .hero-role { font-size: 1.15rem; font-weight: 500; color: #c3cadb; margin-bottom: 1rem; }
 .hero-tagline { max-width: 56ch; color: #aeb6c9; font-size: 1.02rem; margin-bottom: 1.5rem; }
+.hero-meta { color: #c3cadb; font-size: 0.98rem; }
+.hero-meta a { color: var(--brand-2); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+.hero-meta a:hover { border-color: var(--brand-2); }
 .hero-tags { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 2rem; }
 .tag {
     font-size: 0.82rem; font-weight: 500; padding: 0.4rem 0.85rem; border-radius: 999px;
