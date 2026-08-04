@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lecture 1 Handout — Why FPGAs & How HLS Builds Hardware</title>
+<meta name="description" content="Student handout for Lecture 1 of FPGA-based Accelerator Design (Monsoon 2026): why FPGAs, why HLS C, and how HLS turns C into a datapath + FSM.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#4f46e5;--brand-2:#06b6d4;--ink:#1d2330;--ink-soft:#5a6477;
+--line:#e6e9f2;--bg:#f4f6fb;--surface:#fff;--code-bg:#f1f3fb;--accent:#f59e0b;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+line-height:1.7;-webkit-font-smoothing:antialiased;}
+.topbar{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.85);
+backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line);}
+.topbar .in{max-width:820px;margin:0 auto;padding:.8rem 24px;display:flex;
+justify-content:space-between;align-items:center;}
+.topbar a{color:var(--brand);text-decoration:none;font-weight:600;font-size:.9rem;}
+.topbar .home{color:var(--ink-soft);}
+main{max-width:820px;margin:2rem auto 4rem;padding:2.5rem;background:var(--surface);
+border:1px solid var(--line);border-radius:16px;
+box-shadow:0 10px 30px -12px rgba(20,25,50,.15);}
+h1{font-family:'Fraunces',serif;font-size:2rem;line-height:1.15;letter-spacing:-.01em;
+margin:0 0 .3rem;}
+h2{font-family:'Fraunces',serif;font-size:1.5rem;letter-spacing:-.01em;
+margin:2.6rem 0 .9rem;padding-top:1.2rem;border-top:1px solid var(--line);color:#161b28;}
+h3{font-size:1.15rem;margin:1.8rem 0 .5rem;color:#232a3a;}
+p{margin:.9rem 0;color:#28303f;}
+a{color:var(--brand);}
+em{color:var(--ink-soft);}
+ul,ol{padding-left:1.3rem;}
+li{margin:.3rem 0;}
+code{font-family:'SFMono-Regular',Menlo,Consolas,monospace;font-size:.88em;
+background:var(--code-bg);padding:.12em .4em;border-radius:5px;color:#1c2540;}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+padding:1rem 1.15rem;overflow-x:auto;line-height:1.5;}
+pre code{background:none;padding:0;font-size:.86rem;}
+table{border-collapse:collapse;width:100%;margin:1.2rem 0;font-size:.92rem;
+display:block;overflow-x:auto;}
+th{background:var(--brand);color:#fff;text-align:left;padding:.55rem .8rem;
+font-weight:600;font-size:.82rem;}
+td{padding:.55rem .8rem;border-bottom:1px solid var(--line);vertical-align:top;
+color:#333c4d;}
+tr:nth-child(even) td{background:#fafbff;}
+blockquote{margin:1.4rem 0;padding:1rem 1.3rem;background:
+linear-gradient(135deg,rgba(79,70,229,.06),rgba(6,182,212,.05));
+border-left:4px solid var(--accent);border-radius:10px;color:#2b3343;}
+blockquote p{margin:.3rem 0;}
+figure{margin:1.6rem 0;text-align:center;}
+figure img{max-width:100%;height:auto;}
+.subtitle{color:var(--ink-soft);font-style:italic;margin-top:0;}
+@media(max-width:640px){main{padding:1.5rem 1.2rem;margin:1rem;border-radius:12px;}
+h1{font-size:1.6rem}h2{font-size:1.3rem}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="in">
+<a class="home" href="../index.html">← Course home</a>
+<a href="../slides/L1.html" target="_blank" rel="noopener">L1 slides →</a>
+</div></div>
+<main>
+<h1>Lecture 1 — Why FPGAs, why HLS C, and how HLS builds hardware</h1>
+<p><em>Student handout · FPGA-based Accelerator Design · Monsoon 2026</em></p>
+<p><strong>Scope.</strong> How a C program becomes hardware — the <em>mechanism</em>. Pipelining, the
+toolchain, and running on the Alveo U50 come in Lecture 2. This handout follows the
+Lecture 1 slides.</p>
+<blockquote>
+<p><strong>Thesis (the spine of the whole course).</strong> Computation has a structure — a
+control/data-flow graph. A CPU/GPU streams that structure through <strong>fixed</strong>
+hardware over <em>time</em> (<strong>temporal</strong>); an FPGA lays it out in <strong>space</strong> as a custom
+datapath + controller (<strong>spatial</strong>). "Why FPGAs" and "how HLS works" are the same
+idea at two zoom levels — and HLS is what turns your C's graph into that spatial
+layout automatically.</p>
+</blockquote>
+<h2>Learning outcomes</h2>
+<p>By the end of this lecture you can explain:</p>
+<ol>
+<li>Why an FPGA accelerator differs from CPU/GPU execution (spatial vs temporal).</li>
+<li>Why C code does <strong>not</strong> uniquely define hardware.</li>
+<li>What a basic block and a CFG are; what a DFG / dependence graph is.</li>
+<li>How HLS derives operations and dependences from C.</li>
+<li>The difference between <strong>scheduling</strong>, <strong>allocation</strong>, and <strong>binding</strong>.</li>
+<li>How a schedule becomes a <strong>datapath + FSM + memory/interface</strong>.</li>
+<li>Why HLS is a <em>compiler choosing an architecture</em>, not a C-to-Verilog translator.</li>
+</ol>
+<h2>Running example (built in two stages)</h2>
+<p>Stage A is pure datapath (no control flow) — the clean vehicle for scheduling and
+binding. Stage B adds a loop and a branch — the vehicle for the CFG and control
+construction. <strong>Drop the <code>if</code> from Stage B and you have the dense dot product = the
+GEMM inner loop we optimize in L2–L6.</strong> The continuity is deliberate.</p>
+<pre><code class="language-c">// Stage A — one basic block, no control flow
+z = a*b + c*d;
+
+// Stage B — loop with a conditional (a masked / sparse MAC)
+acc = 0;
+for (int i = 0; i &lt; N; i++) {
+    int x = a[i];
+    if (x &gt; threshold)
+        acc += x * b[i];      // multiply-accumulate on the taken path
+}
+*result = acc;
+</code></pre>
+<h2>Part I — Why specialize, and why a high-level language</h2>
+<p>Three questions, in order: <strong>(A)</strong> why not write the hardware directly in RTL?
+<strong>(B)</strong> ASIC or FPGA? <strong>(C)</strong> why build custom hardware at all instead of a CPU/GPU?</p>
+<h3>A. Modern accelerators are complex — RTL alone doesn't scale</h3>
+<p>Modern accelerators (ML inference engines, video codecs, genomics, packet
+processors) are millions of gates: deep pipelines, many parallel units, elaborate
+on-chip memory. Describing that directly in <strong>RTL (Verilog/VHDL)</strong> means
+hand-specifying every register, wire, FSM, and cycle of timing — which is:</p>
+<ul>
+<li><strong>slow &amp; costly</strong> — high lines-of-code per unit of function; months of effort;</li>
+<li><strong>error-prone</strong> — manual pipelining, hazards, handshakes;</li>
+<li><strong>hard to verify</strong> — RTL simulation is slow, bugs surface late;</li>
+<li><strong>hard to explore</strong> — a different microarchitecture means rewriting the RTL.</li>
+</ul>
+<p>So the field raised the abstraction level with <strong>higher-level hardware languages</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Language</th>
+<th>Level</th>
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>HLS C/C++</strong> (Vitis HLS, Catapult)</td>
+<td>algorithm</td>
+<td>write the <em>algorithm</em> in C; big productivity jump; fast design-space exploration; C-level functional verification</td>
+<td>less direct control of microarchitecture; quality-of-results can lag hand-RTL; needs guidance (pragmas); not all C is synthesizable</td>
+</tr>
+<tr>
+<td><strong>Bluespec (BSV)</strong></td>
+<td>"productive RTL"</td>
+<td>guarded atomic rules → correct-by-construction concurrency; strong static types &amp; elaboration</td>
+<td>steeper learning curve; smaller ecosystem; you still think in hardware</td>
+</tr>
+<tr>
+<td><strong>Chisel</strong></td>
+<td>RTL generator (Scala)</td>
+<td>parameterized generators; software abstractions; powers RISC-V cores (Rocket, BOOM)</td>
+<td>still structural RTL underneath; Scala learning curve</td>
+</tr>
+</tbody>
+</table>
+<p><strong>HLS C is the highest</strong> on this spectrum — you write <em>what</em> to compute; Chisel and
+Bluespec are <em>productive RTL</em> (still <em>how</em>, but safer and parameterized). <strong>This
+course uses HLS C</strong> — the biggest productivity jump, and the only one that lets you
+start from an algorithm. The price of that jump is the whole rest of the lecture:
+because C says nothing about cycles or hardware, a <strong>compiler must invent the
+microarchitecture</strong>. That compiler is HLS.</p>
+<h3>B. Where do you put it? ASIC vs FPGA</h3>
+<p>The same RTL — hand-written or emitted by HLS — can be implemented two ways:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>ASIC</strong></th>
+<th><strong>FPGA</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What</td>
+<td>custom-fabricated chip</td>
+<td>reconfigurable fabric (LUTs, FFs, DSPs, BRAM)</td>
+</tr>
+<tr>
+<td><strong>NRE</strong> (upfront)</td>
+<td><strong>very high</strong> — masks, design, verification (up to $M at advanced nodes)</td>
+<td><strong>~zero</strong> — buy the part, reprogram freely</td>
+</tr>
+<tr>
+<td>Per-unit cost</td>
+<td>low at volume</td>
+<td>higher</td>
+</tr>
+<tr>
+<td>Perf / power / area</td>
+<td>best</td>
+<td>~5–20× worse clock, more area &amp; power</td>
+</tr>
+<tr>
+<td>Time-to-market</td>
+<td>months–years, frozen at tape-out</td>
+<td>days; reprogrammable, bugs fixable</td>
+</tr>
+<tr>
+<td>Best for</td>
+<td>high volume, fixed function</td>
+<td>low/medium volume, prototyping, evolving workloads</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Break-even.</strong> Total cost ≈ NRE + (per-unit × volume). ASIC = high intercept,
+shallow slope; FPGA = ~0 intercept, steep slope. They cross at a <strong>break-even
+volume N*</strong>: below it FPGA is cheaper, above it ASIC wins.</p>
+<p><figure><img alt="ASIC vs FPGA break-even — ASIC: high NRE, shallow slope; FPGA: ~0 NRE, steep slope; they cross at N*, FPGA cheaper below it, ASIC above" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MzAgMzAwIiB3aWR0aD0iNDMwIiBoZWlnaHQ9IjMwMCIgZm9udC1mYW1pbHk9IkludGVyLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj4KICA8IS0tIGF4ZXMgLS0+CiAgPGxpbmUgeDE9IjU1IiB5MT0iMjAiIHgyPSI1NSIgeTI9IjI1NSIgc3Ryb2tlPSIjNTU2MzVmIiBzdHJva2Utd2lkdGg9IjEuNSIvPgogIDxsaW5lIHgxPSI1NSIgeTE9IjI1NSIgeDI9IjQxNSIgeTI9IjI1NSIgc3Ryb2tlPSIjNTU2MzVmIiBzdHJva2Utd2lkdGg9IjEuNSIvPgogIDx0ZXh0IHg9IjEyIiB5PSIyMCIgZm9udC1zaXplPSIxMyIgZmlsbD0iIzU1NjM1ZiI+dG90YWw8L3RleHQ+CiAgPHRleHQgeD0iMjAiIHk9IjM1IiBmb250LXNpemU9IjEzIiBmaWxsPSIjNTU2MzVmIj5jb3N0PC90ZXh0PgogIDx0ZXh0IHg9IjM2MCIgeT0iMjc4IiBmb250LXNpemU9IjEzIiBmaWxsPSIjNTU2MzVmIj52b2x1bWUg4oaSPC90ZXh0PgoKICA8IS0tIE4qIGd1aWRlIGxpbmUgKGNyb3NzaW5nIGF0IHg9MjMwLCB5PTEzMCkgLS0+CiAgPGxpbmUgeDE9IjIzMCIgeTE9IjEzMCIgeDI9IjIzMCIgeTI9IjI1NSIgc3Ryb2tlPSIjOWFhOGE1IiBzdHJva2Utd2lkdGg9IjEiIHN0cm9rZS1kYXNoYXJyYXk9IjQgNCIvPgogIDx0ZXh0IHg9IjIyMiIgeT0iMjczIiBmb250LXNpemU9IjEzIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIj5OKjwvdGV4dD4KCiAgPCEtLSBGUEdBOiB+MCBOUkUsIHN0ZWVwIHNsb3BlICh0ZWFsKSAtLT4KICA8bGluZSB4MT0iNTUiIHkxPSIyNDgiIHgyPSIzMzAiIHkyPSI2MyIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjMiLz4KICA8dGV4dCB4PSIyNDMiIHk9Ijk4IiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMGU3NDkwIj5GUEdBPC90ZXh0PgoKICA8IS0tIEFTSUM6IGhpZ2ggTlJFLCBzaGFsbG93IHNsb3BlIChvcmFuZ2UpIC0tPgogIDxsaW5lIHgxPSI1NSIgeTE9IjE4MCIgeDI9IjQxNSIgeTI9Ijc3IiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMyIvPgogIDx0ZXh0IHg9IjM0NSIgeT0iODgiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiNjMjQxMGMiPkFTSUM8L3RleHQ+CgogIDwhLS0gTlJFIGJyYWNrZXQgb24geS1heGlzIC0tPgogIDxsaW5lIHgxPSI0OCIgeTE9IjI1NSIgeDI9IjQ4IiB5Mj0iMTgwIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMS41Ii8+CiAgPHRleHQgeD0iNjAiIHk9IjIxNiIgZm9udC1zaXplPSIxMiIgZmlsbD0iI2MyNDEwYyI+TlJFPC90ZXh0PgoKICA8IS0tIGNyb3NzaW5nIGRvdCAtLT4KICA8Y2lyY2xlIGN4PSIyMzAiIGN5PSIxMzAiIHI9IjQuNSIgZmlsbD0iIzE0MjAxZiIvPgoKICA8IS0tIHJlZ2lvbiBsYWJlbHMgLS0+CiAgPHRleHQgeD0iOTAiIHk9IjI0MiIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzBlNzQ5MCI+RlBHQSBjaGVhcGVyPC90ZXh0PgogIDx0ZXh0IHg9IjMwMCIgeT0iMjQyIiBmb250LXNpemU9IjExIiBmaWxsPSIjYzI0MTBjIj5BU0lDIGNoZWFwZXI8L3RleHQ+Cjwvc3ZnPgo="></figure></p>
+<p>Volume — plus <strong>reconfigurability</strong> and <strong>time-to-market</strong> — decides. For
+fast-moving workloads (ML changes faster than a ~2-year tape-out), reprogrammability
+<em>itself</em> is a reason to pick FPGA. <strong>We target FPGA</strong>: the productive, reprogrammable
+path — and the same HLS C can drive an ASIC flow later.</p>
+<h3>C. Why custom hardware at all? The cost of instructions</h3>
+<p>Why not just run everything on a CPU/GPU? Because a general-purpose processor spends
+most of its <strong>energy not on your computation</strong>. Every operation goes through
+<strong>fetch → decode → (schedule) → register-file → execute</strong>. For a single 32-bit add,
+the ALU work is a sliver of the energy; <strong>instruction supply and data movement
+dominate.</strong></p>
+<p>Representative 45 nm energy (Horowitz, <em>Computing's Energy Problem</em>, ISSCC 2014 —
+orders of magnitude, not exact):</p>
+<ul>
+<li>32-bit int <strong>add</strong> ≈ 0.1 pJ · 32-bit <strong>multiply</strong> ≈ 3 pJ · FP add ≈ 0.9 pJ</li>
+<li>instruction <strong>fetch + decode + control</strong> ≈ <em>tens</em> of pJ per instruction</li>
+<li>8 KB SRAM read ≈ ~10 pJ · a <strong>DRAM</strong> access ≈ ~1000+ pJ</li>
+</ul>
+<p>The arithmetic is often <strong>&lt; 10%</strong> of the energy — the rest is overhead. (Hameed et
+al., ISCA 2010, measured general-purpose chips ~10–100× less efficient than a
+specialized datapath for the same task.) Call it a poor <strong>instruction-to-useful-work
+ratio</strong>, and watch each architecture attack it:</p>
+<table>
+<thead>
+<tr>
+<th>Arch</th>
+<th>Instruction model</th>
+<th>Flexibility</th>
+<th>Perf/Watt</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CPU (scalar)</strong></td>
+<td>1 instruction → 1 op</td>
+<td>highest</td>
+<td>lowest</td>
+</tr>
+<tr>
+<td><strong>SIMD / GPU (SIMT)</strong></td>
+<td>1 instruction → <em>N</em> ops</td>
+<td>high</td>
+<td>medium</td>
+</tr>
+<tr>
+<td><strong>GPU Tensor core</strong></td>
+<td>1 instruction → a matrix tile</td>
+<td>medium</td>
+<td>higher</td>
+</tr>
+<tr>
+<td><strong>FPGA</strong></td>
+<td><em>no instructions</em> — reconfigurable datapath</td>
+<td>medium (reprogram)</td>
+<td>high</td>
+</tr>
+<tr>
+<td><strong>ASIC</strong></td>
+<td><em>no instructions</em> — fixed datapath</td>
+<td>none</td>
+<td>highest</td>
+</tr>
+</tbody>
+</table>
+<p>SIMD/vector and Tensor cores <strong>amortize</strong> fetch/decode over more work per
+instruction. FPGAs/ASICs go all the way: <strong>no instruction stream</strong> — the "program"
+is the <em>wiring</em>, data flows through fixed operators every cycle, and the instruction
+tax goes to <strong>zero</strong>. That's why spatial hardware wins on <strong>performance per watt</strong>
+(ops/joule) for fixed or streaming workloads. FPGAs add two more levers: <strong>custom
+bit-widths</strong> (use exactly the precision you need, not 32 bits) and <strong>deterministic
+low-latency streaming</strong>. The cost of all this: you <em>build</em> hardware per workload
+instead of running an arbitrary program.</p>
+<blockquote>
+<p><strong>The thesis.</strong> A CPU/GPU streams a computation through <strong>fixed</strong> hardware over
+<em>time</em> (<strong>temporal</strong>), paying an instruction tax each step. An FPGA lays the same
+computation out in <strong>space</strong> as a custom datapath (<strong>spatial</strong>) and stops paying
+it. "Why FPGAs" and "how HLS works" are the same idea at two zoom levels — and HLS
+is what turns your C into that spatial layout.</p>
+</blockquote>
+<h2>Part II — "C is not hardware"</h2>
+<p>We picked HLS C for the productivity jump (Part I.A). The catch — and the reason HLS
+is a <strong>compiler, not a translator</strong> — is that C <em>under-specifies</em> the hardware. This
+one line:</p>
+<pre><code class="language-c">z = a*b + c*d;
+</code></pre>
+<p>does <strong>not</strong> specify any of:</p>
+<ul>
+<li>whether each multiply/add takes one cycle or several,</li>
+<li>whether operators are <strong>shared</strong> across cycles,</li>
+<li>operand <strong>bit widths</strong>,</li>
+<li><strong>pipeline depth</strong>,</li>
+<li><strong>clock frequency</strong>,</li>
+<li><strong>interface protocol</strong>.</li>
+</ul>
+<p>Because C leaves all of this open, turning it into hardware is a <strong>compilation and
+search problem</strong> — which the rest of the lecture unpacks. (We schedule <em>exactly this
+expression</em> in Part III.)</p>
+<p>An honest caveat that seeds the whole course: HLS won't give good hardware for free —
+you must guide it, and that guidance is what L2–L6 are about.</p>
+<h2>Part III — From C to hardware: a first example (Stage A)</h2>
+<p>We develop the whole mechanism on the simplest possible kernel — a single expression
+with <strong>no control flow</strong> — then let Stage B (Part IV) add the control-flow machinery.</p>
+<pre><code class="language-c">z = a*b + c*d;
+</code></pre>
+<p><strong>One basic block.</strong> A <em>basic block</em> is straight-line code with one entry and one
+exit — this whole kernel is one. HLS builds <strong>two graphs</strong> from your code: a <strong>CFG</strong>
+(control — which basic blocks execute) and a <strong>DFG</strong> (data — which values depend on
+which). With a single basic block the <strong>CFG is one node</strong>, so Stage A is a clean
+vehicle for the <strong>DFG</strong>, and then <strong>scheduling, allocation, binding</strong>.</p>
+<h3>The data-flow graph (DFG)</h3>
+<p>The DFG captures <em>data dependence only</em>: the two multiplies are independent of each
+other; the add needs both products. No order is imposed beyond "the add waits for its
+inputs" — that freedom is exactly what scheduling resolves next.</p>
+<p><figure><img alt="Stage A DFG — two independent multiplies feeding an adder that produces z" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzODAgMjUwIiB3aWR0aD0iMzgwIiBoZWlnaHQ9IjI1MCIgZm9udC1mYW1pbHk9IkludGVyLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj4KICA8ZGVmcz4KICAgIDxtYXJrZXIgaWQ9ImFoIiBtYXJrZXJXaWR0aD0iOSIgbWFya2VySGVpZ2h0PSI5IiByZWZYPSI2LjUiIHJlZlk9IjMiIG9yaWVudD0iYXV0byI+CiAgICAgIDxwYXRoIGQ9Ik0wLDAgTDYuNSwzIEwwLDYgWiIgZmlsbD0iIzU1NjM1ZiIvPgogICAgPC9tYXJrZXI+CiAgPC9kZWZzPgoKICA8IS0tIGlucHV0IHRlcm1pbmFscyAtLT4KICA8dGV4dCB4PSI1NSIgIHk9IjI4IiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5hPC90ZXh0PgogIDx0ZXh0IHg9IjExNSIgeT0iMjgiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmI8L3RleHQ+CiAgPHRleHQgeD0iMjY1IiB5PSIyOCIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+YzwvdGV4dD4KICA8dGV4dCB4PSIzMjUiIHk9IjI4IiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5kPC90ZXh0PgoKICA8IS0tIGlucHV0IGVkZ2VzIGludG8gbXVsdGlwbGllcnMgLS0+CiAgPGxpbmUgeDE9IjU1IiAgeTE9IjM2IiB4Mj0iNzIiICB5Mj0iNzIiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPGxpbmUgeDE9IjExNSIgeTE9IjM2IiB4Mj0iOTgiICB5Mj0iNzIiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPGxpbmUgeDE9IjI2NSIgeTE9IjM2IiB4Mj0iMjgyIiB5Mj0iNzIiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPGxpbmUgeDE9IjMyNSIgeTE9IjM2IiB4Mj0iMzA4IiB5Mj0iNzIiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CgogIDwhLS0gbXVsdGlwbGllcnMgLS0+CiAgPHJlY3QgeD0iNTciICB5PSI3OCIgd2lkdGg9IjU2IiBoZWlnaHQ9IjM0IiByeD0iNyIgZmlsbD0iI2YxZjZmNyIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8dGV4dCB4PSI4NSIgIHk9IjEwMCIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBlNzQ5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+bXVsPC90ZXh0PgogIDxyZWN0IHg9IjI2NyIgeT0iNzgiIHdpZHRoPSI1NiIgaGVpZ2h0PSIzNCIgcng9IjciIGZpbGw9IiNmMWY2ZjciIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iMjk1IiB5PSIxMDAiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMwZTc0OTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPm11bDwvdGV4dD4KCiAgPCEtLSBtdWx0aXBsaWVyIG91dHB1dHMgaW50byBhZGRlciAtLT4KICA8bGluZSB4MT0iODUiICB5MT0iMTEyIiB4Mj0iMTY4IiB5Mj0iMTU2IiBzdHJva2U9IiM1NTYzNWYiIHN0cm9rZS13aWR0aD0iMS42IiBtYXJrZXItZW5kPSJ1cmwoI2FoKSIvPgogIDxsaW5lIHgxPSIyOTUiIHkxPSIxMTIiIHgyPSIyMTIiIHkyPSIxNTYiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPHRleHQgeD0iMTE4IiB5PSIxNDAiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM1NTYzNWYiPmHCt2I8L3RleHQ+CiAgPHRleHQgeD0iMjQ1IiB5PSIxNDAiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM1NTYzNWYiPmPCt2Q8L3RleHQ+CgogIDwhLS0gYWRkZXIgLS0+CiAgPHJlY3QgeD0iMTYyIiB5PSIxNjIiIHdpZHRoPSI1NiIgaGVpZ2h0PSIzNCIgcng9IjciIGZpbGw9IiNmMWY2ZjciIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iMTkwIiB5PSIxODQiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMwZTc0OTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmFkZDwvdGV4dD4KCiAgPCEtLSBvdXRwdXQgLS0+CiAgPGxpbmUgeDE9IjE5MCIgeTE9IjE5NiIgeDI9IjE5MCIgeTI9IjIyMiIgc3Ryb2tlPSIjNTU2MzVmIiBzdHJva2Utd2lkdGg9IjEuNiIgbWFya2VyLWVuZD0idXJsKCNhaCkiLz4KICA8dGV4dCB4PSIxOTAiIHk9IjI0MiIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+ejwvdGV4dD4KPC9zdmc+Cg=="></figure></p>
+<blockquote>
+<p><strong>DFG = which values depend on which</strong> — the graph HLS schedules and turns into a
+datapath.</p>
+</blockquote>
+<h3>Scheduling, allocation, binding</h3>
+<p>Three distinct decisions — keep them separate:</p>
+<ul>
+<li><strong>Scheduling</strong> — <em>which clock cycle</em> each operation executes in.</li>
+<li><strong>Allocation</strong> — <em>how many</em> hardware resources exist (adders, multipliers, ports).</li>
+<li><strong>Binding</strong> — <em>which</em> resource executes each operation (and thus what gets shared).</li>
+</ul>
+<p>Constraints on scheduling: (a) data dependences (from the DFG), (b) resource limits,
+(c) operation <strong>latencies</strong>. The intuition is <strong>ASAP / ALAP</strong> (as-soon- / as-late-as-
+possible). Real tools use SDC/LP scheduling (out of scope here); if you know VLIW /
+list instruction scheduling with resource constraints, it is essentially that.</p>
+<h3>Stage A schedule — the binding / sharing tradeoff</h3>
+<p>Assume a <strong>non-pipelined</strong> multiplier = 3 cycles, add = 1 cycle. The two multiplies
+are independent; the add needs both.</p>
+<p><strong>Try it yourself first:</strong> with <strong>two</strong> multipliers, how many cycles does <code>z</code> take?
+With <strong>one</strong> multiplier (shared)? Commit to an answer, then check against the tables.</p>
+<p><strong>Allocate 2 multipliers</strong> (the two multiplies are independent → run in parallel):</p>
+<table>
+<thead>
+<tr>
+<th>Cycle</th>
+<th>Operation(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1–3</td>
+<td><code>m1 = a*b</code> and <code>m2 = c*d</code> in parallel</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>z = m1 + m2</code></td>
+</tr>
+</tbody>
+</table>
+<p>Latency = <strong>4 cycles</strong>, cost = 2 multipliers + 1 adder.</p>
+<p><strong>Allocate 1 multiplier</strong> (share it — bind both multiplies to the same unit):</p>
+<table>
+<thead>
+<tr>
+<th>Cycle</th>
+<th>Operation(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1–3</td>
+<td><code>m1 = a*b</code></td>
+</tr>
+<tr>
+<td>4–6</td>
+<td><code>m2 = c*d</code> (reuse the multiplier, operands mux-selected)</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>z = m1 + m2</code></td>
+</tr>
+</tbody>
+</table>
+<p>Latency = <strong>7 cycles</strong>, cost = 1 multiplier + 1 adder + input muxes.</p>
+<blockquote>
+<p>This is <em>the</em> area/latency knob (LUT/DSP vs cycles) you will later read off
+synthesis reports. Same C, two architectures — chosen by allocation + binding.</p>
+</blockquote>
+<h2>Part IV — Adding control flow: a second example (Stage B)</h2>
+<p>Now a kernel <em>with</em> control flow — a masked / sparse multiply-accumulate. <strong>Drop the
+<code>if</code> and it's the dense dot product = the GEMM inner loop optimized in L2–L6.</strong></p>
+<pre><code class="language-c">acc = 0;
+for (int i = 0; i &lt; N; i++) {
+    int x = a[i];
+    if (x &gt; threshold)
+        acc += x * b[i];
+}
+*result = acc;
+</code></pre>
+<h3>Stage B as basic blocks</h3>
+<pre><code>BB0  init:     acc = 0;  i = 0;                 -&gt; BB1
+BB1  cond:     if (i &lt; N)              -&gt; BB2   else -&gt; BB5
+BB2  load+cmp: x = a[i];  c = x &gt; threshold
+               if (c)                  -&gt; BB3   else -&gt; BB4
+BB3  MAC:      y = b[i];  p = x*y;  acc = acc + p   -&gt; BB4
+BB4  incr:     i = i + 1                         -&gt; BB1   (loop back-edge)
+BB5  store:    *result = acc;  return
+</code></pre>
+<h3>The control-flow graph (CFG)</h3>
+<p>Now there is real control flow, so the <strong>CFG</strong> matters — it records <em>which</em> basic
+blocks execute and in what order; its edges are the <strong>branches</strong> and the loop
+<strong>back-edge</strong>.</p>
+<p><figure><img alt="Stage B CFG — BB0 init to BB1 cond, true into the loop body, false to BB5 store/return, BB4 back-edge to BB1" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MDAgNDEwIiB3aWR0aD0iNTAwIiBoZWlnaHQ9IjQxMCIgZm9udC1mYW1pbHk9IkludGVyLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj4KICA8ZGVmcz4KICAgIDxtYXJrZXIgaWQ9ImFoIiBtYXJrZXJXaWR0aD0iOSIgbWFya2VySGVpZ2h0PSI5IiByZWZYPSI2LjUiIHJlZlk9IjMiIG9yaWVudD0iYXV0byI+CiAgICAgIDxwYXRoIGQ9Ik0wLDAgTDYuNSwzIEwwLDYgWiIgZmlsbD0iIzU1NjM1ZiIvPgogICAgPC9tYXJrZXI+CiAgICA8bWFya2VyIGlkPSJhaE8iIG1hcmtlcldpZHRoPSI5IiBtYXJrZXJIZWlnaHQ9IjkiIHJlZlg9IjYuNSIgcmVmWT0iMyIgb3JpZW50PSJhdXRvIj4KICAgICAgPHBhdGggZD0iTTAsMCBMNi41LDMgTDAsNiBaIiBmaWxsPSIjYzI0MTBjIi8+CiAgICA8L21hcmtlcj4KICA8L2RlZnM+CgogIDwhLS0gZWRnZXMgKGRyYXduIGZpcnN0LCB1bmRlciB0aGUgYm94ZXMpIC0tPgogIDwhLS0gQkIwIC0+IEJCMSAtLT4KICA8bGluZSB4MT0iMTg1IiB5MT0iNjAiIHgyPSIxODUiIHkyPSI5MyIgc3Ryb2tlPSIjNTU2MzVmIiBzdHJva2Utd2lkdGg9IjEuNiIgbWFya2VyLWVuZD0idXJsKCNhaCkiLz4KICA8IS0tIEJCMSAtPiBCQjUgKGZhbHNlKSAtLT4KICA8bGluZSB4MT0iMjYwIiB5MT0iMTE2IiB4Mj0iMzI4IiB5Mj0iMTE2IiBzdHJva2U9IiM1NTYzNWYiIHN0cm9rZS13aWR0aD0iMS42IiBtYXJrZXItZW5kPSJ1cmwoI2FoKSIvPgogIDx0ZXh0IHg9IjI3OCIgeT0iMTA5IiBmb250LXNpemU9IjEyIiBmaWxsPSIjNTU2MzVmIj5mYWxzZTwvdGV4dD4KICA8IS0tIEJCMSAtPiBCQjIgKHRydWUpIC0tPgogIDxsaW5lIHgxPSIxODUiIHkxPSIxMzciIHgyPSIxODUiIHkyPSIxNzgiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPHRleHQgeD0iMTkyIiB5PSIxNjIiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM1NTYzNWYiPnRydWU8L3RleHQ+CiAgPCEtLSBCQjIgLT4gQkIzICh0cnVlKSAtLT4KICA8bGluZSB4MT0iMTg1IiB5MT0iMjIyIiB4Mj0iMTg1IiB5Mj0iMjYwIiBzdHJva2U9IiM1NTYzNWYiIHN0cm9rZS13aWR0aD0iMS42IiBtYXJrZXItZW5kPSJ1cmwoI2FoKSIvPgogIDx0ZXh0IHg9IjE5MiIgeT0iMjQ1IiBmb250LXNpemU9IjEyIiBmaWxsPSIjNTU2MzVmIj50cnVlPC90ZXh0PgogIDwhLS0gQkIyIC0+IEJCNCAoZmFsc2UpLCByb3V0ZWQgcmlnaHQgLS0+CiAgPHBvbHlsaW5lIHBvaW50cz0iMjYwLDIwMSAzMDAsMjAxIDMwMCwzNjUgMjYyLDM2NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNTU2MzVmIiBzdHJva2Utd2lkdGg9IjEuNiIgbWFya2VyLWVuZD0idXJsKCNhaCkiLz4KICA8dGV4dCB4PSIzMDUiIHk9IjI4NSIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzU1NjM1ZiI+ZmFsc2U8L3RleHQ+CiAgPCEtLSBCQjMgLT4gQkI0IC0tPgogIDxsaW5lIHgxPSIxODUiIHkxPSIzMDQiIHgyPSIxODUiIHkyPSIzNDIiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPCEtLSBCQjQgLT4gQkIxIGJhY2stZWRnZSwgcm91dGVkIGxlZnQgKG9yYW5nZSkgLS0+CiAgPHBvbHlsaW5lIHBvaW50cz0iMTEwLDM2NSA0MiwzNjUgNDIsMTE2IDEwOCwxMTYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2MyNDEwYyIgc3Ryb2tlLXdpZHRoPSIxLjgiIG1hcmtlci1lbmQ9InVybCgjYWhPKSIvPgogIDx0ZXh0IHg9IjE4IiB5PSIyMzgiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNjMjQxMGMiIHRyYW5zZm9ybT0icm90YXRlKC05MCAxOCAyMzgpIj5sb29wIGJhY2stZWRnZTwvdGV4dD4KCiAgPCEtLSBib3hlcyAtLT4KICA8Zz4KICAgIDxyZWN0IHg9IjExMCIgeT0iMTgiICB3aWR0aD0iMTUwIiBoZWlnaHQ9IjQyIiByeD0iNyIgZmlsbD0iI2YxZjZmNyIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjIiLz4KICAgIDx0ZXh0IHg9IjE4NSIgeT0iNDQiICBmb250LXNpemU9IjEzIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5CQjAgwrcgaW5pdDwvdGV4dD4KCiAgICA8cmVjdCB4PSIxMTAiIHk9Ijk0IiAgd2lkdGg9IjE1MCIgaGVpZ2h0PSI0MiIgcng9IjciIGZpbGw9IiNmMWY2ZjciIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgICA8dGV4dCB4PSIxODUiIHk9IjEyMCIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QkIxIMK3IGNvbmQgKGkgJmx0OyBOKTwvdGV4dD4KCiAgICA8cmVjdCB4PSIxMTAiIHk9IjE3OSIgd2lkdGg9IjE1MCIgaGVpZ2h0PSI0MiIgcng9IjciIGZpbGw9IiNmMWY2ZjciIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgICA8dGV4dCB4PSIxODUiIHk9IjIwNSIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QkIyIMK3IGxvYWQgKyBjbXA8L3RleHQ+CgogICAgPHJlY3QgeD0iMTEwIiB5PSIyNjEiIHdpZHRoPSIxNTAiIGhlaWdodD0iNDIiIHJ4PSI3IiBmaWxsPSIjZjFmNmY3IiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMiIvPgogICAgPHRleHQgeD0iMTg1IiB5PSIyODciIGZvbnQtc2l6ZT0iMTMiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkJCMyDCtyBNQUM8L3RleHQ+CgogICAgPHJlY3QgeD0iMTEwIiB5PSIzNDMiIHdpZHRoPSIxNTAiIGhlaWdodD0iNDIiIHJ4PSI3IiBmaWxsPSIjZjFmNmY3IiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMiIvPgogICAgPHRleHQgeD0iMTg1IiB5PSIzNjkiIGZvbnQtc2l6ZT0iMTMiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkJCNCDCtyBpbmNyIChpKyspPC90ZXh0PgoKICAgIDxyZWN0IHg9IjMzMCIgeT0iOTQiICB3aWR0aD0iMTUwIiBoZWlnaHQ9IjQyIiByeD0iNyIgZmlsbD0iI2ZkZWVlNiIgc3Ryb2tlPSIjYzI0MTBjIiBzdHJva2Utd2lkdGg9IjIiLz4KICAgIDx0ZXh0IHg9IjQwNSIgeT0iMTIwIiBmb250LXNpemU9IjEzIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5CQjUgwrcgc3RvcmUgLyByZXR1cm48L3RleHQ+CiAgPC9nPgo8L3N2Zz4K"></figure></p>
+<p>Vocabulary you now own — <strong>basic block, branch, loop back-edge, control dependence,
+data dependence, live variable.</strong> HLS turns the CFG into the <strong>controller (FSM)</strong>.</p>
+<h3>DFG inside each basic block</h3>
+<p>Each block still has its own DFG:</p>
+<p><figure><img alt="Stage B per-block DFGs — BB2 load a[i] then compare vs threshold; BB3 multiply x times b[i] then accumulate into acc" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NjAgMjUwIiB3aWR0aD0iNTYwIiBoZWlnaHQ9IjI1MCIgZm9udC1mYW1pbHk9IkludGVyLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj4KICA8ZGVmcz4KICAgIDxtYXJrZXIgaWQ9ImFoIiBtYXJrZXJXaWR0aD0iOSIgbWFya2VySGVpZ2h0PSI5IiByZWZYPSI2LjUiIHJlZlk9IjMiIG9yaWVudD0iYXV0byI+CiAgICAgIDxwYXRoIGQ9Ik0wLDAgTDYuNSwzIEwwLDYgWiIgZmlsbD0iIzU1NjM1ZiIvPgogICAgPC9tYXJrZXI+CiAgPC9kZWZzPgoKICA8IS0tID09PT09IEJCMjogbG9hZCArIGNvbXBhcmUgPT09PT0gLS0+CiAgPHRleHQgeD0iMTMwIiB5PSIyMiIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBlNzQ5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QkIyIMK3IGxvYWQgKyBjb21wYXJlPC90ZXh0PgoKICA8dGV4dCB4PSI1NSIgIHk9IjUyIiBmb250LXNpemU9IjEzIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5pPC90ZXh0PgogIDxsaW5lIHgxPSI1NSIgeTE9IjYwIiB4Mj0iNTUiIHkyPSI3NiIgc3Ryb2tlPSIjNTU2MzVmIiBzdHJva2Utd2lkdGg9IjEuNiIgbWFya2VyLWVuZD0idXJsKCNhaCkiLz4KICA8cmVjdCB4PSIyNyIgeT0iODIiIHdpZHRoPSI3MCIgaGVpZ2h0PSIzMiIgcng9IjciIGZpbGw9IiNmMWY2ZjciIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iNjIiIHk9IjEwMyIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMGU3NDkwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5sb2FkIGFbaV08L3RleHQ+CiAgPGxpbmUgeDE9IjYyIiB5MT0iMTE0IiB4Mj0iNjIiIHkyPSIxNDAiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPHRleHQgeD0iNzIiIHk9IjEzMiIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzU1NjM1ZiI+eDwvdGV4dD4KCiAgPHJlY3QgeD0iMzQiIHk9IjE0NiIgd2lkdGg9IjU2IiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iI2YxZjZmNyIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8dGV4dCB4PSI2MiIgeT0iMTY3IiBmb250LXNpemU9IjEzIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMGU3NDkwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5jbXA8L3RleHQ+CiAgPHRleHQgeD0iMTc1IiB5PSIxNTIiIGZvbnQtc2l6ZT0iMTMiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPnRocmVzaG9sZDwvdGV4dD4KICA8bGluZSB4MT0iMTUwIiB5MT0iMTU4IiB4Mj0iOTIiIHkyPSIxNjIiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPGxpbmUgeDE9IjYyIiB5MT0iMTc4IiB4Mj0iNjIiIHkyPSIyMDQiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPHRleHQgeD0iNzIiIHk9IjE5NiIgZm9udC1zaXplPSIxMiIgZmlsbD0iI2MyNDEwYyI+YyAoYnJhbmNoKTwvdGV4dD4KCiAgPCEtLSBkaXZpZGVyIC0tPgogIDxsaW5lIHgxPSIyOTAiIHkxPSIzMCIgeDI9IjI5MCIgeTI9IjIxNSIgc3Ryb2tlPSIjZDNkZWUwIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWRhc2hhcnJheT0iNCA0Ii8+CgogIDwhLS0gPT09PT0gQkIzOiBNQUMgPT09PT0gLS0+CiAgPHRleHQgeD0iNDMwIiB5PSIyMiIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBlNzQ5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QkIzIMK3IE1BQzwvdGV4dD4KCiAgPHRleHQgeD0iMzYwIiB5PSI1MiIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+eDwvdGV4dD4KICA8cmVjdCB4PSI0MDUiIHk9IjM2IiB3aWR0aD0iNzAiIGhlaWdodD0iMzIiIHJ4PSI3IiBmaWxsPSIjZjFmNmY3IiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMiIvPgogIDx0ZXh0IHg9IjQ0MCIgeT0iNTciIGZvbnQtc2l6ZT0iMTIuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBlNzQ5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+bG9hZCBiW2ldPC90ZXh0PgoKICA8bGluZSB4MT0iMzYwIiB5MT0iNjAiIHgyPSIzOTIiIHkyPSI5NCIgc3Ryb2tlPSIjNTU2MzVmIiBzdHJva2Utd2lkdGg9IjEuNiIgbWFya2VyLWVuZD0idXJsKCNhaCkiLz4KICA8bGluZSB4MT0iNDQwIiB5MT0iNjgiIHgyPSI0NTIiIHkyPSI5NCIgc3Ryb2tlPSIjNTU2MzVmIiBzdHJva2Utd2lkdGg9IjEuNiIgbWFya2VyLWVuZD0idXJsKCNhaCkiLz4KICA8dGV4dCB4PSI0NzAiIHk9Ijg2IiBmb250LXNpemU9IjEyIiBmaWxsPSIjNTU2MzVmIj55PC90ZXh0PgoKICA8cmVjdCB4PSIzOTUiIHk9IjEwMCIgd2lkdGg9IjU2IiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iI2YxZjZmNyIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8dGV4dCB4PSI0MjMiIHk9IjEyMSIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBlNzQ5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+bXVsPC90ZXh0PgogIDxsaW5lIHgxPSI0MjMiIHkxPSIxMzIiIHgyPSI0MjMiIHkyPSIxNTgiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPHRleHQgeD0iNDMyIiB5PSIxNTAiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM1NTYzNWYiPnA8L3RleHQ+CgogIDxyZWN0IHg9IjM5NSIgeT0iMTY0IiB3aWR0aD0iNTYiIGhlaWdodD0iMzIiIHJ4PSI3IiBmaWxsPSIjZjFmNmY3IiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMiIvPgogIDx0ZXh0IHg9IjQyMyIgeT0iMTg1IiBmb250LXNpemU9IjEzIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMGU3NDkwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5hZGQ8L3RleHQ+CiAgPHRleHQgeD0iNTEzIiB5PSIxNzAiIGZvbnQtc2l6ZT0iMTMiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiNjMjQxMGMiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmFjYzwvdGV4dD4KICA8bGluZSB4MT0iNDk1IiB5MT0iMTc2IiB4Mj0iNDUzIiB5Mj0iMTgwIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMS42IiBtYXJrZXItZW5kPSJ1cmwoI2FoKSIvPgogIDxsaW5lIHgxPSI0MjMiIHkxPSIxOTYiIHgyPSI0MjMiIHkyPSIyMjIiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPHRleHQgeD0iNDIzIiB5PSIyNDIiIGZvbnQtc2l6ZT0iMTMiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmFjY+KAsjwvdGV4dD4KPC9zdmc+Cg=="></figure></p>
+<p>HLS needs <em>both</em> graphs: the CFG to generate control, the DFG to schedule and build
+the datapath.</p>
+<h3>Stage B schedule — one loop iteration</h3>
+<p>Assume: 1 memory port, load = 1 cycle, compare = 1, <strong>non-pipelined</strong> multiply = 3,
+add = 1. The schedule is <strong>non-speculative</strong> — <code>b[i]</code> is loaded only after the
+compare resolves the branch, matching the FSM below.</p>
+<p><strong>Taken path</strong> (<code>x &gt; threshold</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Cycle</th>
+<th>Operation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>load <code>a[i]</code> → x</td>
+</tr>
+<tr>
+<td>2</td>
+<td>compare <code>x &gt; threshold</code> → branch resolves</td>
+</tr>
+<tr>
+<td>3</td>
+<td>load <code>b[i]</code> → y</td>
+</tr>
+<tr>
+<td>4–6</td>
+<td>multiply <code>p = x*y</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td>accumulate <code>acc = acc + p</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>i++</code>, loop check</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Not-taken path:</strong> load, compare, <code>i++</code> → 3 cycles.</p>
+<p>Two things fall out of this schedule: <strong>variable latency per iteration</strong> (it depends
+on the data), and the <strong>loop-carried dependence on <code>acc</code></strong> — the next iteration's
+accumulate waits on this one. We leave it <strong>un-pipelined</strong> here; that loop-carried
+dependence is exactly what L2's pipeline and L3's breakdown are about.</p>
+<h2>Part V — RTL generation: three components</h2>
+<p>The schedule + CFG lower to RTL with <strong>three</strong> principal components:</p>
+<p><figure><img alt="Three RTL components — a DATAPATH (comparator, multiplier to adder to acc reg, registers and muxes) exchanging addr/data with a MEMORY/INTERFACE block and enables/status with a CONTROLLER (FSM)" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgNDAwIiB3aWR0aD0iNjQwIiBoZWlnaHQ9IjQwMCIgZm9udC1mYW1pbHk9IkludGVyLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj4KICA8ZGVmcz4KICAgIDxtYXJrZXIgaWQ9ImFoIiBtYXJrZXJXaWR0aD0iOSIgbWFya2VySGVpZ2h0PSI5IiByZWZYPSI2LjUiIHJlZlk9IjMiIG9yaWVudD0iYXV0byI+CiAgICAgIDxwYXRoIGQ9Ik0wLDAgTDYuNSwzIEwwLDYgWiIgZmlsbD0iIzU1NjM1ZiIvPgogICAgPC9tYXJrZXI+CiAgICA8bWFya2VyIGlkPSJhaDIiIG1hcmtlcldpZHRoPSI5IiBtYXJrZXJIZWlnaHQ9IjkiIHJlZlg9IjYuNSIgcmVmWT0iMyIgb3JpZW50PSJhdXRvIj4KICAgICAgPHBhdGggZD0iTTAsMCBMNi41LDMgTDAsNiBaIiBmaWxsPSIjMGU3NDkwIi8+CiAgICA8L21hcmtlcj4KICA8L2RlZnM+CgogIDwhLS0gPT09PT0gREFUQVBBVEggY29udGFpbmVyID09PT09IC0tPgogIDxyZWN0IHg9IjE2IiB5PSIxNiIgd2lkdGg9IjYwOCIgaGVpZ2h0PSIxOTYiIHJ4PSIxMCIgZmlsbD0iI2Y3ZmJmYiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8dGV4dCB4PSIzMiIgeT0iMzgiIGZvbnQtc2l6ZT0iMTMiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMwZTc0OTAiPkRBVEFQQVRIPC90ZXh0PgoKICA8IS0tIGNvbXBhcmF0b3IgcGF0aCAtLT4KICA8dGV4dCB4PSI1OCIgeT0iNzIiICBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5hW2ldPC90ZXh0PgogIDx0ZXh0IHg9IjU4IiB5PSI5NiIgIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPnRocjwvdGV4dD4KICA8bGluZSB4MT0iODAiIHkxPSI2OCIgeDI9IjExMiIgeTI9Ijc2IiBzdHJva2U9IiM1NTYzNWYiIHN0cm9rZS13aWR0aD0iMS41IiBtYXJrZXItZW5kPSJ1cmwoI2FoKSIvPgogIDxsaW5lIHgxPSI4MCIgeTE9IjkyIiB4Mj0iMTEyIiB5Mj0iODQiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjUiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPHJlY3QgeD0iMTE2IiB5PSI2MiIgd2lkdGg9Ijk2IiBoZWlnaHQ9IjM0IiByeD0iNyIgZmlsbD0iI2VlZjVmNiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuNiIvPgogIDx0ZXh0IHg9IjE2NCIgeT0iODMiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmNvbXBhcmF0b3I8L3RleHQ+CiAgPGxpbmUgeDE9IjIxMiIgeTE9Ijc5IiB4Mj0iMjUwIiB5Mj0iNzkiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjUiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPHRleHQgeD0iMjY2IiB5PSI4MyIgZm9udC1zaXplPSIxMS41IiBmaWxsPSIjYzI0MTBjIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5icmFuY2g8L3RleHQ+CgogIDwhLS0gbXVsdGlwbHkgLT4gYWRkIC0+IGFjYyByZWcgLS0+CiAgPHRleHQgeD0iNTgiIHk9IjE0MCIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+eDwvdGV4dD4KICA8dGV4dCB4PSI1OCIgeT0iMTY0IiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj55PC90ZXh0PgogIDxsaW5lIHgxPSI3MiIgeTE9IjEzNiIgeDI9IjExMiIgeTI9IjE0NiIgc3Ryb2tlPSIjNTU2MzVmIiBzdHJva2Utd2lkdGg9IjEuNSIgbWFya2VyLWVuZD0idXJsKCNhaCkiLz4KICA8bGluZSB4MT0iNzIiIHkxPSIxNjAiIHgyPSIxMTIiIHkyPSIxNTQiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjUiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPHJlY3QgeD0iMTE2IiB5PSIxMzQiIHdpZHRoPSI5NiIgaGVpZ2h0PSIzNCIgcng9IjciIGZpbGw9IiNlZWY1ZjYiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjYiLz4KICA8dGV4dCB4PSIxNjQiIHk9IjE1NSIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+bXVsdGlwbGllcjwvdGV4dD4KICA8bGluZSB4MT0iMjEyIiB5MT0iMTUxIiB4Mj0iMjUyIiB5Mj0iMTUxIiBzdHJva2U9IiM1NTYzNWYiIHN0cm9rZS13aWR0aD0iMS41IiBtYXJrZXItZW5kPSJ1cmwoI2FoKSIvPgogIDx0ZXh0IHg9IjIzMiIgeT0iMTQ1IiBmb250LXNpemU9IjExIiBmaWxsPSIjNTU2MzVmIj5wPC90ZXh0PgoKICA8dGV4dCB4PSIzMDAiIHk9IjEyOCIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iI2MyNDEwYyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+YWNjPC90ZXh0PgogIDxsaW5lIHgxPSIzMDAiIHkxPSIxMzQiIHgyPSIzMDAiIHkyPSIxNDYiIHN0cm9rZT0iI2MyNDEwYyIgc3Ryb2tlLXdpZHRoPSIxLjUiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPHJlY3QgeD0iMjU2IiB5PSIxMzQiIHdpZHRoPSI4OCIgaGVpZ2h0PSIzNCIgcng9IjciIGZpbGw9IiNlZWY1ZjYiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjYiLz4KICA8dGV4dCB4PSIzMDAiIHk9IjE1NSIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+YWRkZXI8L3RleHQ+CiAgPGxpbmUgeDE9IjM0NCIgeTE9IjE1MSIgeDI9IjM4NCIgeTI9IjE1MSIgc3Ryb2tlPSIjNTU2MzVmIiBzdHJva2Utd2lkdGg9IjEuNSIgbWFya2VyLWVuZD0idXJsKCNhaCkiLz4KICA8dGV4dCB4PSIzNjYiIHk9IjE0NSIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzU1NjM1ZiI+YWNj4oCyPC90ZXh0PgogIDxyZWN0IHg9IjM4OCIgeT0iMTM0IiB3aWR0aD0iOTIiIGhlaWdodD0iMzQiIHJ4PSI3IiBmaWxsPSIjZWVmNWY2IiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS42Ii8+CiAgPHRleHQgeD0iNDM0IiB5PSIxNTUiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmFjYyByZWc8L3RleHQ+CgogIDx0ZXh0IHg9IjMyMCIgeT0iMTk2IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPnJlZ2lzdGVyczogaSwgeCwgeSwgcCwgYWNjICDCtyAgbXV4ZXMgKGFjYyAvIGFjYyArIHApPC90ZXh0PgoKICA8IS0tID09PT09IGJvdHRvbSBib3hlcyA9PT09PSAtLT4KICA8cmVjdCB4PSIxNiIgIHk9IjMwMCIgd2lkdGg9IjI3MCIgaGVpZ2h0PSI3MiIgcng9IjEwIiBmaWxsPSIjZjFmNmY3IiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMiIvPgogIDx0ZXh0IHg9IjE1MSIgeT0iMzMwIiBmb250LXNpemU9IjEzIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMGU3NDkwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5NRU1PUlkgLyBJTlRFUkZBQ0U8L3RleHQ+CiAgPHRleHQgeD0iMTUxIiB5PSIzNTIiIGZvbnQtc2l6ZT0iMTEuNSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+YWRkciBnZW4gwrcgQlJBTSBwb3J0cyDCtyBoYW5kc2hha2luZzwvdGV4dD4KCiAgPHJlY3QgeD0iMzU0IiB5PSIzMDAiIHdpZHRoPSIyNzAiIGhlaWdodD0iNzIiIHJ4PSIxMCIgZmlsbD0iI2ZkZWVlNiIgc3Ryb2tlPSIjYzI0MTBjIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8dGV4dCB4PSI0ODkiIHk9IjMzMCIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI2MyNDEwYyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Q09OVFJPTExFUiAoRlNNKTwvdGV4dD4KICA8dGV4dCB4PSI0ODkiIHk9IjM1MiIgZm9udC1zaXplPSIxMS41IiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5vbmUgc3RhdGUg4omIIG9uZSBjb250cm9sIHN0ZXA8L3RleHQ+CgogIDwhLS0gZGF0YXBhdGggPC0+IG1lbW9yeSAtLT4KICA8bGluZSB4MT0iMTUxIiB5MT0iMjEyIiB4Mj0iMTUxIiB5Mj0iMjk4IiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS42IiBtYXJrZXItc3RhcnQ9InVybCgjYWgyKSIgbWFya2VyLWVuZD0idXJsKCNhaDIpIi8+CiAgPHRleHQgeD0iMTU4IiB5PSIyNTgiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMwZTc0OTAiPmFkZHIgLyBkYXRhPC90ZXh0PgoKICA8IS0tIGNvbnRyb2xsZXIgLT4gZGF0YXBhdGggKGVuYWJsZXMpIGFuZCBkYXRhcGF0aCAtPiBjb250cm9sbGVyIChzdGF0dXMpIC0tPgogIDxsaW5lIHgxPSI0NzAiIHkxPSIyOTgiIHgyPSI0NzAiIHkyPSIyMTIiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPHRleHQgeD0iMzYwIiB5PSIyNTAiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM1NTYzNWYiPmVuYWJsZXMgLyBtdXgtc2VsPC90ZXh0PgogIDxsaW5lIHgxPSI1MDgiIHkxPSIyMTIiIHgyPSI1MDgiIHkyPSIyOTgiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPHRleHQgeD0iNTE1IiB5PSIyNTgiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM1NTYzNWYiPnN0YXR1cyAoY29uZCwgaSZsdDtOKTwvdGV4dD4KPC9zdmc+Cg=="></figure></p>
+<ol>
+<li><strong>Datapath</strong> — adders, multipliers, comparators, muxes, registers.</li>
+<li><strong>Controller (FSM)</strong> — decides which operations occur each cycle.</li>
+<li><strong>Memory / interface logic</strong> — address generators, RAM ports, handshaking.
+   (Called out as first-class because <em>memory architecture is the recurring
+   performance theme</em> of L4–L5.)</li>
+</ol>
+<h3>The FSM for Stage B</h3>
+<p><figure><img alt="Stage B controller FSM — IDLE to INIT to COND; COND i&gt;=N to STORE to DONE, i&lt;N to LOAD_A to COMPARE; COMPARE true to LOAD_B to MUL to ACC, false to INCR; INCR loops back to COND" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3MDAgMzYwIiB3aWR0aD0iNzAwIiBoZWlnaHQ9IjM2MCIgZm9udC1mYW1pbHk9IkludGVyLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj4KICA8ZGVmcz4KICAgIDxtYXJrZXIgaWQ9ImFoIiBtYXJrZXJXaWR0aD0iOSIgbWFya2VySGVpZ2h0PSI5IiByZWZYPSI2LjUiIHJlZlk9IjMiIG9yaWVudD0iYXV0byI+CiAgICAgIDxwYXRoIGQ9Ik0wLDAgTDYuNSwzIEwwLDYgWiIgZmlsbD0iIzU1NjM1ZiIvPgogICAgPC9tYXJrZXI+CiAgICA8bWFya2VyIGlkPSJhaE8iIG1hcmtlcldpZHRoPSI5IiBtYXJrZXJIZWlnaHQ9IjkiIHJlZlg9IjYuNSIgcmVmWT0iMyIgb3JpZW50PSJhdXRvIj4KICAgICAgPHBhdGggZD0iTTAsMCBMNi41LDMgTDAsNiBaIiBmaWxsPSIjYzI0MTBjIi8+CiAgICA8L21hcmtlcj4KICA8L2RlZnM+CgogIDwhLS0gPT09PT0gZWRnZXMgKHVuZGVyIGJveGVzKSA9PT09PSAtLT4KICA8IS0tIHJvdyAxIGNoYWluIC0tPgogIDxsaW5lIHgxPSI5OCIgIHkxPSIzMiIgeDI9IjEyMSIgeTI9IjMyIiBzdHJva2U9IiM1NTYzNWYiIHN0cm9rZS13aWR0aD0iMS42IiBtYXJrZXItZW5kPSJ1cmwoI2FoKSIvPgogIDxsaW5lIHgxPSIyMDkiIHkxPSIzMiIgeDI9IjI0MSIgeTI9IjMyIiBzdHJva2U9IiM1NTYzNWYiIHN0cm9rZS13aWR0aD0iMS42IiBtYXJrZXItZW5kPSJ1cmwoI2FoKSIvPgogIDxsaW5lIHgxPSIzMjkiIHkxPSIzMiIgeDI9IjM3NiIgeTI9IjMyIiBzdHJva2U9IiM1NTYzNWYiIHN0cm9rZS13aWR0aD0iMS42IiBtYXJrZXItZW5kPSJ1cmwoI2FoKSIvPgogIDx0ZXh0IHg9IjM1MiIgeT0iMjQiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmniiaVOPC90ZXh0PgogIDxsaW5lIHgxPSI0NjQiIHkxPSIzMiIgeDI9IjUwMSIgeTI9IjMyIiBzdHJva2U9IiM1NTYzNWYiIHN0cm9rZS13aWR0aD0iMS42IiBtYXJrZXItZW5kPSJ1cmwoI2FoKSIvPgogIDwhLS0gQ09ORCAtPiBMT0FEX0EgLS0+CiAgPGxpbmUgeDE9IjI4NSIgeTE9IjUwIiB4Mj0iMjg1IiB5Mj0iMTAxIiBzdHJva2U9IiM1NTYzNWYiIHN0cm9rZS13aWR0aD0iMS42IiBtYXJrZXItZW5kPSJ1cmwoI2FoKSIvPgogIDx0ZXh0IHg9IjI5MiIgeT0iODAiIGZvbnQtc2l6ZT0iMTEuNSIgZmlsbD0iIzU1NjM1ZiI+aSZsdDtOPC90ZXh0PgogIDwhLS0gTE9BRF9BIC0+IENPTVBBUkUgLS0+CiAgPGxpbmUgeDE9IjMyOCIgeTE9IjEyMCIgeDI9IjM4NiIgeTI9IjEyMCIgc3Ryb2tlPSIjNTU2MzVmIiBzdHJva2Utd2lkdGg9IjEuNiIgbWFya2VyLWVuZD0idXJsKCNhaCkiLz4KICA8IS0tIENPTVBBUkUgLT4gTE9BRF9CICh0cnVlKSAtLT4KICA8bGluZSB4MT0iNDMwIiB5MT0iMTM4IiB4Mj0iNDMwIiB5Mj0iMTg2IiBzdHJva2U9IiM1NTYzNWYiIHN0cm9rZS13aWR0aD0iMS42IiBtYXJrZXItZW5kPSJ1cmwoI2FoKSIvPgogIDx0ZXh0IHg9IjQzNyIgeT0iMTY2IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiM1NTYzNWYiPnRydWU8L3RleHQ+CiAgPCEtLSBMT0FEX0IgLT4gTVVMIC0+IEFDQyAtLT4KICA8bGluZSB4MT0iNDczIiB5MT0iMjA1IiB4Mj0iNDk2IiB5Mj0iMjA1IiBzdHJva2U9IiM1NTYzNWYiIHN0cm9rZS13aWR0aD0iMS42IiBtYXJrZXItZW5kPSJ1cmwoI2FoKSIvPgogIDxsaW5lIHgxPSI1ODMiIHkxPSIyMDUiIHgyPSI1OTYiIHkyPSIyMDUiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPCEtLSBBQ0MgLT4gSU5DUiAobG93ZXIgY2hhbm5lbCB5PTMzMikgLS0+CiAgPHBvbHlsaW5lIHBvaW50cz0iNjQwLDIyMyA2NDAsMzMyIDI4NSwzMzIgMjg1LDMwOSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNTU2MzVmIiBzdHJva2Utd2lkdGg9IjEuNiIgbWFya2VyLWVuZD0idXJsKCNhaCkiLz4KICA8IS0tIENPTVBBUkUgLT4gSU5DUiAoZmFsc2UsIHJpZ2h0IGNoYW5uZWwpIC0tPgogIDxwb2x5bGluZSBwb2ludHM9IjQ3MywxMjAgNjc2LDEyMCA2NzYsMjkwIDMyOSwyOTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPHRleHQgeD0iNTYwIiB5PSIxMTMiIGZvbnQtc2l6ZT0iMTEuNSIgZmlsbD0iIzU1NjM1ZiI+ZmFsc2U8L3RleHQ+CiAgPCEtLSBJTkNSIC0+IENPTkQgYmFjay1lZGdlIChsZWZ0IGNoYW5uZWwsIG9yYW5nZSkgLS0+CiAgPHBvbHlsaW5lIHBvaW50cz0iMjQyLDI5MCAzMCwyOTAgMzAsMzIgMjQxLDMyIiBmaWxsPSJub25lIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMS44IiBtYXJrZXItZW5kPSJ1cmwoI2FoTykiLz4KICA8dGV4dCB4PSIyMCIgeT0iMTc1IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiNjMjQxMGMiIHRyYW5zZm9ybT0icm90YXRlKC05MCAyMCAxNzUpIj5sb29wIGJhY2stZWRnZTwvdGV4dD4KCiAgPCEtLSA9PT09PSBzdGF0ZXMgPT09PT0gLS0+CiAgPGcgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj4KICAgIDxyZWN0IHg9IjEyIiAgeT0iMTQiIHdpZHRoPSI4NiIgaGVpZ2h0PSIzNiIgcng9IjciIGZpbGw9IiNmMWY2ZjciIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iNTUiICB5PSIzNyI+SURMRTwvdGV4dD4KICAgIDxyZWN0IHg9IjEyMiIgeT0iMTQiIHdpZHRoPSI4NiIgaGVpZ2h0PSIzNiIgcng9IjciIGZpbGw9IiNmMWY2ZjciIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iMTY1IiB5PSIzNyI+SU5JVDwvdGV4dD4KICAgIDxyZWN0IHg9IjI0MiIgeT0iMTQiIHdpZHRoPSI4NiIgaGVpZ2h0PSIzNiIgcng9IjciIGZpbGw9IiNmMWY2ZjciIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iMjg1IiB5PSIzNyI+Q09ORDwvdGV4dD4KICAgIDxyZWN0IHg9IjM3NyIgeT0iMTQiIHdpZHRoPSI4NiIgaGVpZ2h0PSIzNiIgcng9IjciIGZpbGw9IiNmZGVlZTYiIHN0cm9rZT0iI2MyNDEwYyIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iNDIwIiB5PSIzNyI+U1RPUkU8L3RleHQ+CiAgICA8cmVjdCB4PSI1MDIiIHk9IjE0IiB3aWR0aD0iODYiIGhlaWdodD0iMzYiIHJ4PSI3IiBmaWxsPSIjZmRlZWU2IiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMiIvPjx0ZXh0IHg9IjU0NSIgeT0iMzciPkRPTkU8L3RleHQ+CgogICAgPHJlY3QgeD0iMjQyIiB5PSIxMDIiIHdpZHRoPSI4NiIgaGVpZ2h0PSIzNiIgcng9IjciIGZpbGw9IiNmMWY2ZjciIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iMjg1IiB5PSIxMjUiPkxPQURfQTwvdGV4dD4KICAgIDxyZWN0IHg9IjM4NyIgeT0iMTAyIiB3aWR0aD0iODYiIGhlaWdodD0iMzYiIHJ4PSI3IiBmaWxsPSIjZjFmNmY3IiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMiIvPjx0ZXh0IHg9IjQzMCIgeT0iMTI1Ij5DT01QQVJFPC90ZXh0PgoKICAgIDxyZWN0IHg9IjM4NyIgeT0iMTg3IiB3aWR0aD0iODYiIGhlaWdodD0iMzYiIHJ4PSI3IiBmaWxsPSIjZjFmNmY3IiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMiIvPjx0ZXh0IHg9IjQzMCIgeT0iMjEwIj5MT0FEX0I8L3RleHQ+CiAgICA8cmVjdCB4PSI0OTciIHk9IjE4NyIgd2lkdGg9Ijg2IiBoZWlnaHQ9IjM2IiByeD0iNyIgZmlsbD0iI2YxZjZmNyIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjIiLz48dGV4dCB4PSI1NDAiIHk9IjIxMCI+TVVMPC90ZXh0PgogICAgPHJlY3QgeD0iNTk3IiB5PSIxODciIHdpZHRoPSI4NiIgaGVpZ2h0PSIzNiIgcng9IjciIGZpbGw9IiNmMWY2ZjciIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iNjQwIiB5PSIyMTAiPkFDQzwvdGV4dD4KCiAgICA8cmVjdCB4PSIyNDIiIHk9IjI3MiIgd2lkdGg9Ijg2IiBoZWlnaHQ9IjM2IiByeD0iNyIgZmlsbD0iI2YxZjZmNyIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjIiLz48dGV4dCB4PSIyODUiIHk9IjI5NSI+SU5DUjwvdGV4dD4KICA8L2c+Cjwvc3ZnPgo="></figure></p>
+<blockquote>
+<p>Basic blocks do not become RTL modules directly. <strong>Operations are scheduled into
+clock cycles, and the schedule is realized as a datapath controlled by an FSM,
+talking to memory through an interface.</strong></p>
+</blockquote>
+<h2>Part VI — Software vs hardware, and the whole flow</h2>
+<p><strong>Contrast.</strong> For software, five instructions (load, compare, branch, multiply, add)
+<em>reuse the processor's one datapath</em> over time. For synthesized hardware, a load unit
++ comparator + multiplier + adder + registers + controller <em>persist and operate every
+clock cycle</em>.</p>
+<blockquote>
+<p>In software, the program moves through the processor. In hardware synthesis, the
+compiler builds a processor-<em>like</em> structure <strong>around</strong> the program — an
+application-specific datapath, not a general-purpose processor.</p>
+</blockquote>
+<p>The whole flow, end to end — and it marks where the rest of the course operates:</p>
+<pre><code>   C/C++ program
+        │  parse
+   Compiler IR
+        │
+   CFG  +  DFG
+        │  dependence analysis
+   Scheduling                &lt;-- L1 ends here (mechanism understood)
+        │
+   Allocation + Binding
+        │
+   Datapath + Controller + Memory interface
+        │
+   RTL
+        │  synthesis, place &amp; route
+   FPGA bitstream            &lt;-- L2 makes this concrete + runs it on the U50
+</code></pre>
+<blockquote>
+<p><strong>The one message to take away.</strong> HLS is not a C-to-Verilog translator. It is a
+compiler-driven process of <strong>choosing a hardware architecture for a computation</strong> —
+and the choices it makes are what we spend the rest of the course learning to
+control.</p>
+</blockquote>
+<p><em>Looking ahead:</em> a GEMM kernel goes from <strong>25074 ms → 112 ms (223×)</strong> with the right
+restructuring. By L6 you'll understand every number.</p>
+</main>
+</body>
+</html>
