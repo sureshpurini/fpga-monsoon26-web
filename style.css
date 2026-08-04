@@ -148,6 +148,12 @@ table.schedule { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
 .schedule .ltopic { color: var(--ink); font-weight: 500; }
 .schedule .lblock { display: block; font-size: 0.82rem; color: var(--ink-soft); margin-top: 0.15rem; }
 .reading { font-size: 0.86rem; color: var(--ink-soft); }
+.slide-link {
+    display: inline-block; margin-top: 0.5rem; font-size: 0.82rem; font-weight: 600;
+    color: var(--brand); text-decoration: none; border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+}
+.slide-link:hover { border-color: var(--brand); }
 .block-label {
     display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em;
     text-transform: uppercase; color: var(--brand); margin: 1.4rem 0 0.4rem;
