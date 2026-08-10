@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lecture 2 Handout — The Toolchain End-to-End, then the Pipeline</title>
+<meta name="description" content="Student handout for Lecture 2 of FPGA-based Accelerator Design (Monsoon 2026): the data-center FPGA system, the full HLS compilation + host flow, running vadd on the Alveo U50, roofline, and pipelining a loop to II=1.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#4f46e5;--brand-2:#06b6d4;--ink:#1d2330;--ink-soft:#5a6477;
+--line:#e6e9f2;--bg:#f4f6fb;--surface:#fff;--code-bg:#f1f3fb;--accent:#f59e0b;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+line-height:1.7;-webkit-font-smoothing:antialiased;}
+.topbar{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.85);
+backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line);}
+.topbar .in{max-width:820px;margin:0 auto;padding:.8rem 24px;display:flex;
+justify-content:space-between;align-items:center;}
+.topbar a{color:var(--brand);text-decoration:none;font-weight:600;font-size:.9rem;}
+.topbar .home{color:var(--ink-soft);}
+main{max-width:820px;margin:2rem auto 4rem;padding:2.5rem;background:var(--surface);
+border:1px solid var(--line);border-radius:16px;
+box-shadow:0 10px 30px -12px rgba(20,25,50,.15);}
+h1{font-family:'Fraunces',serif;font-size:2rem;line-height:1.15;letter-spacing:-.01em;
+margin:0 0 .3rem;}
+h2{font-family:'Fraunces',serif;font-size:1.5rem;letter-spacing:-.01em;
+margin:2.6rem 0 .9rem;padding-top:1.2rem;border-top:1px solid var(--line);color:#161b28;}
+h3{font-size:1.15rem;margin:1.8rem 0 .5rem;color:#232a3a;}
+p{margin:.9rem 0;color:#28303f;}
+a{color:var(--brand);}
+em{color:var(--ink-soft);}
+ul,ol{padding-left:1.3rem;}
+li{margin:.3rem 0;}
+code{font-family:'SFMono-Regular',Menlo,Consolas,monospace;font-size:.88em;
+background:var(--code-bg);padding:.12em .4em;border-radius:5px;color:#1c2540;}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+padding:1rem 1.15rem;overflow-x:auto;line-height:1.5;}
+pre code{background:none;padding:0;font-size:.86rem;}
+table{border-collapse:collapse;width:100%;margin:1.2rem 0;font-size:.92rem;
+display:block;overflow-x:auto;}
+th{background:var(--brand);color:#fff;text-align:left;padding:.55rem .8rem;
+font-weight:600;font-size:.82rem;}
+td{padding:.55rem .8rem;border-bottom:1px solid var(--line);vertical-align:top;
+color:#333c4d;}
+tr:nth-child(even) td{background:#fafbff;}
+blockquote{margin:1.4rem 0;padding:1rem 1.3rem;background:
+linear-gradient(135deg,rgba(79,70,229,.06),rgba(6,182,212,.05));
+border-left:4px solid var(--accent);border-radius:10px;color:#2b3343;}
+blockquote p{margin:.3rem 0;}
+figure{margin:1.6rem 0;text-align:center;}
+figure img{max-width:100%;height:auto;}
+.subtitle{color:var(--ink-soft);font-style:italic;margin-top:0;}
+@media(max-width:640px){main{padding:1.5rem 1.2rem;margin:1rem;border-radius:12px;}
+h1{font-size:1.6rem}h2{font-size:1.3rem}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="in">
+<a class="home" href="../index.html">← Course home</a>
+<a href="../slides/L2.html" target="_blank" rel="noopener">L2 slides →</a>
+</div></div>
+<main>
+<h1>Lecture 2 — The toolchain end-to-end, then the pipeline</h1>
+<p><em>Student handout · FPGA-based Accelerator Design · Monsoon 2026</em></p>
+<p><strong>Scope.</strong> How the hardware HLS builds in Lecture 1 becomes <em>a thing running on the
+Alveo U50</em> — and how your program talks to it. We cover the data-center system
+model (CPU/DDR, PCIe, FPGA/HBM), the full compilation + host flow, a vadd run on
+the U50, roofline, and pipelining a benign loop to II = 1. This handout follows the
+Lecture 2 slides. <strong>The first lab lands here:</strong> by the end you should be able to
+reproduce vadd end-to-end.</p>
+<blockquote>
+<p><strong>Thesis (the spine).</strong> L1 showed HLS turn C into a <strong>datapath + FSM</strong>. L2 shows
+how that hardware becomes <em>a thing running on the U50</em> and how your program <em>talks
+to it</em>. Two ideas carry the lecture: there are <strong>two programs and two compilers</strong>
+— a kernel for the fabric and a host for the CPU — that meet only at <strong>runtime</strong>;
+and because the real "run" is a <strong>~1-hour build</strong>, you climb a <strong>fidelity/cost
+ladder</strong>, catching each bug class at the cheapest rung before paying for the next.</p>
+</blockquote>
+<h2>Learning outcomes</h2>
+<p>By the end of this lecture you can:</p>
+<ol start="0">
+<li>Describe the <strong>data-center FPGA system</strong> — CPU + DDR, an FPGA + HBM on a <strong>PCIe</strong>
+   card — and the four runtime steps (allocate, copy in, launch, copy back); and
+   contrast it with an <strong>embedded SoC</strong> (ARM + fabric on one die, shared DDR).</li>
+<li>Name the <strong>two build tracks</strong> (host via <code>g++</code>; kernel via Vitis HLS + <code>v++</code>)
+   and say what runs where.</li>
+<li>Explain what an <strong><code>.xo</code></strong> and an <strong><code>.xclbin</code></strong> are, and that the xclbin <em>is</em>
+   L1's spatial datapath frozen into a fabric configuration (bitstream + metadata).</li>
+<li>Order the <strong>verification ladder</strong> — csim → csynth → cosim → hw_emu → hw → run —
+   and say which bug class each rung catches and roughly what it costs.</li>
+<li>Read a <strong>csynth report</strong>: clock, II, LUT/FF/DSP/BRAM.</li>
+<li>Describe the <strong>five things a host does</strong> over XRT (open, load, allocate, sync,
+   launch/wait, sync-back) and why the sync steps are the data-movement cost.</li>
+<li>Pipeline the dot product to <strong>II = 1</strong> on the happy path and read iteration- vs
+   total-latency off the report.</li>
+</ol>
+<h2>Running example — the same vadd we run in Lab 01</h2>
+<p><code>out[i] = in1[i] + in2[i]</code>. Three DRAM-backed arrays as <code>m_axi</code> ports, <code>size</code> on
+<code>s_axilite</code>, one pipelined loop. This is the Lab 01 vadd kernel verbatim — the
+lecture and the lab are the same artifact on purpose, and later labs reuse this
+exact loop.</p>
+<pre><code class="language-c">extern &quot;C&quot; void vadd(const unsigned int *in1, const unsigned int *in2,
+                     unsigned int *out, int size) {
+#pragma HLS INTERFACE m_axi port=in1 bundle=gmem0 depth=MAX_SIZE
+#pragma HLS INTERFACE m_axi port=in2 bundle=gmem1 depth=MAX_SIZE
+#pragma HLS INTERFACE m_axi port=out bundle=gmem0 depth=MAX_SIZE
+vadd_loop:
+    for (int i = 0; i &lt; size; i++) {
+#pragma HLS PIPELINE II=1
+        out[i] = in1[i] + in2[i];
+    }
+}
+</code></pre>
+<h2>Part I — The system: a data-center FPGA</h2>
+<p>L1 lived entirely "inside the chip." L2 starts one level out — where the data lives
+and how it reaches the fabric. Grounding the lecture in the physical machine first
+makes the host's allocate/copy/launch calls obviously necessary, and it pre-loads
+the PCIe wall that roofline (Part IV) runs into.</p>
+<h3>The machine</h3>
+<ul>
+<li><strong>Host:</strong> a CPU (x86-64) with <strong>DDR</strong> — ordinary server memory.</li>
+<li><strong>Card:</strong> the <strong>Alveo U50</strong>, an FPGA on a <strong>PCIe</strong> board with its <strong>own</strong> memory,
+  <strong>HBM</strong> (8 GB, 316 GB/s). The kernel can only touch data that is <strong>in HBM</strong>.</li>
+<li><strong>Link:</strong> <strong>PCIe Gen3 ×16 ≈ 16 GB/s</strong> — the narrow door between the two memories.</li>
+</ul>
+<p>A data-center FPGA is a <strong>PCIe accelerator with its own memory — the same shape as a
+GPU.</strong> If you have seen CUDA, this is <code>cudaMalloc</code> / <code>cudaMemcpy</code> / launch /
+copy-back, one-for-one.</p>
+<p><figure><img alt="Data-center FPGA system — host CPU with DDR connected over PCIe (~16 GB/s) to an Alveo U50 card with its own HBM (316 GB/s); the kernel runs on the fabric and reads only from HBM" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3NjAgNDAwIiB3aWR0aD0iNzYwIiBoZWlnaHQ9IjQwMCIgZm9udC1mYW1pbHk9IkludGVyLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj4KICA8ZGVmcz4KICAgIDxtYXJrZXIgaWQ9ImFoIiBtYXJrZXJXaWR0aD0iOSIgbWFya2VySGVpZ2h0PSI5IiByZWZYPSI2LjUiIHJlZlk9IjMiIG9yaWVudD0iYXV0byI+CiAgICAgIDxwYXRoIGQ9Ik0wLDAgTDYuNSwzIEwwLDYgWiIgZmlsbD0iIzU1NjM1ZiIvPgogICAgPC9tYXJrZXI+CiAgICA8bWFya2VyIGlkPSJhaGQiIG1hcmtlcldpZHRoPSI5IiBtYXJrZXJIZWlnaHQ9IjkiIHJlZlg9IjYuNSIgcmVmWT0iMyIgb3JpZW50PSJhdXRvIj4KICAgICAgPHBhdGggZD0iTTAsMCBMNi41LDMgTDAsNiBaIiBmaWxsPSIjMGU3NDkwIi8+CiAgICA8L21hcmtlcj4KICA8L2RlZnM+CgogIDwhLS0gY29udGFpbmVyIHRpdGxlcyAtLT4KICA8dGV4dCB4PSIxNjUiIHk9IjgyIiBmb250LXNpemU9IjE1IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMzM0MTU1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5IT1NUIOKAlCBDUFUgc2VydmVyPC90ZXh0PgogIDx0ZXh0IHg9IjYwNSIgeT0iODIiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMwZTc0OTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkFsdmVvIFU1MCDigJQgUENJZSBjYXJkPC90ZXh0PgoKICA8IS0tIGhvc3QgY29udGFpbmVyIC0tPgogIDxyZWN0IHg9IjMwIiB5PSI5NSIgd2lkdGg9IjI3MCIgaGVpZ2h0PSIyNDAiIHJ4PSIxMCIgZmlsbD0iI2ZiZmNmZCIgc3Ryb2tlPSIjMzM0MTU1IiBzdHJva2Utd2lkdGg9IjEuNiIvPgogIDwhLS0gQ1BVIC0tPgogIDxyZWN0IHg9IjYwIiB5PSIxMjAiIHdpZHRoPSIyMTAiIGhlaWdodD0iNjYiIHJ4PSI3IiBmaWxsPSIjZjRmNWY3IiBzdHJva2U9IiMzMzQxNTUiIHN0cm9rZS13aWR0aD0iMiIvPgogIDx0ZXh0IHg9IjE2NSIgeT0iMTU4IiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DUFUgKHg4Ni02NCk8L3RleHQ+CiAgPCEtLSBERFIgLS0+CiAgPHJlY3QgeD0iNjAiIHk9IjI1MiIgd2lkdGg9IjIxMCIgaGVpZ2h0PSI2NiIgcng9IjciIGZpbGw9IiNmNGY1ZjciIHN0cm9rZT0iIzMzNDE1NSIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iMTY1IiB5PSIyODMiIGZvbnQtc2l6ZT0iMTMuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+RERSPC90ZXh0PgogIDx0ZXh0IHg9IjE2NSIgeT0iMzAxIiBmb250LXNpemU9IjEwLjUiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmhvc3QgbWVtb3J5PC90ZXh0PgogIDwhLS0gaG9zdCBpbnRlcm5hbCBidXMgLS0+CiAgPGxpbmUgeDE9IjE2NSIgeTE9IjE4NiIgeDI9IjE2NSIgeTI9IjI1MiIgc3Ryb2tlPSIjNTU2MzVmIiBzdHJva2Utd2lkdGg9IjEuNiIgbWFya2VyLXN0YXJ0PSJ1cmwoI2FoKSIgbWFya2VyLWVuZD0idXJsKCNhaCkiLz4KCiAgPCEtLSBjYXJkIGNvbnRhaW5lciAtLT4KICA8cmVjdCB4PSI0NzAiIHk9Ijk1IiB3aWR0aD0iMjcwIiBoZWlnaHQ9IjI0MCIgcng9IjEwIiBmaWxsPSIjZmJmZGZkIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS42Ii8+CiAgPCEtLSBGUEdBIC0tPgogIDxyZWN0IHg9IjUwMCIgeT0iMTIwIiB3aWR0aD0iMjEwIiBoZWlnaHQ9IjY2IiByeD0iNyIgZmlsbD0iI2UyZWVmMSIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8dGV4dCB4PSI2MDUiIHk9IjE1MSIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+RlBHQSBmYWJyaWM8L3RleHQ+CiAgPHRleHQgeD0iNjA1IiB5PSIxNjkiIGZvbnQtc2l6ZT0iMTAuNSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+eW91ciBrZXJuZWw8L3RleHQ+CiAgPCEtLSBIQk0gLS0+CiAgPHJlY3QgeD0iNTAwIiB5PSIyNTIiIHdpZHRoPSIyMTAiIGhlaWdodD0iNjYiIHJ4PSI3IiBmaWxsPSIjZTJlZWYxIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMiIvPgogIDx0ZXh0IHg9IjYwNSIgeT0iMjgwIiBmb250LXNpemU9IjEzLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkhCTTwvdGV4dD4KICA8dGV4dCB4PSI2MDUiIHk9IjI5OCIgZm9udC1zaXplPSIxMC41IiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5kZXZpY2UgbWVtb3J5IMK3IDggR0IgwrcgMzE2IEdCL3M8L3RleHQ+CiAgPCEtLSBjYXJkIGludGVybmFsIGJ1cyAtLT4KICA8bGluZSB4MT0iNjA1IiB5MT0iMTg2IiB4Mj0iNjA1IiB5Mj0iMjUyIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS42IiBtYXJrZXItc3RhcnQ9InVybCgjYWhkKSIgbWFya2VyLWVuZD0idXJsKCNhaGQpIi8+CgogIDwhLS0gUENJZSBsYWJlbCAtLT4KICA8cmVjdCB4PSIzMTUiIHk9Ijk4IiB3aWR0aD0iMTQwIiBoZWlnaHQ9IjI2IiByeD0iMTMiIGZpbGw9IiNmMWY2ZjciIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjMiLz4KICA8dGV4dCB4PSIzODUiIHk9IjExNSIgZm9udC1zaXplPSIxMS41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMGU3NDkwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5QQ0llIMOXMTYgwrcgfjE2IEdCL3M8L3RleHQ+CgogIDwhLS0gKDMpIGxhdW5jaCA6IENQVSAtPiBGUEdBIChjb250cm9sLCBkYXNoZWQpIC0tPgogIDxsaW5lIHgxPSIyNzAiIHkxPSIxNTAiIHgyPSI0OTciIHkyPSIxNTAiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIHN0cm9rZS1kYXNoYXJyYXk9IjYgNCIgbWFya2VyLWVuZD0idXJsKCNhaCkiLz4KICA8Y2lyY2xlIGN4PSIzODUiIGN5PSIxNTAiIHI9IjExIiBmaWxsPSIjMGU3NDkwIi8+PHRleHQgeD0iMzg1IiB5PSIxNTQiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPjM8L3RleHQ+CiAgPHRleHQgeD0iMzg1IiB5PSIxNDAiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmxhdW5jaCBrZXJuZWw8L3RleHQ+CgogIDwhLS0gKDEpIGFsbG9jIGJ1ZmZlciBpbiBIQk0gLS0+CiAgPGNpcmNsZSBjeD0iNTE5IiBjeT0iMjQwIiByPSIxMSIgZmlsbD0iIzBlNzQ5MCIvPjx0ZXh0IHg9IjUxOSIgeT0iMjQ0IiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj4xPC90ZXh0PgogIDx0ZXh0IHg9IjYyOCIgeT0iMjM4IiBmb250LXNpemU9IjExIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5hbGxvYyBidWZmZXIgaW4gSEJNPC90ZXh0PgoKICA8IS0tICgyKSBjb3B5IGluIDogRERSIC0+IEhCTSAtLT4KICA8bGluZSB4MT0iMjcwIiB5MT0iMjY4IiB4Mj0iNDk3IiB5Mj0iMjY4IiBzdHJva2U9IiM1NTYzNWYiIHN0cm9rZS13aWR0aD0iMS44IiBtYXJrZXItZW5kPSJ1cmwoI2FoKSIvPgogIDxjaXJjbGUgY3g9IjM2MCIgY3k9IjI2OCIgcj0iMTEiIGZpbGw9IiMwZTc0OTAiLz48dGV4dCB4PSIzNjAiIHk9IjI3MiIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+MjwvdGV4dD4KICA8dGV4dCB4PSI0MTAiIHk9IjI2MiIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Y29weSBpbnB1dHMgIEREUiDihpIgSEJNPC90ZXh0PgoKICA8IS0tICg0KSBjb3B5IG91dCA6IEhCTSAtPiBERFIgLS0+CiAgPGxpbmUgeDE9IjQ5NyIgeTE9IjMwMCIgeDI9IjI3MCIgeTI9IjMwMCIgc3Ryb2tlPSIjNTU2MzVmIiBzdHJva2Utd2lkdGg9IjEuOCIgbWFya2VyLWVuZD0idXJsKCNhaCkiLz4KICA8Y2lyY2xlIGN4PSI0MTAiIGN5PSIzMDAiIHI9IjExIiBmaWxsPSIjYzI0MTBjIi8+PHRleHQgeD0iNDEwIiB5PSIzMDQiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPjQ8L3RleHQ+CiAgPHRleHQgeD0iMzYwIiB5PSIzMjIiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPnJlc3VsdHMgIEhCTSDihpIgRERSPC90ZXh0PgoKICA8IS0tIGNhcHRpb24gLS0+CiAgPHRleHQgeD0iMzgwIiB5PSIzNjIiIGZvbnQtc2l6ZT0iMTMiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkEgZGF0YS1jZW50ZXIgRlBHQSBpcyBhIFBDSWUgYWNjZWxlcmF0b3Igd2l0aCBpdHMgb3duIG1lbW9yeSDigJQgbGlrZSBhIEdQVS48L3RleHQ+CiAgPHRleHQgeD0iMzgwIiB5PSIzODQiIGZvbnQtc2l6ZT0iMTEuNSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+RGV2aWNlIG1lbW9yeSAoSEJNKSBpcyBmYXN0ICgzMTYgR0Ivcyk7IHRoZSBQQ0llIGxpbmsgaXMgdGhlIG5hcnJvdyBkb29yICh+MTYgR0IvcykuPC90ZXh0Pgo8L3N2Zz4K"></figure></p>
+<h3>The four runtime steps (with host code)</h3>
+<p>Each numbered step maps to one XRT call:</p>
+<ol>
+<li><strong>Allocate</strong> a buffer in HBM — <code>xrt::bo(dev, bytes, group_id)</code></li>
+<li><strong>Copy inputs in</strong> (DDR → HBM) — <code>bo.sync(XCL_BO_SYNC_BO_TO_DEVICE)</code></li>
+<li><strong>Launch</strong> the kernel — <code>auto r = krnl(...); r.wait()</code></li>
+<li><strong>Copy results back</strong> (HBM → DDR) — <code>bo.sync(XCL_BO_SYNC_BO_FROM_DEVICE)</code></li>
+</ol>
+<p>Steps 2 and 4 cross <strong>PCIe</strong> (~16 GB/s) while HBM runs at <strong>316 GB/s</strong> — the link is
+~20× slower than device memory. Hold that thought; roofline (Part IV) puts numbers
+on why it matters.</p>
+<h3>Data-center vs embedded</h3>
+<ul>
+<li><strong>Data-center (this course):</strong> a discrete PCIe card, separate HBM, explicit DMA —
+  our lab's U50 host. Like a GPU.</li>
+<li><strong>Embedded SoC (Zynq / MPSoC):</strong> an <strong>ARM CPU on the same die</strong> as the fabric,
+  <strong>sharing DDR</strong> — no PCIe, no copies; tight, low-latency, power-constrained.</li>
+</ul>
+<p><figure><img alt="Embedded SoC — an ARM CPU and FPGA fabric on the same die sharing one DDR, with no PCIe link and no explicit copies between them" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDAgMzIwIiB3aWR0aD0iNDQwIiBoZWlnaHQ9IjMyMCIgZm9udC1mYW1pbHk9IkludGVyLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj4KICA8ZGVmcz4KICAgIDxtYXJrZXIgaWQ9ImFoIiBtYXJrZXJXaWR0aD0iOSIgbWFya2VySGVpZ2h0PSI5IiByZWZYPSI2LjUiIHJlZlk9IjMiIG9yaWVudD0iYXV0byI+CiAgICAgIDxwYXRoIGQ9Ik0wLDAgTDYuNSwzIEwwLDYgWiIgZmlsbD0iIzU1NjM1ZiIvPgogICAgPC9tYXJrZXI+CiAgPC9kZWZzPgoKICA8dGV4dCB4PSIyMjAiIHk9IjM0IiBmb250LXNpemU9IjE1IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMGU3NDkwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5FbWJlZGRlZCBTb0MgIChlLmcuIFp5bnEgVWx0cmFTY2FsZSspPC90ZXh0PgoKICA8IS0tIFNvQyBkaWUgLS0+CiAgPHJlY3QgeD0iNDUiIHk9IjUyIiB3aWR0aD0iMzUwIiBoZWlnaHQ9IjE1MCIgcng9IjEyIiBmaWxsPSIjZmJmZGZkIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS44Ii8+CiAgPHRleHQgeD0iMjIwIiB5PSI3NCIgZm9udC1zaXplPSIxMS41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5vbmUgY2hpcDwvdGV4dD4KCiAgPCEtLSBBUk0gUFMgLS0+CiAgPHJlY3QgeD0iNzAiIHk9Ijg4IiB3aWR0aD0iMTQwIiBoZWlnaHQ9IjYwIiByeD0iNyIgZmlsbD0iI2Y0ZjVmNyIgc3Ryb2tlPSIjMzM0MTU1IiBzdHJva2Utd2lkdGg9IjIiLz4KICA8dGV4dCB4PSIxNDAiIHk9IjExNCIgZm9udC1zaXplPSIxMy41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5BUk0gQ1BVPC90ZXh0PgogIDx0ZXh0IHg9IjE0MCIgeT0iMTMyIiBmb250LXNpemU9IjEwLjUiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPnByb2Nlc3Npbmcgc3lzdGVtIChQUyk8L3RleHQ+CgogIDwhLS0gRlBHQSBQTCAtLT4KICA8cmVjdCB4PSIyMzAiIHk9Ijg4IiB3aWR0aD0iMTQwIiBoZWlnaHQ9IjYwIiByeD0iNyIgZmlsbD0iI2UyZWVmMSIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8dGV4dCB4PSIzMDAiIHk9IjExNCIgZm9udC1zaXplPSIxMy41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5GUEdBIGZhYnJpYzwvdGV4dD4KICA8dGV4dCB4PSIzMDAiIHk9IjEzMiIgZm9udC1zaXplPSIxMC41IiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5wcm9ncmFtbWFibGUgbG9naWMgKFBMKTwvdGV4dD4KCiAgPCEtLSBzaGFyZWQgYnVzIGRvd24gdG8gRERSIC0tPgogIDxsaW5lIHgxPSIxNDAiIHkxPSIxNDgiIHgyPSIxNDAiIHkyPSIyMzgiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPGxpbmUgeDE9IjMwMCIgeTE9IjE0OCIgeDI9IjMwMCIgeTI9IjIzOCIgc3Ryb2tlPSIjNTU2MzVmIiBzdHJva2Utd2lkdGg9IjEuNiIgbWFya2VyLWVuZD0idXJsKCNhaCkiLz4KCiAgPCEtLSBzaGFyZWQgRERSIC0tPgogIDxyZWN0IHg9IjEyMCIgeT0iMjQwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjUwIiByeD0iNyIgZmlsbD0iI2Y0ZjVmNyIgc3Ryb2tlPSIjMzM0MTU1IiBzdHJva2Utd2lkdGg9IjIiLz4KICA8dGV4dCB4PSIyMjAiIHk9IjI3MCIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+c2hhcmVkIEREUjwvdGV4dD4KCiAgPCEtLSBjYXB0aW9uIC0tPgogIDx0ZXh0IHg9IjIyMCIgeT0iMzEyIiBmb250LXNpemU9IjExLjUiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkNQVSBuZXh0IHRvIHRoZSBmYWJyaWMgwrcgc2hhcmVkIG1lbW9yeSDCtyBubyBQQ0llIGNvcGllcy48L3RleHQ+Cjwvc3ZnPgo="></figure></p>
+<p>Same HLS C, same kernel; only the <em>system</em> around it changes. We target the
+data-center U50, but the embedded world uses the same HLS — so the mechanism spans
+both.</p>
+<h2>Part II — Full compilation flow</h2>
+<h3>The project layout — one kernel, two drivers</h3>
+<p>The lab folder names the pieces before any tooling touches them — which makes the
+"two programs" point concrete:</p>
+<pre><code class="language-text">vadd/
+├─ hlscribe.yaml          # platform=u50, top=vadd
+└─ baseline/
+   ├─ src/
+   │  ├─ kernel.cpp       # the kernel   → hardware
+   │  └─ host.cpp         # host program → drives the U50
+   ├─ test/
+   │  └─ kernel_tb.cpp    # testbench    → csim / cosim
+   ├─ configs/baseline.cfg   # part · clock · files
+   └─ scripts/            # env + build (hlscribe)
+</code></pre>
+<ul>
+<li><strong><code>src/kernel.cpp</code></strong> — the kernel, synthesized to <strong>hardware</strong>.</li>
+<li><strong><code>test/kernel_tb.cpp</code></strong> — the <strong>testbench</strong>: random inputs + a software golden
+  reference, calls the kernel like a plain function, returns 0/1. It <strong>drives csim
+  (native C) and cosim (against the RTL)</strong> — no hardware, no host.</li>
+<li><strong><code>src/host.cpp</code></strong> — the XRT <strong>host</strong> program (Part I); needed only for the
+  <strong>actual hardware run</strong>.</li>
+<li><code>configs/baseline.cfg</code> (part/clock/files), <code>hlscribe.yaml</code>, <code>scripts/</code>.</li>
+</ul>
+<p>The split to internalize: <strong>verify with the testbench through cosim; the host takes
+over for real execution.</strong> Two drivers, two jobs — students routinely conflate them.</p>
+<h3>The mental-model shift: two programs, two compilers</h3>
+<p>This is the single biggest jump from L1. A CPU programmer thinks "compile my program
+and run it." On an accelerator there are <strong>two</strong> programs, built by <strong>two different
+compilers</strong>, that only meet at <strong>runtime</strong>:</p>
+<pre><code class="language-text">   KERNEL  (runs on the FPGA fabric)          HOST  (runs on the CPU)
+   src/kernel.cpp                             src/host.cpp
+        │                                          │
+        │  Vitis HLS                               │  g++  -std=c++17
+        │   csim ✓   (functional)                  │   (ordinary C++;
+        │   csynth   → RTL + estimates             │    links -lxrt_coreutil)
+        │   cosim ✓  (RTL vs C)                     │
+        ▼                                          ▼
+       RTL                                       host_app
+        │  v++ -c                                   │
+        ▼                                          │
+     vadd.xo   (compiled kernel object)            │
+        │  v++ -l   ← place &amp; route, ~1 h           │
+        ▼                                          │
+     vadd.xclbin  (bitstream + metadata)           │
+        │                                          │
+        └──────────────►  RUNTIME (XRT)  ◄─────────┘
+             host_app loads the xclbin onto the U50 over PCIe,
+             DMAs inputs in, launches the kernel, DMAs results back
+</code></pre>
+<p><strong><code>kernel.cpp</code> never runs on the CPU, and <code>host.cpp</code> never touches the fabric.</strong> They
+are separate builds. The lab's <code>hlscribe build host</code> and <code>hlscribe build hw</code> are
+literally two independent compiles.</p>
+<p><figure><img alt="Two-track flow — the kernel track (kernel.cpp → Vitis HLS → RTL → v++ -c → .xo → v++ -l place-and-route → .xclbin) and the host track (host.cpp → g++ → host_app) meeting only at the XRT runtime" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3ODAgNTYwIiB3aWR0aD0iNzgwIiBoZWlnaHQ9IjU2MCIgZm9udC1mYW1pbHk9IkludGVyLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj4KICA8ZGVmcz4KICAgIDxtYXJrZXIgaWQ9ImFoIiBtYXJrZXJXaWR0aD0iOSIgbWFya2VySGVpZ2h0PSI5IiByZWZYPSI2LjUiIHJlZlk9IjMiIG9yaWVudD0iYXV0byI+CiAgICAgIDxwYXRoIGQ9Ik0wLDAgTDYuNSwzIEwwLDYgWiIgZmlsbD0iIzU1NjM1ZiIvPgogICAgPC9tYXJrZXI+CiAgPC9kZWZzPgoKICA8IS0tIHRyYWNrIGhlYWRlcnMgLS0+CiAgPHRleHQgeD0iMjAwIiB5PSIzMCIgZm9udC1zaXplPSIxNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBlNzQ5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+S0VSTkVMIOKAlCBvbiB0aGUgRlBHQSBmYWJyaWM8L3RleHQ+CiAgPHRleHQgeD0iNTgwIiB5PSIzMCIgZm9udC1zaXplPSIxNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzMzNDE1NSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+SE9TVCDigJQgb24gdGhlIENQVTwvdGV4dD4KCiAgPCEtLSA9PT09PSBLRVJORUwgdHJhY2sgKGxlZnQpID09PT09IC0tPgogIDwhLS0ga2VybmVsLmNwcCAtLT4KICA8cmVjdCB4PSI5MCIgeT0iNDgiIHdpZHRoPSIyMjAiIGhlaWdodD0iNDAiIHJ4PSI3IiBmaWxsPSIjZjFmNmY3IiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMiIvPgogIDx0ZXh0IHg9IjIwMCIgeT0iNzMiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmtlcm5lbC5jcHA8L3RleHQ+CiAgPGxpbmUgeDE9IjIwMCIgeTE9Ijg4IiB4Mj0iMjAwIiB5Mj0iMTE4IiBzdHJva2U9IiM1NTYzNWYiIHN0cm9rZS13aWR0aD0iMS42IiBtYXJrZXItZW5kPSJ1cmwoI2FoKSIvPgoKICA8IS0tIEhMUyBzdGFnZSAtLT4KICA8cmVjdCB4PSI5MCIgeT0iMTIwIiB3aWR0aD0iMjIwIiBoZWlnaHQ9IjQwIiByeD0iNyIgZmlsbD0iI2YxZjZmNyIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8dGV4dCB4PSIyMDAiIHk9IjEzOSIgZm9udC1zaXplPSIxMy41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5WaXRpcyBITFM8L3RleHQ+CiAgPHRleHQgeD0iMjAwIiB5PSIxNTMiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmNzaW0gwrcgY3N5bnRoIMK3IGNvc2ltPC90ZXh0PgogIDxsaW5lIHgxPSIyMDAiIHkxPSIxNjAiIHgyPSIyMDAiIHkyPSIxOTAiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CgogIDwhLS0gUlRMIC0tPgogIDxyZWN0IHg9IjkwIiB5PSIxOTIiIHdpZHRoPSIyMjAiIGhlaWdodD0iNDAiIHJ4PSI3IiBmaWxsPSIjZjFmNmY3IiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMiIvPgogIDx0ZXh0IHg9IjIwMCIgeT0iMjE3IiBmb250LXNpemU9IjE1IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5SVEwgKFZlcmlsb2cpPC90ZXh0PgogIDxsaW5lIHgxPSIyMDAiIHkxPSIyMzIiIHgyPSIyMDAiIHkyPSIyNjIiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPHRleHQgeD0iMjEyIiB5PSIyNTEiIGZvbnQtc2l6ZT0iMTEuNSIgZmlsbD0iIzU1NjM1ZiI+disrIC1jPC90ZXh0PgoKICA8IS0tIC54byAtLT4KICA8cmVjdCB4PSI5MCIgeT0iMjY0IiB3aWR0aD0iMjIwIiBoZWlnaHQ9IjQwIiByeD0iNyIgZmlsbD0iI2YxZjZmNyIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8dGV4dCB4PSIyMDAiIHk9IjI4MyIgZm9udC1zaXplPSIxNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+dmFkZC54bzwvdGV4dD4KICA8dGV4dCB4PSIyMDAiIHk9IjI5NyIgZm9udC1zaXplPSIxMC41IiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5jb21waWxlZCBrZXJuZWwgb2JqZWN0PC90ZXh0PgogIDxsaW5lIHgxPSIyMDAiIHkxPSIzMDQiIHgyPSIyMDAiIHkyPSIzMzQiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPHRleHQgeD0iMjEyIiB5PSIzMjMiIGZvbnQtc2l6ZT0iMTEuNSIgZmlsbD0iI2MyNDEwYyIgZm9udC13ZWlnaHQ9IjYwMCI+disrIC1sPC90ZXh0PgoKICA8IS0tIC54Y2xiaW4gKHRoZSB+MWggc3RlcCkgLS0+CiAgPHJlY3QgeD0iOTAiIHk9IjMzNiIgd2lkdGg9IjIyMCIgaGVpZ2h0PSI0NiIgcng9IjciIGZpbGw9IiNmZGYxZWEiIHN0cm9rZT0iI2MyNDEwYyIgc3Ryb2tlLXdpZHRoPSIyLjIiLz4KICA8dGV4dCB4PSIyMDAiIHk9IjM1NiIgZm9udC1zaXplPSIxNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+dmFkZC54Y2xiaW48L3RleHQ+CiAgPHRleHQgeD0iMjAwIiB5PSIzNzIiIGZvbnQtc2l6ZT0iMTAuNSIgZmlsbD0iI2MyNDEwYyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+cGxhY2UgJmFtcDsgcm91dGUgwrcgfjEgaCDCtyB0aGUgYml0c3RyZWFtPC90ZXh0PgoKICA8IS0tID09PT09IEhPU1QgdHJhY2sgKHJpZ2h0KSA9PT09PSAtLT4KICA8cmVjdCB4PSI0NzAiIHk9IjQ4IiB3aWR0aD0iMjIwIiBoZWlnaHQ9IjQwIiByeD0iNyIgZmlsbD0iI2Y0ZjVmNyIgc3Ryb2tlPSIjMzM0MTU1IiBzdHJva2Utd2lkdGg9IjIiLz4KICA8dGV4dCB4PSI1ODAiIHk9IjczIiBmb250LXNpemU9IjE1IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5ob3N0LmNwcDwvdGV4dD4KICA8bGluZSB4MT0iNTgwIiB5MT0iODgiIHgyPSI1ODAiIHkyPSIxMTgiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPHRleHQgeD0iNTkyIiB5PSIxMDciIGZvbnQtc2l6ZT0iMTEuNSIgZmlsbD0iIzU1NjM1ZiI+ZysrPC90ZXh0PgoKICA8cmVjdCB4PSI0NzAiIHk9IjEyMCIgd2lkdGg9IjIyMCIgaGVpZ2h0PSI0MCIgcng9IjciIGZpbGw9IiNmNGY1ZjciIHN0cm9rZT0iIzMzNDE1NSIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iNTgwIiB5PSIxMzkiIGZvbnQtc2l6ZT0iMTMuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+ZysrICAob3JkaW5hcnkgQysrKTwvdGV4dD4KICA8dGV4dCB4PSI1ODAiIHk9IjE1MyIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+bGlua3MgLWx4cnRfY29yZXV0aWw8L3RleHQ+CiAgPGxpbmUgeDE9IjU4MCIgeTE9IjE2MCIgeDI9IjU4MCIgeTI9IjE5MCIgc3Ryb2tlPSIjNTU2MzVmIiBzdHJva2Utd2lkdGg9IjEuNiIgbWFya2VyLWVuZD0idXJsKCNhaCkiLz4KCiAgPHJlY3QgeD0iNDcwIiB5PSIxOTIiIHdpZHRoPSIyMjAiIGhlaWdodD0iNDAiIHJ4PSI3IiBmaWxsPSIjZjRmNWY3IiBzdHJva2U9IiMzMzQxNTUiIHN0cm9rZS13aWR0aD0iMiIvPgogIDx0ZXh0IHg9IjU4MCIgeT0iMjE3IiBmb250LXNpemU9IjE1IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5ob3N0X2FwcDwvdGV4dD4KCiAgPCEtLSA9PT09PSBjb252ZXJnZSB0byBydW50aW1lID09PT09IC0tPgogIDwhLS0ga2VybmVsIHhjbGJpbiBkb3duIGludG8gcnVudGltZSAtLT4KICA8cGF0aCBkPSJNMjAwLDM4MiBMMjAwLDQ1NSBMMjUwLDQ1NSBMMjUwLDQ3MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNTU2MzVmIiBzdHJva2Utd2lkdGg9IjEuNiIgbWFya2VyLWVuZD0idXJsKCNhaCkiLz4KICA8IS0tIGhvc3RfYXBwIGRvd24gaW50byBydW50aW1lIChsb25nKSAtLT4KICA8cGF0aCBkPSJNNTgwLDIzMiBMNTgwLDQ1NSBMNTIwLDQ1NSBMNTIwLDQ3MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNTU2MzVmIiBzdHJva2Utd2lkdGg9IjEuNiIgbWFya2VyLWVuZD0idXJsKCNhaCkiLz4KICA8dGV4dCB4PSI1OTIiIHk9IjM2MCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzU1NjM1ZiI+d2FpdHMgZm9yPC90ZXh0PgogIDx0ZXh0IHg9IjU5MiIgeT0iMzc0IiBmb250LXNpemU9IjExIiBmaWxsPSIjNTU2MzVmIj50aGUgeGNsYmluPC90ZXh0PgoKICA8IS0tIHJ1bnRpbWUgYm94IC0tPgogIDxyZWN0IHg9IjkwIiB5PSI0NzIiIHdpZHRoPSI2MDAiIGhlaWdodD0iNjgiIHJ4PSI5IiBmaWxsPSIjZjFmNmY3IiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMiIvPgogIDx0ZXh0IHg9IjM5MCIgeT0iNDk3IiBmb250LXNpemU9IjE1IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMGU3NDkwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5SVU5USU1FICDCtyAgWFJUIG92ZXIgUENJZTwvdGV4dD4KICA8dGV4dCB4PSIzOTAiIHk9IjUyMCIgZm9udC1zaXplPSIxMi41IiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5ob3N0X2FwcCBsb2FkcyB0aGUgeGNsYmluIG9udG8gdGhlIFU1MCDCtyBETUEgaW5wdXRzIGluIMK3IGxhdW5jaCBrZXJuZWwgwrcgRE1BIHJlc3VsdHMgYmFjazwvdGV4dD4KPC9zdmc+Cg=="></figure></p>
+<h3>Track 1 — the kernel: from C to bitstream</h3>
+<p>Four artifacts, in order. Each is a real file on disk:</p>
+<ul>
+<li><strong>RTL</strong> — Vitis HLS turns <code>kernel.cpp</code> into Verilog. This is L1's datapath+FSM,
+  now real. You never hand-edit it; you <em>read its report</em> (next).</li>
+<li><strong><code>vadd.xo</code></strong> — <code>v++ -c</code> packages that RTL as a <strong>compiled kernel object</strong>
+  (analogous to a <code>.o</code>): the kernel, not yet placed on any specific fabric.</li>
+<li><strong><code>vadd.xclbin</code></strong> — <code>v++ -l</code> <strong>links</strong> the <code>.xo</code> against the U50 platform and runs
+  <strong>place &amp; route</strong> — assigning every LUT/FF/DSP/BRAM a physical location and routing
+  the wires. This is the <strong>~1-hour</strong> step and the real <em>bitstream</em>. <strong>This file is
+  L1's spatial layout, frozen into a configuration the fabric loads.</strong></li>
+</ul>
+<p>Note the trap in the word "link": <code>v++ -l</code> is <em>not</em> the cheap linking a CPU
+programmer expects — it is synthesis-to-silicon-map, the hour-long step.</p>
+<p><strong>Callback to L1.</strong> Remember the datapath + FSM drawn by hand in L1? <code>csynth</code>
+generates it; <code>v++ -l</code> bolts it onto physical fabric. The xclbin is that picture,
+made loadable.</p>
+<h3>Track 2 — the host: ordinary C++ that drives the card</h3>
+<p><code>host.cpp</code> is plain C++ compiled by <code>g++</code> — no HLS, no fabric. Its whole job is to
+<strong>drive</strong> the card through the <strong>XRT</strong> runtime. The full baseline host program:</p>
+<pre><code class="language-cpp">#include &quot;experimental/xrt_kernel.h&quot;        // + xrt_device.h, xrt_bo.h
+#define N 4096
+int main(int argc, char** argv) {
+  // --- open the device, load the bitstream ---
+  auto dev  = xrt::device(&quot;0000:xx:00.1&quot;);      // U50 by BDF
+  auto uuid = dev.load_xclbin(argv[1]);
+  auto k    = xrt::kernel(dev, uuid, &quot;vadd&quot;);   // name = kernel top
+  // --- (1) allocate device buffers in HBM  (group_id = bank) ---
+  size_t bytes = sizeof(unsigned) * N;
+  auto a = xrt::bo(dev, bytes, k.group_id(0));
+  auto b = xrt::bo(dev, bytes, k.group_id(1));
+  auto o = xrt::bo(dev, bytes, k.group_id(2));
+  // --- map buffers, fill inputs on the host ---
+  auto pa = a.map&lt;unsigned*&gt;();
+  auto pb = b.map&lt;unsigned*&gt;();
+  auto po = o.map&lt;unsigned*&gt;();
+  for (int i = 0; i &lt; N; ++i) { pa[i] = i; pb[i] = 2*i + 1; }
+  // --- (2) copy in · (3) launch · (4) copy out ---
+  a.sync(XCL_BO_SYNC_BO_TO_DEVICE);             // DDR -&gt; HBM
+  b.sync(XCL_BO_SYNC_BO_TO_DEVICE);
+  auto run = k(a, b, o, N);  run.wait();        // launch + block
+  o.sync(XCL_BO_SYNC_BO_FROM_DEVICE);           // HBM -&gt; DDR; po[] valid
+}
+</code></pre>
+<p>The five beats to recognize:</p>
+<ol>
+<li><strong>Open the device</strong> — <code>xrt::device(bdf)</code>. (A gotcha lives here — see Part III.)</li>
+<li><strong>Load the xclbin</strong> — <code>device.load_xclbin(...)</code> returns a UUID; then
+   <code>xrt::kernel(device, uuid, "vadd")</code> (the name must match the top function).</li>
+<li><strong>Allocate device buffers</strong> — <code>xrt::bo(device, bytes, krnl.group_id(i))</code>.
+   <code>group_id(i)</code> picks the <strong>DRAM bank</strong> for argument <code>i</code> — this is where the
+   kernel's <code>bundle=gmem0/gmem1</code> becomes a physical bank choice on the host side.</li>
+<li><strong>Sync inputs to device</strong> — <code>bo.sync(XCL_BO_SYNC_BO_TO_DEVICE)</code>: DMA host→card
+   over PCIe.</li>
+<li><strong>Launch + wait</strong> — <code>auto run = krnl(bo_in1, bo_in2, bo_out, SIZE); run.wait();</code></li>
+<li><strong>Sync output back</strong> — <code>bo.sync(XCL_BO_SYNC_BO_FROM_DEVICE)</code>, then check vs golden.</li>
+</ol>
+<p>(Xilinx also ships an older <strong>OpenCL</strong> host API — <code>clCreateBuffer</code> /
+<code>clEnqueueMigrateMemObjects</code> / <code>clEnqueueTask</code> — with the same four steps, more
+verbose; we use the native <strong>XRT C++</strong> API.)</p>
+<p>Here is the point that seeds <strong>roofline</strong> (Part IV): steps 4 and 6 are <strong>data
+movement over PCIe</strong>; step 5 is <strong>compute</strong>. For vadd the arrays are huge and the
+work per element is one add — so the sync dominates. That is <em>why</em> vadd is
+memory-bound, and Part IV puts numbers on it.</p>
+<h3>The fidelity / cost ladder — the workflow discipline</h3>
+<p>This is the heart of Part II. A CPU dev edits-compiles-runs in seconds; here the
+real run is a <strong>~1 h 16 m</strong> place-and-route. So you don't "just build it" — you climb
+a ladder of increasing fidelity and cost, where each rung catches a bug class the
+cheaper rungs can't, so you only pay for the next rung once you are confident.</p>
+<p><figure><img alt="The fidelity/cost ladder — rungs from csim (cheap, algorithm) up through csynth, cosim, hw_emu, hw build (expensive, ~1 h), to the real run on the U50" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3NjAgNDQwIiB3aWR0aD0iNzYwIiBoZWlnaHQ9IjQ0MCIgZm9udC1mYW1pbHk9IkludGVyLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj4KICA8ZGVmcz4KICAgIDxtYXJrZXIgaWQ9ImFoIiBtYXJrZXJXaWR0aD0iMTAiIG1hcmtlckhlaWdodD0iMTAiIHJlZlg9IjciIHJlZlk9IjMiIG9yaWVudD0iYXV0byI+CiAgICAgIDxwYXRoIGQ9Ik0wLDAgTDcsMyBMMCw2IFoiIGZpbGw9IiMwZTc0OTAiLz4KICAgIDwvbWFya2VyPgogIDwvZGVmcz4KCiAgPHRleHQgeD0iMzgwIiB5PSIzMCIgZm9udC1zaXplPSIxNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+VGhlIGZpZGVsaXR5IC8gY29zdCBsYWRkZXIg4oCUIGNsaW1iIG9ubHkgYXMgZmFyIGFzIHlvdSBtdXN0PC90ZXh0PgoKICA8IS0tIGJhc2VsaW5lIC0tPgogIDxsaW5lIHgxPSI1NSIgeTE9IjQwMCIgeDI9IjcyMCIgeTI9IjQwMCIgc3Ryb2tlPSIjZDNkZWUwIiBzdHJva2Utd2lkdGg9IjEuNSIvPgoKICA8IS0tIHN0ZXBzIChyaXNpbmcgY29zdCkgLS0+CiAgPCEtLSBjc2ltIC0tPgogIDxyZWN0IHg9IjYwIiAgeT0iMzMwIiB3aWR0aD0iMTI4IiBoZWlnaHQ9IjcwIiAgZmlsbD0iI2UyZWVmMSIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuNiIvPgogIDx0ZXh0IHg9IjEyNCIgeT0iMzUyIiBmb250LXNpemU9IjEzIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5jc2ltPC90ZXh0PgogIDx0ZXh0IHg9IjEyNCIgeT0iMzcwIiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMwZTc0OTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPn4zMyBzPC90ZXh0PgogIDx0ZXh0IHg9IjEyNCIgeT0iMzg4IiBmb250LXNpemU9IjEwLjUiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmxvZ2ljIGJ1Z3M8L3RleHQ+CgogIDwhLS0gY3N5bnRoIC0tPgogIDxyZWN0IHg9IjE4OCIgeT0iMjkwIiB3aWR0aD0iMTI4IiBoZWlnaHQ9IjExMCIgZmlsbD0iI2Q2ZTllZCIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuNiIvPgogIDx0ZXh0IHg9IjI1MiIgeT0iMzEyIiBmb250LXNpemU9IjEzIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5jc3ludGg8L3RleHQ+CiAgPHRleHQgeD0iMjUyIiB5PSIzMzAiIGZvbnQtc2l6ZT0iMTEuNSIgZmlsbD0iIzBlNzQ5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+fjY1IHM8L3RleHQ+CiAgPHRleHQgeD0iMjUyIiB5PSIzNDgiIGZvbnQtc2l6ZT0iMTAuNSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+SUkgwrcgY2xvY2sgwrc8L3RleHQ+CiAgPHRleHQgeD0iMjUyIiB5PSIzNjIiIGZvbnQtc2l6ZT0iMTAuNSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+cmVzb3VyY2VzPC90ZXh0PgoKICA8IS0tIGNvc2ltIC0tPgogIDxyZWN0IHg9IjMxNiIgeT0iMjUwIiB3aWR0aD0iMTI4IiBoZWlnaHQ9IjE1MCIgZmlsbD0iI2M5ZTNlOSIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuNiIvPgogIDx0ZXh0IHg9IjM4MCIgeT0iMjcyIiBmb250LXNpemU9IjEzIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5jb3NpbTwvdGV4dD4KICA8dGV4dCB4PSIzODAiIHk9IjI5MCIgZm9udC1zaXplPSIxMS41IiBmaWxsPSIjMGU3NDkwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5+NjYgczwvdGV4dD4KICA8dGV4dCB4PSIzODAiIHk9IjMwOCIgZm9udC1zaXplPSIxMC41IiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5SVEwgbWF0Y2hlcyBDPC90ZXh0PgoKICA8IS0tIGh3X2VtdSAtLT4KICA8cmVjdCB4PSI0NDQiIHk9IjE4NSIgd2lkdGg9IjEyOCIgaGVpZ2h0PSIyMTUiIGZpbGw9IiNiY2RiZTMiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjYiLz4KICA8dGV4dCB4PSI1MDgiIHk9IjIwNyIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+aHdfZW11PC90ZXh0PgogIDx0ZXh0IHg9IjUwOCIgeT0iMjI1IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMwZTc0OTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPn43LjUgbWluPC90ZXh0PgogIDx0ZXh0IHg9IjUwOCIgeT0iMjQzIiBmb250LXNpemU9IjEwLjUiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmhvc3QgKyBYUlQ8L3RleHQ+CiAgPHRleHQgeD0iNTA4IiB5PSIyNTciIGZvbnQtc2l6ZT0iMTAuNSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+KyBETUEsIG5vIGNhcmQ8L3RleHQ+CgogIDwhLS0gaHcgLS0+CiAgPHJlY3QgeD0iNTcyIiB5PSI5NSIgd2lkdGg9IjEyOCIgaGVpZ2h0PSIzMDUiIGZpbGw9IiNmZGYxZWEiIHN0cm9rZT0iI2MyNDEwYyIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iNjM2IiB5PSIxMTgiIGZvbnQtc2l6ZT0iMTMiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmh3PC90ZXh0PgogIDx0ZXh0IHg9IjYzNiIgeT0iMTM2IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiNjMjQxMGMiIHRleHQtYW5jaG9yPSJtaWRkbGUiPn4xIGggMTYgbTwvdGV4dD4KICA8dGV4dCB4PSI2MzYiIHk9IjE1NCIgZm9udC1zaXplPSIxMC41IiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj50aW1pbmcgLzwvdGV4dD4KICA8dGV4dCB4PSI2MzYiIHk9IjE2OCIgZm9udC1zaXplPSIxMC41IiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5yb3V0aW5nPC90ZXh0PgoKICA8IS0tIHJ1biBmbGFnIC0tPgogIDx0ZXh0IHg9IjYzNiIgeT0iNzgiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMwZTc0OTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPuKWtiBydW4gb24gVTUwPC90ZXh0PgogIDx0ZXh0IHg9IjYzNiIgeT0iNjIiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlRFU1QgUEFTU0VEIMK3IH4xLjMgczwvdGV4dD4KCiAgPCEtLSBjbGltYmluZyBhcnJvdyAtLT4KICA8bGluZSB4MT0iODAiIHkxPSIzNjAiIHgyPSI3MDUiIHkyPSIxMjAiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIyLjIiIHN0cm9rZS1kYXNoYXJyYXk9IjIgMCIgbWFya2VyLWVuZD0idXJsKCNhaCkiIG9wYWNpdHk9IjAuNTUiLz4KICA8dGV4dCB4PSIzMDAiIHk9IjIxNSIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBlNzQ5MCIgdHJhbnNmb3JtPSJyb3RhdGUoLTIxIDMwMCAyMTUpIiBvcGFjaXR5PSIwLjkiPmluY3JlYXNpbmcgZmlkZWxpdHkgJmFtcDsgY29zdDwvdGV4dD4KCiAgPCEtLSBjYXB0aW9uIC0tPgogIDx0ZXh0IHg9IjM4MCIgeT0iNDI4IiBmb250LXNpemU9IjEyLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkVhY2ggcnVuZyBjYXRjaGVzIGEgYnVnIGNsYXNzIHRoZSBjaGVhcGVyIG9uZXMgY2FuJ3Qg4oCUIG9ubHkgcGF5IGZvciB0aGUgbmV4dCBvbmNlIHlvdSdyZSBjb25maWRlbnQuPC90ZXh0Pgo8L3N2Zz4K"></figure></p>
+<table>
+<thead>
+<tr>
+<th>Rung</th>
+<th>hlscribe verb</th>
+<th>What it proves</th>
+<th>Cost</th>
+<th>Catches</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>C sim</strong></td>
+<td><code>build csim</code></td>
+<td>the <strong>algorithm</strong> is correct (native compile of kernel + testbench)</td>
+<td>~33 s</td>
+<td>plain logic bugs</td>
+</tr>
+<tr>
+<td><strong>C synth</strong></td>
+<td><code>build csynth</code> → <code>results</code></td>
+<td>HLS <strong>built hardware</strong>; gives clock, <strong>II</strong>, LUT/FF/DSP/BRAM</td>
+<td>~65 s</td>
+<td>won't-synthesize; bad II; resource blowup</td>
+</tr>
+<tr>
+<td><strong>C/RTL cosim</strong></td>
+<td><code>build cosim</code></td>
+<td>the generated <strong>RTL matches the C</strong>, cycle-accurate</td>
+<td>~66 s</td>
+<td>HLS/interface bugs the C sim can't see</td>
+</tr>
+<tr>
+<td><strong>HW emulation</strong></td>
+<td><code>build hw_emu</code> → <code>run-hw-emu</code></td>
+<td>the <strong>host + kernel integrate</strong> — XRT calls, DMA, bank/<code>group_id</code> mapping — in simulation, <strong>no card, no 1 h build</strong></td>
+<td>~7.5 min (build) + run</td>
+<td>wrong bank, bad buffer size, host/kernel mismatch</td>
+</tr>
+<tr>
+<td><strong>HW build</strong></td>
+<td><code>build hw</code> (<code>--slurm</code>)</td>
+<td>a <strong>real bitstream</strong>; timing closure via place &amp; route</td>
+<td>~1 h 16 m</td>
+<td>timing/routing failures</td>
+</tr>
+<tr>
+<td><strong>Run</strong></td>
+<td><code>run-hw</code></td>
+<td>it <strong>works on the U50</strong></td>
+<td>~1.3 s</td>
+<td>reality</td>
+</tr>
+</tbody>
+</table>
+<p>Two teaching points on this table:</p>
+<ul>
+<li><strong>csim/csynth/cosim validate Track 1 only</strong> (the kernel). <strong>hw_emu is the first
+  rung that exercises Track 2 + the handshake</strong> — the host program, XRT, DMA, and the
+  <code>group_id</code>↔<code>bundle</code> bank mapping — without a card or the hour-long build. That is
+  exactly why it exists: it catches the "my kernel is fine but my host talks to it
+  wrong" class of bug cheaply.</li>
+<li>The <strong>csynth rung is the bridge to Part V.</strong> When you run <code>results</code> you read
+  <strong>II = 1</strong> off the report — that is not new hardware, it is L1's schedule, measured.
+  Hold that thought; Part V is about <em>making</em> II = 1 happen (and the next lecture is about when it
+  won't).</li>
+</ul>
+<h3>What hlscribe runs underneath</h3>
+<p><code>hlscribe</code> is a thin driver over the Vitis tools; nothing magic. The real commands,
+once, so the verbs are not a black box:</p>
+<pre><code class="language-bash"># csim / cosim  → the HLS front-end runner
+vitis-run --mode hls --csim  --config baseline.cfg --work_dir workspace/baseline
+vitis-run --mode hls --cosim --config baseline.cfg --work_dir workspace/baseline
+
+# csynth        → v++ in HLS mode
+v++ -c --mode hls --config baseline.cfg --work_dir workspace/baseline
+
+# hw: compile the kernel object, then link+place&amp;route to a bitstream
+v++ -c -t hw --platform $PLATFORM -k vadd -o vadd_hw.xo   src/kernel.cpp
+v++ -l -t hw --platform $PLATFORM      vadd_hw.xo -o vadd_hw.xclbin
+
+# host: just g++
+g++ -std=c++17 -o host_app src/host.cpp -I$XRT_INC -L$XRT_LIB -lxrt_coreutil -lpthread
+</code></pre>
+<p>The <code>baseline.cfg</code> is where the part, clock, and file list live — the single source
+of truth both <code>vitis-run</code> and <code>v++</code> read:</p>
+<pre><code class="language-ini">part=xcu50-fsvh2104-2-e          # the U50 device
+
+[hls]
+flow_target=vitis
+syn.top=vadd                     # top function
+syn.file=../src/kernel.cpp       # the kernel
+tb.file=../test/kernel_tb.cpp    # the testbench
+clock=3.3ns                      # target period ≈ 300 MHz
+clock_uncertainty=15%
+
+# add optimization directives below this line   ←  later
+</code></pre>
+<p>The design point of the whole flow: <strong>target selection is one flag</strong> — <code>-t hw_emu</code>
+vs <code>-t hw</code> builds the emulation model or the real bitstream from the <em>same</em> sources.
+You change fidelity without changing code.</p>
+<h2>Part III — Live demo: vadd on the U50</h2>
+<p>The hw build is ~1 h 16 m, so it is <strong>pre-built</strong>. In class we run the fast rungs
+live and the <strong>hardware run from the precompiled xclbin</strong>. The kernel is the Lab 01
+vadd: <code>out[i] = in1[i] + in2[i]</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Command</th>
+<th>Run</th>
+<th>Watch for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>csim</td>
+<td><code>hlscribe build csim</code></td>
+<td>live · 33 s</td>
+<td><code>TEST PASSED</code></td>
+</tr>
+<tr>
+<td>csynth</td>
+<td><code>hlscribe build csynth</code></td>
+<td>live · 65 s</td>
+<td>II · clock · area</td>
+</tr>
+<tr>
+<td>cosim</td>
+<td><code>hlscribe build cosim</code></td>
+<td>pre · 66 s</td>
+<td><code>PASS</code></td>
+</tr>
+<tr>
+<td>hw</td>
+<td><code>hlscribe build hw</code></td>
+<td>pre-built · 1.3 h</td>
+<td>31 MB xclbin</td>
+</tr>
+<tr>
+<td>run</td>
+<td><code>hlscribe run-hw</code></td>
+<td>live · 1.3 s</td>
+<td><code>TEST PASSED</code></td>
+</tr>
+</tbody>
+</table>
+<h3>Reading the csynth report — L1's schedule, measured</h3>
+<p><code>hlscribe build csynth</code> then <code>hlscribe results</code>. The loop table in the report shows:</p>
+<ul>
+<li><strong>Initiation Interval = 1</strong> (<em>achieved</em> vs target) — a new element every cycle</li>
+<li>iteration latency <strong>143</strong>, clock <strong>2.8 ns</strong> achieved vs <strong>3.3 ns</strong> target</li>
+<li>~2.2k LUT/FF, <strong>2 BRAM</strong></li>
+</ul>
+<p>This is exactly L1's datapath + schedule, now a number. II = 1 means one element per
+cycle once the pipeline is full — hold that for Part V.</p>
+<h3>The hardware run</h3>
+<p><code>hlscribe run-hw</code> on the U50 node:</p>
+<pre><code class="language-text">XCLBIN exists, skipping link ...
+Opening device 0000:xx:00.1
+Executing kernel
+TEST PASSED
+</code></pre>
+<p>That is the whole point of the course — working, on real silicon, in ~1.3 s. The
+hw_emu rung (<code>hlscribe build hw_emu &amp;&amp; hlscribe run-hw-emu</code>) validates the host + XRT
++ DMA path with no card; we skip its live run for time but it is the rung that catches
+host/kernel integration bugs cheaply. And <code>hlscribe build hw --slurm</code> offloads the
+hour-long place-and-route to one of the cluster's build nodes so the U50 host stays
+free for runs.</p>
+<h3>The BDF gotcha — open by BDF, not index</h3>
+<p>The U50 node hosts <strong>two cards</strong>: a VCK5000 (<code>0000:yy:00.1</code>) and our U50
+(<code>0000:xx:00.1</code>) — note the two cards have <strong>different BDFs</strong>. XRT enumerates the
+<strong>VCK5000 as device index 0</strong>, so a host that calls <code>xrt::device(0)</code> pushes the U50
+xclbin to the wrong card and XRT rejects it:</p>
+<pre><code class="language-text">[XRT] ERROR: failed to load xclbin: Invalid argument   (err = -22)
+</code></pre>
+<p>It <em>looks</em> like a platform/UUID mismatch but it is <strong>device selection</strong>. Our
+<code>host.cpp</code> opens the U50 explicitly by <strong>BDF</strong> (<code>0000:xx:00.1</code>). The lesson: <strong>always
+open Alveo cards by BDF, not index.</strong> No tutorial tells you this — and reading the
+error carefully (<code>-22</code> = device selection, not a UUID mismatch) is the real skill.</p>
+<p><figure><img alt="The BDF gotcha — two cards on one host with different BDFs; index 0 is the VCK5000, so opening by index loads the U50 xclbin onto the wrong card and XRT returns err -22; opening by BDF targets the U50 directly" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NjAgMzMwIiB3aWR0aD0iNjYwIiBoZWlnaHQ9IjMzMCIgZm9udC1mYW1pbHk9IkludGVyLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj4KICA8ZGVmcz4KICAgIDxtYXJrZXIgaWQ9ImFyIiBtYXJrZXJXaWR0aD0iOSIgbWFya2VySGVpZ2h0PSI5IiByZWZYPSI2LjUiIHJlZlk9IjMiIG9yaWVudD0iYXV0byI+CiAgICAgIDxwYXRoIGQ9Ik0wLDAgTDYuNSwzIEwwLDYgWiIgZmlsbD0iI2MyNDEwYyIvPgogICAgPC9tYXJrZXI+CiAgICA8bWFya2VyIGlkPSJhdCIgbWFya2VyV2lkdGg9IjkiIG1hcmtlckhlaWdodD0iOSIgcmVmWD0iNi41IiByZWZZPSIzIiBvcmllbnQ9ImF1dG8iPgogICAgICA8cGF0aCBkPSJNMCwwIEw2LjUsMyBMMCw2IFoiIGZpbGw9IiMwZTc0OTAiLz4KICAgIDwvbWFya2VyPgogIDwvZGVmcz4KCiAgPHRleHQgeD0iMzMwIiB5PSIyOCIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+dGhlIGxhYiBub2RlIGhvc3RzIHR3byBjYXJkcyDigJQgb3BlbiB0aGUgVTUwIGJ5IEJERiwgbm90IGJ5IGluZGV4PC90ZXh0PgoKICA8IS0tIGhvc3QgLS0+CiAgPHJlY3QgeD0iNDAiIHk9IjEyOCIgd2lkdGg9IjE1MCIgaGVpZ2h0PSI3MCIgcng9IjgiIGZpbGw9IiNmNGY1ZjciIHN0cm9rZT0iIzMzNDE1NSIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iMTE1IiB5PSIxNjAiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmhvc3RfYXBwPC90ZXh0PgogIDx0ZXh0IHg9IjExNSIgeT0iMTgwIiBmb250LXNpemU9IjEwLjUiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmxvYWRzIHZhZGQueGNsYmluPC90ZXh0PgoKICA8IS0tIHRoZSBsYWIgbm9kZSAtLT4KICA8cmVjdCB4PSIzNjAiIHk9IjU1IiB3aWR0aD0iMjcwIiBoZWlnaHQ9IjI0NSIgcng9IjEwIiBmaWxsPSIjZmJmZGZkIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS42Ii8+CiAgPHRleHQgeD0iNDk1IiB5PSI4MCIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBlNzQ5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+dGhlIGxhYiBub2RlPC90ZXh0PgoKICA8IS0tIFZDSzUwMDAgLS0+CiAgPHJlY3QgeD0iMzg1IiB5PSI5OCIgd2lkdGg9IjIyMCIgaGVpZ2h0PSI2NiIgcng9IjciIGZpbGw9IiNmZGYxZWEiIHN0cm9rZT0iI2MyNDEwYyIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iNDk1IiB5PSIxMjMiIGZvbnQtc2l6ZT0iMTMiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlZDSzUwMDAgIMK3ICBpbmRleCAwPC90ZXh0PgogIDx0ZXh0IHg9IjQ5NSIgeT0iMTQ1IiBmb250LXNpemU9IjExIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj4wMDAwOnl5OjAwLjE8L3RleHQ+CgogIDwhLS0gVTUwIC0tPgogIDxyZWN0IHg9IjM4NSIgeT0iMjAwIiB3aWR0aD0iMjIwIiBoZWlnaHQ9IjY2IiByeD0iNyIgZmlsbD0iI2UyZWVmMSIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8dGV4dCB4PSI0OTUiIHk9IjIyNSIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+VTUwICAob3VyIHRhcmdldCk8L3RleHQ+CiAgPHRleHQgeD0iNDk1IiB5PSIyNDciIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPjAwMDA6eHg6MDAuMTwvdGV4dD4KCiAgPCEtLSB3cm9uZyBhcnJvdzogZGV2aWNlKDApIC0+IFZDSzUwMDAgLS0+CiAgPHBhdGggZD0iTTE5MCwxNTAgTDMwMCwxNTAgTDMwMCwxMzEgTDM4MywxMzEiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2MyNDEwYyIgc3Ryb2tlLXdpZHRoPSIxLjgiIG1hcmtlci1lbmQ9InVybCgjYXIpIi8+CiAgPHRleHQgeD0iMjUwIiB5PSIxNDIiIGZvbnQtc2l6ZT0iMTEuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI2MyNDEwYyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+eHJ0OjpkZXZpY2UoMCk8L3RleHQ+CiAgPHRleHQgeD0iMjUwIiB5PSIxNzAiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiNjMjQxMGMiIHRleHQtYW5jaG9yPSJtaWRkbGUiPuKclyBlcnIgLTIyPC90ZXh0PgoKICA8IS0tIHJpZ2h0IGFycm93OiBCREYgLT4gVTUwIC0tPgogIDxwYXRoIGQ9Ik0xOTAsMTgwIEwzMDAsMTgwIEwzMDAsMjMzIEwzODMsMjMzIiBmaWxsPSJub25lIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS44IiBtYXJrZXItZW5kPSJ1cmwoI2F0KSIvPgogIDx0ZXh0IHg9IjI1NSIgeT0iMjA1IiBmb250LXNpemU9IjExLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMwZTc0OTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmJ5IEJERiAwMDAwOnh4OjAwLjE8L3RleHQ+CiAgPHRleHQgeD0iMzMwIiB5PSIyNTIiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiMwZTc0OTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPuKckyBsb2FkczwvdGV4dD4KCiAgPHRleHQgeD0iMzMwIiB5PSIzMjIiIGZvbnQtc2l6ZT0iMTEuNSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+WFJUIGVudW1lcmF0ZXMgdGhlIFZDSzUwMDAgYXMgaW5kZXggMCDigJQgZGV2aWNlKDApIHB1c2hlcyB0aGUgVTUwIHhjbGJpbiB0byB0aGUgd3JvbmcgY2FyZC48L3RleHQ+Cjwvc3ZnPgo="></figure></p>
+<h2>Part IV — Roofline</h2>
+<p>Roofline is a back-of-envelope model that predicts, <em>before</em> you optimize, whether a
+kernel is limited by <strong>compute</strong> or by <strong>memory</strong>. We build both ceilings from first
+principles off the U50 datasheet, and use them to show that vadd is hard
+memory-bound — so the pipelining we do next (Part V) is <em>not</em> what makes vadd fast.</p>
+<h3>The U50 on one slide (datasheet numbers)</h3>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>U50</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LUTs</td>
+<td>872,000</td>
+</tr>
+<tr>
+<td>Registers (FF)</td>
+<td>1,743,000</td>
+</tr>
+<tr>
+<td><strong>DSP slices</strong> (DSP48E2)</td>
+<td><strong>5,952</strong></td>
+</tr>
+<tr>
+<td>BRAM</td>
+<td>1,344 blocks · 47.3 Mb (~5.9 MB)</td>
+</tr>
+<tr>
+<td>URAM</td>
+<td>640 blocks · 180 Mb (~22.5 MB)</td>
+</tr>
+<tr>
+<td><strong>HBM2</strong></td>
+<td><strong>8 GB, 316 GB/s peak</strong> (201 GB/s nominal)</td>
+</tr>
+<tr>
+<td>Fabric / power</td>
+<td>UltraScale+, 75 W max</td>
+</tr>
+</tbody>
+</table>
+<h3>Ceiling 1 — peak compute from DSPs</h3>
+<p>The recipe: <strong>peak = (DSP count) × (clock) × (ops per DSP per cycle)</strong> — but "ops per
+DSP" depends on the <strong>datatype</strong>, and that swings the answer by an order of
+magnitude. That is the whole lesson.</p>
+<p>Take the <strong>fabric clock</strong> the vadd design actually hits, ~<strong>300 MHz</strong> (the lab
+targets 3.3 ns = 303 MHz; csynth reports 2.8 ns). One DSP48E2 does one
+<strong>multiply-accumulate per cycle</strong>.</p>
+<ul>
+<li><strong>INT8</strong> — the DSP48E2 <strong>packs two INT8 MACs</strong> into one DSP (shared-operand trick),
+  so ~4 ops/DSP:
+  $$5{,}952 \times 300\times10^{6} \times 4 \;=\; 7.1\ \text{TOP/s (INT8)}$$</li>
+<li><strong>Fixed-point / integer MAC (16/32-bit)</strong> — 1 DSP = 1 MAC = 2 ops:
+  $$5{,}952 \times 300\times10^{6} \times 2 \;=\; 3.6\ \text{TOP/s (INT MAC)}$$</li>
+<li><strong>FP32</strong> — a float multiply costs ~3 DSPs and a float add ~2, so an FP32 <strong>FMA
+  ≈ 5 DSPs</strong>. Effective FMA units ≈ 5,952 / 5 ≈ 1,190:
+  $$1{,}190 \times 300\times10^{6} \times 2 \;=\; 0.71\ \text{TFLOP/s (FP32)}$$</li>
+</ul>
+<p><strong>Same silicon, ~10× apart</strong> (INT8 → FP32) just from datatype — which is exactly why
+FPGAs love fixed-point / low-precision, and why any vendor "peak TOPS" headline is
+really a statement about a datatype and a DSP clock. (Vendor slides quote more by
+clocking DSPs to ~600–700 MHz standalone and by INT8 packing — so the gap between our
+3.6 TOP/s and a marketing number is not mysterious.)</p>
+<h3>Ceiling 2 — the memory <em>hierarchy</em>, not one number</h3>
+<p>Here is where the FPGA roofline differs from a CPU/GPU one. There is no single memory
+roof — there is a <strong>stack</strong> of them. Each on-chip memory type is <strong>distributed and
+parallel</strong> (hundreds of independent blocks, each with its own ports), so aggregate
+on-chip bandwidth is enormous. Same recipe as compute: <strong>BW = (# blocks) ×
+(bits/block/cycle) × clock</strong>, at 300 MHz.</p>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Capacity</th>
+<th>Parallelism</th>
+<th><strong>Aggregate BW @ 300 MHz</strong></th>
+<th>Nature</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>HBM2</strong> (off-chip)</td>
+<td>8 GB</td>
+<td>32 pseudo-channels</td>
+<td><strong>316 GB/s</strong> (201 nominal)</td>
+<td>shared, off-chip</td>
+</tr>
+<tr>
+<td><strong>URAM</strong></td>
+<td>~22.5 MB</td>
+<td>640 blk × 2 ports × 72 b</td>
+<td><strong>~3.5 TB/s</strong></td>
+<td>on-chip, banked</td>
+</tr>
+<tr>
+<td><strong>BRAM</strong></td>
+<td>~5.9 MB</td>
+<td>1,344 blk × 72 b</td>
+<td><strong>~3.6 TB/s</strong></td>
+<td>on-chip, banked</td>
+</tr>
+<tr>
+<td><strong>LUTRAM</strong> (distributed)</td>
+<td>~few MB</td>
+<td>~half of LUTs as 64×1 RAM</td>
+<td><strong>~10s of TB/s</strong> (trades vs logic)</td>
+<td>on-chip, fine-grained</td>
+</tr>
+<tr>
+<td><strong>Registers</strong> (FF)</td>
+<td>~0.2 MB</td>
+<td>1.74 M bits/cycle</td>
+<td><strong>~65 TB/s</strong></td>
+<td>fully spatial</td>
+</tr>
+</tbody>
+</table>
+<p><figure><img alt="The memory pyramid, inverted — from HBM at the top (large capacity, ~316 GB/s) down to registers at the bottom (tiny capacity, ~65 TB/s); capacity falls ~40,000× while bandwidth rises ~200×" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3MjAgNDcwIiB3aWR0aD0iNzIwIiBoZWlnaHQ9IjQ3MCIgZm9udC1mYW1pbHk9IkludGVyLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj4KICA8ZGVmcz4KICAgIDxtYXJrZXIgaWQ9ImFoZCIgbWFya2VyV2lkdGg9IjEwIiBtYXJrZXJIZWlnaHQ9IjEwIiByZWZYPSI0IiByZWZZPSI3LjUiIG9yaWVudD0iYXV0byI+CiAgICAgIDxwYXRoIGQ9Ik0wLDAgTDgsMCBMNCw4IFoiIGZpbGw9IiMwZTc0OTAiLz4KICAgIDwvbWFya2VyPgogIDwvZGVmcz4KCiAgPCEtLSBiYW5kczogd2lkdGgg4oidIGNhcGFjaXR5IChmdW5uZWwgbmFycm93cyBkb3dud2FyZCkgLS0+CiAgPCEtLSBIQk0gLS0+CiAgPHJlY3QgeD0iODAiICB5PSI0MCIgIHdpZHRoPSI1NjAiIGhlaWdodD0iNjAiIHJ4PSI2IiBmaWxsPSIjZWVmMmY0IiBzdHJva2U9IiM1NTYzNWYiIHN0cm9rZS13aWR0aD0iMiIvPgogIDx0ZXh0IHg9IjM2MCIgeT0iNjYiICBmb250LXNpemU9IjE1IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5IQk0yICAob2ZmLWNoaXApPC90ZXh0PgogIDx0ZXh0IHg9IjM2MCIgeT0iODYiICBmb250LXNpemU9IjEyLjUiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPjggR0IgIMK3ICAzMTYgR0IvcyAgIChvbmUgY2hhbm5lbCDiiYggMTAgR0Ivcyk8L3RleHQ+CgogIDwhLS0gVVJBTSAtLT4KICA8cmVjdCB4PSIxMzAiIHk9IjExMCIgd2lkdGg9IjQ2MCIgaGVpZ2h0PSI1OCIgcng9IjYiIGZpbGw9IiNlMmVlZjEiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iMzYwIiB5PSIxMzUiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlVSQU08L3RleHQ+CiAgPHRleHQgeD0iMzYwIiB5PSIxNTQiIGZvbnQtc2l6ZT0iMTIuNSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+MjIuNSBNQiAgwrcgIH4zLjUgVEIvczwvdGV4dD4KCiAgPCEtLSBCUkFNIC0tPgogIDxyZWN0IHg9IjE3NSIgeT0iMTc4IiB3aWR0aD0iMzcwIiBoZWlnaHQ9IjU4IiByeD0iNiIgZmlsbD0iI2Q2ZTllZCIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8dGV4dCB4PSIzNjAiIHk9IjIwMyIgZm9udC1zaXplPSIxNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QlJBTTwvdGV4dD4KICA8dGV4dCB4PSIzNjAiIHk9IjIyMiIgZm9udC1zaXplPSIxMi41IiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj41LjkgTUIgIMK3ICB+My42IFRCL3M8L3RleHQ+CgogIDwhLS0gTFVUUkFNIC0tPgogIDxyZWN0IHg9IjIxNSIgeT0iMjQ2IiB3aWR0aD0iMjkwIiBoZWlnaHQ9IjU4IiByeD0iNiIgZmlsbD0iI2M5ZTNlOSIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8dGV4dCB4PSIzNjAiIHk9IjI3MSIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+TFVUUkFNPC90ZXh0PgogIDx0ZXh0IHg9IjM2MCIgeT0iMjkwIiBmb250LXNpemU9IjEyIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5+ZmV3IE1CIMK3IH4xMHMgVEIvczwvdGV4dD4KCiAgPCEtLSBSZWdpc3RlcnMgLS0+CiAgPHJlY3QgeD0iMjU1IiB5PSIzMTQiIHdpZHRoPSIyMTAiIGhlaWdodD0iNTgiIHJ4PSI2IiBmaWxsPSIjZmRmMWVhIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMi4yIi8+CiAgPHRleHQgeD0iMzYwIiB5PSIzMzkiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlJlZ2lzdGVyczwvdGV4dD4KICA8dGV4dCB4PSIzNjAiIHk9IjM1OCIgZm9udC1zaXplPSIxMiIgZmlsbD0iI2MyNDEwYyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+MC4yIE1CIMK3IH42NSBUQi9zPC90ZXh0PgoKICA8IS0tIGJhbmR3aWR0aCBhcnJvdyAoZG93biB0aGUgcmlnaHQgc2lkZSkgLS0+CiAgPGxpbmUgeDE9IjY3OCIgeTE9IjU1IiB4Mj0iNjc4IiB5Mj0iMzYwIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMi40IiBtYXJrZXItZW5kPSJ1cmwoI2FoZCkiLz4KICA8dGV4dCB4PSI2OTUiIHk9IjIxMCIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBlNzQ5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgdHJhbnNmb3JtPSJyb3RhdGUoOTAgNjk1IDIxMCkiPmJhbmR3aWR0aCAg4oaRIH4yMDDDlzwvdGV4dD4KCiAgPCEtLSBjYXBhY2l0eSBub3RlIChsZWZ0KSAtLT4KICA8dGV4dCB4PSI0MiIgeT0iMjEwIiBmb250LXNpemU9IjEzIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB0cmFuc2Zvcm09InJvdGF0ZSgtOTAgNDIgMjEwKSI+Y2FwYWNpdHkgIOKGkyB+NDAsMDAww5c8L3RleHQ+CgogIDwhLS0gY2FwdGlvbiAtLT4KICA8dGV4dCB4PSIzNjAiIHk9IjQwNSIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+R2V0IGRhdGEgb250byB0aGUgY2hpcCBvbmNlIGFuZCByZXVzZSBpdCDigJQ8L3RleHQ+CiAgPHRleHQgeD0iMzYwIiB5PSI0MjQiIGZvbnQtc2l6ZT0iMTIuNSIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+dGhlIGRhdGFwYXRoIHRoZW4gZmVlZHMgZnJvbSBhIHJvb2YgMTDigJMyMDDDlyBhYm92ZSBIQk0uPC90ZXh0PgogIDx0ZXh0IHg9IjM2MCIgeT0iNDQ2IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkJSQU0rVVJBTSDiiYggNyBUQi9zICh+MjLDlyBIQk0pIMK3IHJlZ2lzdGVycyDiiYggNjUgVEIvcyAofjIwMMOXIEhCTSkgwrcgYWxsIEAgMzAwIE1IejwvdGV4dD4KPC9zdmc+Cg=="></figure></p>
+<p>Read it as an <strong>inverted pyramid</strong>: from HBM down to registers, <strong>capacity falls
+~40,000× but bandwidth rises ~200×</strong>. That inversion is the physical basis of the
+whole course. Two consequences:</p>
+<ul>
+<li><strong>On-chip bandwidth dwarfs HBM.</strong> BRAM+URAM alone ≈ <strong>7 TB/s</strong> — ~22× HBM;
+  registers ≈ 65 TB/s — ~200× HBM. If you can get data <em>onto</em> the chip and <strong>reuse</strong>
+  it, you feed the datapath from a roof 1–2 orders of magnitude higher.</li>
+<li><strong>Even HBM's 316 is optimistic per kernel.</strong> It is aggregate over 32 channels; a
+  single <code>m_axi</code> port sees only ~316/32 ≈ <strong>10 GB/s</strong>. Reaching the full number needs
+  banking across channels — the seed for a later memory lecture (multiple ports, <code>ARRAY_PARTITION</code>,
+  bundling).</li>
+</ul>
+<p><strong>The optimization game, stated once:</strong> move each datum from HBM up into BRAM/URAM
+(or registers) <strong>once</strong>, then reuse it many times at the on-chip roof. Every later
+lecture is a way of climbing this pyramid — later lectures tile into BRAM, then stream through FIFOs, then put the operands
+in registers (systolic) — the 65 TB/s endgame.</p>
+<h3>Put them together — the ridge point</h3>
+<p>Roofline plots <strong>attainable ops/s</strong> (y) vs <strong>arithmetic intensity</strong> AI = ops per byte
+moved (x). Two ceilings: a slanted memory roof <code>perf = AI × BW</code> and a flat compute
+roof. They meet at the <strong>ridge</strong> AI* = peak-compute / peak-BW:</p>
+<ul>
+<li>INT: 3.6 TOP/s ÷ 316 GB/s ≈ <strong>11.3 ops/byte</strong></li>
+<li>FP32: 0.71 TFLOP/s ÷ 316 GB/s ≈ <strong>2.2 FLOP/byte</strong></li>
+</ul>
+<p><figure><img alt="Roofline — attainable ops/s vs arithmetic intensity; a slanted memory roof and a flat compute roof meet at the ridge, with vadd's dot far down the memory slope at AI ≈ 0.08" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3MjAgNDYwIiB3aWR0aD0iNzIwIiBoZWlnaHQ9IjQ2MCIgZm9udC1mYW1pbHk9IkludGVyLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj4KICA8ZGVmcz4KICAgIDxtYXJrZXIgaWQ9ImFoIiBtYXJrZXJXaWR0aD0iOSIgbWFya2VySGVpZ2h0PSI5IiByZWZYPSI2LjUiIHJlZlk9IjMiIG9yaWVudD0iYXV0byI+CiAgICAgIDxwYXRoIGQ9Ik0wLDAgTDYuNSwzIEwwLDYgWiIgZmlsbD0iIzU1NjM1ZiIvPgogICAgPC9tYXJrZXI+CiAgPC9kZWZzPgoKICA8IS0tIGF4ZXMgLS0+CiAgPGxpbmUgeDE9IjkwIiB5MT0iNDEwIiB4Mj0iNjcwIiB5Mj0iNDEwIiBzdHJva2U9IiMxNDIwMWYiIHN0cm9rZS13aWR0aD0iMS42IiBtYXJrZXItZW5kPSJ1cmwoI2FoKSIvPgogIDxsaW5lIHgxPSI5MCIgeTE9IjQxMCIgeDI9IjkwIiAgeTI9IjQ1IiAgc3Ryb2tlPSIjMTQyMDFmIiBzdHJva2Utd2lkdGg9IjEuNiIgbWFya2VyLWVuZD0idXJsKCNhaCkiLz4KICA8dGV4dCB4PSIzODAiIHk9IjQ0NiIgZm9udC1zaXplPSIxMy41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5hcml0aG1ldGljIGludGVuc2l0eSAgKG9wZXJhdGlvbnMgLyBieXRlKSAg4oaSICBsb2c8L3RleHQ+CiAgPHRleHQgeD0iMzAiIHk9IjIzMCIgZm9udC1zaXplPSIxMy41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB0cmFuc2Zvcm09InJvdGF0ZSgtOTAgMzAgMjMwKSI+YXR0YWluYWJsZSBvcHMvcyAg4oaSICBsb2c8L3RleHQ+CgogIDwhLS0geCB0aWNrIGd1aWRlcyAtLT4KICA8dGV4dCB4PSIyNzAiIHk9IjQyOCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+MTwvdGV4dD4KICA8dGV4dCB4PSI0MTAiIHk9IjQyOCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+MTA8L3RleHQ+CiAgPHRleHQgeD0iNTUwIiB5PSI0MjgiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPjEwMDwvdGV4dD4KCiAgPCEtLSBtZW1vcnkgcm9vZiAoc2xhbnRlZCkgLS0+CiAgPGxpbmUgeDE9IjkwIiB5MT0iMjkzIiB4Mj0iNDE4IiB5Mj0iMTA2IiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMyIvPgogIDx0ZXh0IHg9IjE1MCIgeT0iMjI4IiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMwZTc0OTAiIHRyYW5zZm9ybT0icm90YXRlKC0zMCAxNTAgMjI4KSI+SEJNIDMxNiBHQi9zPC90ZXh0PgoKICA8IS0tIGNvbXB1dGUgcm9vZiAoZmxhdCkgLS0+CiAgPGxpbmUgeDE9IjQxOCIgeTE9IjEwNiIgeDI9IjY2MCIgeTI9IjEwNiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjMiLz4KICA8dGV4dCB4PSI1NDUiIHk9Ijk3IiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMwZTc0OTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPnBlYWsgY29tcHV0ZSDiiYggMy42IFRPUC9zIChJTlQpPC90ZXh0PgoKICA8IS0tIHJpZGdlIC0tPgogIDxsaW5lIHgxPSI0MTgiIHkxPSIxMDYiIHgyPSI0MTgiIHkyPSI0MTAiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjMiIHN0cm9rZS1kYXNoYXJyYXk9IjUgNCIvPgogIDx0ZXh0IHg9IjQxOCIgeT0iMTIyIiBmb250LXNpemU9IjExLjUiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPnJpZGdlIEFJKiDiiYggMTE8L3RleHQ+CgogIDwhLS0gcmVnaW9uIGxhYmVscyAtLT4KICA8dGV4dCB4PSIyNDAiIHk9IjM5MiIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5tZW1vcnktYm91bmQ8L3RleHQ+CiAgPHRleHQgeD0iNTQ1IiB5PSIzOTIiIGZvbnQtc2l6ZT0iMTIuNSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Y29tcHV0ZS1ib3VuZDwvdGV4dD4KCiAgPCEtLSB2YWRkIGRvdCArIGd1aWRlcyAtLT4KICA8bGluZSB4MT0iMTIyIiB5MT0iMjc3IiB4Mj0iMTIyIiB5Mj0iNDEwIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMS4xIiBzdHJva2UtZGFzaGFycmF5PSI0IDQiLz4KICA8bGluZSB4MT0iMTIyIiB5MT0iMjc3IiB4Mj0iOTAiICB5Mj0iMjc3IiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMS4xIiBzdHJva2UtZGFzaGFycmF5PSI0IDQiLz4KICA8Y2lyY2xlIGN4PSIxMjIiIGN5PSIyNzciIHI9IjYuNSIgZmlsbD0iI2MyNDEwYyIvPgogIDx0ZXh0IHg9IjEzNCIgeT0iMjYyIiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiNjMjQxMGMiPnZhZGQ8L3RleHQ+CiAgPHRleHQgeD0iMTM0IiB5PSIyNzgiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiNjMjQxMGMiPkFJIOKJiCAwLjA4MzwvdGV4dD4KICA8dGV4dCB4PSIxMzQiIHk9IjI5MyIgZm9udC1zaXplPSIxMSIgZmlsbD0iI2MyNDEwYyI+4oaSIH4yNiBHb3AvczwvdGV4dD4KCiAgPCEtLSBwdW5jaGxpbmUgLS0+CiAgPHRleHQgeD0iMzYwIiB5PSI0MCIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj52YWRkIHNpdHMgZmFyIGRvd24gdGhlIG1lbW9yeSBzbG9wZSDigJQgdXNpbmcgJmx0OyAxJSBvZiB0aGUgY29tcHV0ZSByb29mPC90ZXh0Pgo8L3N2Zz4K"></figure></p>
+<p>Left of the ridge → <strong>memory-bound</strong>; right → <strong>compute-bound</strong>. The twist from
+Ceiling 2: <strong>the memory roof is whichever tier actually feeds the datapath.</strong> Compute
+the ridge against HBM (316 GB/s) and it sits at AI ≈ 2–11; recompute it against BRAM
+(~3.6 TB/s) and the slanted roof jumps ~11× — the <strong>ridge slides left</strong>, so a kernel
+that was memory-bound on HBM becomes compute-bound once its data lives on-chip. That
+move — climbing the pyramid to raise the roof — is what optimization buys you.</p>
+<h3>Where vadd lands</h3>
+<p><code>out[i] = in1[i] + in2[i]</code>, <code>unsigned int</code> = 4 B. Per output element: <strong>1 add</strong>, and
+<strong>12 bytes</strong> move (read in1 + read in2 + write out).</p>
+<p>$$\text{AI}_\text{vadd} = \frac{1\ \text{op}}{12\ \text{B}} \approx 0.083\ \text{op/byte}$$</p>
+<p>That is ~<strong>27× below</strong> even the FP32 ridge (2.2) — vadd is <strong>deep in the
+memory-bound region</strong>. Its ceiling is the memory roof:</p>
+<p>$$\text{attainable} = \text{AI}\times\text{BW} = 0.083 \times 316\ \text{GB/s} \approx 26\ \text{Gadd/s}$$</p>
+<p>...and only ~<strong>0.8–1 Gadd/s</strong> if it hits a <em>single</em> HBM channel — which our baseline
+<strong>does</strong>: with no <code>[connectivity]</code>/<code>sp=</code> in <code>baseline.cfg</code>, <code>v++ -l</code> defaults all
+three <code>m_axi</code> ports (<code>gmem0/1</code>) to <strong><code>HBM[0]</code></strong>. So the realized ceiling is ~0.8
+Gadd/s until a later lecture banks the ports across channels. Against the 3.6 TOP/s compute roof,
+vadd uses <strong>&lt; 1 % of the DSPs' capability</strong>. The adders are almost idle; the kernel
+is starving for bytes.</p>
+<p><strong>Punchlines to take away:</strong></p>
+<ol>
+<li><strong>Pipelining vadd to II = 1 (Part V next) does not make vadd "fast."</strong> II = 1 just
+   means the datapath can consume one element per cycle — but the <em>memory</em> can't feed
+   one element per cycle from a single port. Optimizing the compute side of a
+   memory-bound kernel is pushing on the flat roof you are nowhere near.</li>
+<li>The only real levers for a memory-bound kernel: <strong>raise bandwidth</strong> (more HBM
+   channels → a later lecture) or <strong>raise AI</strong> (do more compute per byte moved — fuse operations,
+   keep data on-chip and reuse it → later lectures). You cannot out-pipeline a bandwidth wall.
+   <strong>But vadd can't even use the on-chip pyramid:</strong> it touches each element exactly
+   <em>once</em>, so there is nothing to reuse — it is pinned to the HBM roof. Contrast
+   <strong>GEMM</strong>, where every element is reused O(N) times: tile it into BRAM once and it
+   feeds off the ~3.6 TB/s roof — <em>that</em> is the 223× story we reach later. vadd is the honest
+   counter-example: a kernel the FPGA memory hierarchy can't rescue.</li>
+<li><strong>Second bottleneck, from Part II:</strong> the host also feeds the card over <strong>PCIe 3.0
+   ×16 ≈ 16 GB/s</strong>. Those <code>bo.sync()</code> steps move all three arrays across PCIe; for one
+   add per element that transfer dominates end-to-end. vadd is bandwidth-bound <em>twice
+   over</em> — on HBM and on PCIe.</li>
+</ol>
+<h3>Structural hazard — two loads, one port</h3>
+<p>There is a concrete micro-architectural reason memory <em>structure</em> limits the loop —
+and it is the payoff of the <code>gmem0/gmem1</code> bundling from Part II. Pipeline the body
+<code>out[i] = in1[i] + in2[i]</code> and overlap iterations i, i+1, i+2 (stages: load in1 · load
+in2 · add · store):</p>
+<ul>
+<li>Each iteration issues <strong>two loads</strong>. On <strong>one</strong> AXI port only one load goes per
+  cycle, so at II = 1 the loads of adjacent iterations collide in the same cycle
+  (e.g. iter i+1's <code>in2</code> and iter i+2's <code>in1</code> both in C3) — a <strong>structural hazard on
+  the port</strong>. The scheduler spaces iterations out ⇒ <strong>II = 2</strong>.</li>
+<li><strong>Fix:</strong> put the inputs on <strong>separate ports</strong> — <code>in1→gmem0</code>, <code>in2→gmem1</code> — so both
+  loads issue every cycle ⇒ <strong>II = 1</strong>. This is exactly why the baseline bundles them
+  apart. (<code>out</code> sharing <code>gmem0</code> with <code>in1</code> is fine — AXI read and write channels are
+  independent, so the store doesn't fight the load.)</li>
+</ul>
+<p><figure><img alt="Structural hazard — two loads per iteration collide on a single shared AXI port forcing II = 2; splitting the inputs onto separate ports lets both loads issue every cycle for II = 1" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3NDAgMzgwIiB3aWR0aD0iNzQwIiBoZWlnaHQ9IjM4MCIgZm9udC1mYW1pbHk9IkludGVyLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj4KICA8dGV4dCB4PSIzNzAiIHk9IjI0IiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5QaXBlbGluZWQgdmFkZCBsb29wIOKAlCB0d28gbG9hZHMgcGVyIGl0ZXJhdGlvbiBjb250ZW5kIGZvciBvbmUgcG9ydDwvdGV4dD4KICA8dGV4dCB4PSIzNzAiIHk9IjQ0IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkwxID0gbG9hZCBpbjEgwrcgTDIgPSBsb2FkIGluMiDCtyArID0gYWRkIMK3IFMgPSBzdG9yZSBvdXQgICAoYm9keTogb3V0W2ldID0gaW4xW2ldICsgaW4yW2ldKTwvdGV4dD4KCiAgPCEtLSBjb2x1bW4gaGVhZGVycyAtLT4KICA8dGV4dCB4PSIxNDYiIHk9Ijg2IiBmb250LXNpemU9IjEyIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DMTwvdGV4dD4KICA8dGV4dCB4PSIyMTgiIHk9Ijg2IiBmb250LXNpemU9IjEyIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DMjwvdGV4dD4KICA8dGV4dCB4PSIyOTAiIHk9Ijg2IiBmb250LXNpemU9IjEyIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DMzwvdGV4dD4KICA8dGV4dCB4PSIzNjIiIHk9Ijg2IiBmb250LXNpemU9IjEyIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DNDwvdGV4dD4KICA8dGV4dCB4PSI0MzQiIHk9Ijg2IiBmb250LXNpemU9IjEyIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DNTwvdGV4dD4KICA8dGV4dCB4PSI1MDYiIHk9Ijg2IiBmb250LXNpemU9IjEyIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DNjwvdGV4dD4KCiAgPCEtLSByb3cgbGFiZWxzIC0tPgogIDx0ZXh0IHg9IjEwMCIgeT0iMTI3IiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiMwZTc0OTAiIHRleHQtYW5jaG9yPSJlbmQiPml0ZXIgaTwvdGV4dD4KICA8dGV4dCB4PSIxMDAiIHk9IjE4MSIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMGU3NDkwIiB0ZXh0LWFuY2hvcj0iZW5kIj5pdGVyIGkrMTwvdGV4dD4KICA8dGV4dCB4PSIxMDAiIHk9IjIzNSIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMGU3NDkwIiB0ZXh0LWFuY2hvcj0iZW5kIj5pdGVyIGkrMjwvdGV4dD4KCiAgPCEtLSBjb25mbGljdCBoaWdobGlnaHQgKEMzIGNvbHVtbiwgcm93cyBpKzEgJiBpKzIpIC0tPgogIDxyZWN0IHg9IjI1MCIgeT0iMTUwIiB3aWR0aD0iODAiIGhlaWdodD0iMTAyIiByeD0iNiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZDExZDFkIiBzdHJva2Utd2lkdGg9IjIuNCIgc3Ryb2tlLWRhc2hhcnJheT0iNiA0Ii8+CgogIDwhLS0gPT09PT0gaXRlciBpIChyb3cwLCB5PTEwMCkgPT09PT0gLS0+CiAgPHJlY3QgeD0iMTEwIiB5PSIxMDAiIHdpZHRoPSI3MiIgaGVpZ2h0PSI0NCIgcng9IjUiIGZpbGw9IiNlMmVlZjEiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjQiLz48dGV4dCB4PSIxNDYiIHk9IjEyNyIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5MMTwvdGV4dD4KICA8cmVjdCB4PSIxODIiIHk9IjEwMCIgd2lkdGg9IjcyIiBoZWlnaHQ9IjQ0IiByeD0iNSIgZmlsbD0iI2UyZWVmMSIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuNCIvPjx0ZXh0IHg9IjIxOCIgeT0iMTI3IiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkwyPC90ZXh0PgogIDxyZWN0IHg9IjI1NCIgeT0iMTAwIiB3aWR0aD0iNzIiIGhlaWdodD0iNDQiIHJ4PSI1IiBmaWxsPSIjZjFmNmY3IiBzdHJva2U9IiM1NTYzNWYiIHN0cm9rZS13aWR0aD0iMS40Ii8+PHRleHQgeD0iMjkwIiB5PSIxMjciIGZvbnQtc2l6ZT0iMTIuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+KzwvdGV4dD4KICA8cmVjdCB4PSIzMjYiIHk9IjEwMCIgd2lkdGg9IjcyIiBoZWlnaHQ9IjQ0IiByeD0iNSIgZmlsbD0iI2ZkZjFlYSIgc3Ryb2tlPSIjYzI0MTBjIiBzdHJva2Utd2lkdGg9IjEuNCIvPjx0ZXh0IHg9IjM2MiIgeT0iMTI3IiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlM8L3RleHQ+CgogIDwhLS0gPT09PT0gaXRlciBpKzEgKHJvdzEsIHk9MTU0KSA9PT09PSAtLT4KICA8cmVjdCB4PSIxODIiIHk9IjE1NCIgd2lkdGg9IjcyIiBoZWlnaHQ9IjQ0IiByeD0iNSIgZmlsbD0iI2UyZWVmMSIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuNCIvPjx0ZXh0IHg9IjIxOCIgeT0iMTgxIiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkwxPC90ZXh0PgogIDxyZWN0IHg9IjI1NCIgeT0iMTU0IiB3aWR0aD0iNzIiIGhlaWdodD0iNDQiIHJ4PSI1IiBmaWxsPSIjZTJlZWYxIiBzdHJva2U9IiNkMTFkMWQiIHN0cm9rZS13aWR0aD0iMi4yIi8+PHRleHQgeD0iMjkwIiB5PSIxODEiIGZvbnQtc2l6ZT0iMTIuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+TDI8L3RleHQ+CiAgPHJlY3QgeD0iMzI2IiB5PSIxNTQiIHdpZHRoPSI3MiIgaGVpZ2h0PSI0NCIgcng9IjUiIGZpbGw9IiNmMWY2ZjciIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjQiLz48dGV4dCB4PSIzNjIiIHk9IjE4MSIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj4rPC90ZXh0PgogIDxyZWN0IHg9IjM5OCIgeT0iMTU0IiB3aWR0aD0iNzIiIGhlaWdodD0iNDQiIHJ4PSI1IiBmaWxsPSIjZmRmMWVhIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMS40Ii8+PHRleHQgeD0iNDM0IiB5PSIxODEiIGZvbnQtc2l6ZT0iMTIuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UzwvdGV4dD4KCiAgPCEtLSA9PT09PSBpdGVyIGkrMiAocm93MiwgeT0yMDgpID09PT09IC0tPgogIDxyZWN0IHg9IjI1NCIgeT0iMjA4IiB3aWR0aD0iNzIiIGhlaWdodD0iNDQiIHJ4PSI1IiBmaWxsPSIjZTJlZWYxIiBzdHJva2U9IiNkMTFkMWQiIHN0cm9rZS13aWR0aD0iMi4yIi8+PHRleHQgeD0iMjkwIiB5PSIyMzUiIGZvbnQtc2l6ZT0iMTIuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+TDE8L3RleHQ+CiAgPHJlY3QgeD0iMzI2IiB5PSIyMDgiIHdpZHRoPSI3MiIgaGVpZ2h0PSI0NCIgcng9IjUiIGZpbGw9IiNlMmVlZjEiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjQiLz48dGV4dCB4PSIzNjIiIHk9IjIzNSIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5MMjwvdGV4dD4KICA8cmVjdCB4PSIzOTgiIHk9IjIwOCIgd2lkdGg9IjcyIiBoZWlnaHQ9IjQ0IiByeD0iNSIgZmlsbD0iI2YxZjZmNyIgc3Ryb2tlPSIjNTU2MzVmIiBzdHJva2Utd2lkdGg9IjEuNCIvPjx0ZXh0IHg9IjQzNCIgeT0iMjM1IiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPis8L3RleHQ+CiAgPHJlY3QgeD0iNDcwIiB5PSIyMDgiIHdpZHRoPSI3MiIgaGVpZ2h0PSI0NCIgcng9IjUiIGZpbGw9IiNmZGYxZWEiIHN0cm9rZT0iI2MyNDEwYyIgc3Ryb2tlLXdpZHRoPSIxLjQiLz48dGV4dCB4PSI1MDYiIHk9IjIzNSIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TPC90ZXh0PgoKICA8IS0tIGNvbmZsaWN0IGNhbGxvdXQgLS0+CiAgPHRleHQgeD0iMjkwIiB5PSIyNzIiIGZvbnQtc2l6ZT0iMTEuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI2QxMWQxZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+4pyVIHR3byBsb2FkcyBpbiBDMyDigJQgb25lIHBvcnQgY2FuJ3Qgc2VydmUgYm90aDwvdGV4dD4KCiAgPCEtLSBib3R0b206IGhhemFyZCB2cyBmaXggKHBpbGxzLCBubyB0c3BhbnMpIC0tPgogIDx0ZXh0IHg9IjE1MCIgeT0iMzA5IiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJzdGFydCI+T25lIHBvcnQgKGdtZW0wKSDihpIgMSBsb2FkIC8gY3ljbGU8L3RleHQ+CiAgPHJlY3QgeD0iNTYwIiB5PSIyOTMiIHdpZHRoPSIxMDQiIGhlaWdodD0iMjQiIHJ4PSI2IiBmaWxsPSIjZmRlY2VjIiBzdHJva2U9IiNkMTFkMWQiIHN0cm9rZS13aWR0aD0iMS42Ii8+CiAgPHRleHQgeD0iNjEyIiB5PSIzMDkiIGZvbnQtc2l6ZT0iMTIuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI2QxMWQxZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+SUkgPSAyPC90ZXh0PgoKICA8dGV4dCB4PSIxNTAiIHk9IjM0MSIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPlR3byBwb3J0cyAoaW4xIOKGkiBnbWVtMCwgaW4yIOKGkiBnbWVtMSkg4oaSIDIgbG9hZHMgLyBjeWNsZTwvdGV4dD4KICA8cmVjdCB4PSI1NjAiIHk9IjMyNSIgd2lkdGg9IjEwNCIgaGVpZ2h0PSIyNCIgcng9IjYiIGZpbGw9IiNlMmVlZjEiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjYiLz4KICA8dGV4dCB4PSI2MTIiIHk9IjM0MSIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMGU3NDkwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5JSSA9IDE8L3RleHQ+CgogIDx0ZXh0IHg9IjM3MCIgeT0iMzY1IiBmb250LXNpemU9IjExIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj4odGhpcyBpcyB3aHkgdGhlIGJhc2VsaW5lIGtlcm5lbCBidW5kbGVzIHRoZSB0d28gaW5wdXRzIG9uIHNlcGFyYXRlIHBvcnRzKTwvdGV4dD4KPC9zdmc+Cg=="></figure></p>
+<p>A taxonomy bridge for this architecture-literate audience: a <strong>structural</strong> hazard is
+a <em>shared-resource</em> stall (a port); the stall in Parts V/VI is a <strong>data</strong> hazard (the
+loop-carried recurrence). Same II symptom, different cause — name both.</p>
+<p>We pipeline the dot product to II = 1 next because it teaches the mechanism cleanly —
+not because it is how you would speed up a memory-bound kernel. Do not over-learn
+"pipeline = fast."</p>
+<h2>Part V — Pipelining, the happy path</h2>
+<p>The plan: <strong>(A)</strong> open with the accumulate as a work-it-out-yourself problem — it
+isolates pipelining from any dependency and introduces latency / throughput / II on
+it; <strong>(B)</strong> tighten those into a model; <strong>(C)</strong> apply it to our running example, the
+integer dot product, and read II = 1 off the report; <strong>(D)</strong> hand the float twist to
+Part VI. Everything here is on the <strong>happy path</strong> — II = 1 <em>works</em>.</p>
+<h3>A. Motivating example — the accumulate</h3>
+<p>Take the Chapter-4 accumulate from the reading (Bluebook Ex. 4-3) — <code>dout = a + b + c
++ d</code> as a <strong>3-add dependency chain</strong>, one output per iteration of the implied main
+loop. The compiler lowers it to <strong>three-address</strong> ops:</p>
+<pre><code class="language-text">C1:  t1 = a  + b
+C2:  t2 = t1 + c        # needs t1
+C3:  t3 = t2 + d        # needs t2
+C4:  write dout         # = t3    →  unpipelined: L=3, a new result every 4 clks, 1 adder
+</code></pre>
+<p>The key property, before you work it out: <strong>consecutive iterations are independent</strong>
+— iteration <em>i+1</em> reuses nothing from iteration <em>i</em>. So the only question is how much
+hardware we spend to overlap them.</p>
+<p>The three words you need, on this concrete picture:</p>
+<ul>
+<li><strong>Latency</strong> — clocks from an iteration's inputs to its result. Here the 3-add chain
+  ⇒ <strong>L = 3</strong>. "How long one result takes."</li>
+<li><strong>Throughput</strong> — how often a finished result comes out. We count it as
+  <strong>cycles/output</strong> (unpipelined ⇒ a result <strong>every 4 clks</strong>); the <em>rate</em> form is
+  outputs/clock = 1/that, so <strong>fewer cycles/output = higher throughput</strong>. Pipelining
+  shrinks it <strong>without</strong> shrinking latency. (Be careful: "4" is not a bigger
+  throughput — it is the interval; the rate is 1/4.)</li>
+<li><strong>Initiation Interval (II)</strong> — the knob: clocks before the <em>next</em> iteration starts.
+  II = 1 ⇒ a new iteration every clock. Overlapping iterations is what turns a
+  result-every-4-clks into a result-every-II-clks.</li>
+</ul>
+<p>Say the distinction once: <strong>latency = per-result time; throughput = result rate.</strong> The
+table below is exactly that distinction made numeric.</p>
+<p><strong>Work it out.</strong> To start a new iteration every II cycles, fill in cycles/output,
+adders, and pipeline stages:</p>
+<table>
+<thead>
+<tr>
+<th>Constraint</th>
+<th style="text-align: center;">Cycles / output</th>
+<th style="text-align: center;"># Adders</th>
+<th style="text-align: center;"># Pipeline stages</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No pipelining</td>
+<td style="text-align: center;"><strong>4</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+</tr>
+<tr>
+<td>II = 3</td>
+<td style="text-align: center;"><strong>3</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;"><strong>1</strong></td>
+</tr>
+<tr>
+<td>II = 2</td>
+<td style="text-align: center;"><strong>2</strong></td>
+<td style="text-align: center;"><strong>2</strong></td>
+<td style="text-align: center;"><strong>2</strong></td>
+</tr>
+<tr>
+<td>II = 1</td>
+<td style="text-align: center;"><strong>1</strong></td>
+<td style="text-align: center;"><strong>3</strong></td>
+<td style="text-align: center;"><strong>3</strong></td>
+</tr>
+</tbody>
+</table>
+<p>(These match Bluebook Figs 4-7→4-10, and are Worksheet 1's core table.)</p>
+<p><strong>The reveal.</strong> Seen cycle-by-cycle — no-pipe · II = 3 · II = 2 · II = 1 — the <strong>#
+adders = the most adds in any one column</strong> and the spacing of the <code>w</code> (write) cells =
+cycles/output. Zoom into II = 1 and at any cycle three different iterations occupy the
+three chain positions.</p>
+<p><figure><img alt="Four pipeline schedules cycle-by-cycle — no-pipe, II=3, II=2, II=1 — showing the same 3-add chain packed tighter as II shrinks, with more adders active per cycle and results emerging more often; latency stays 3 in every case" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MDAgMzM2IiB3aWR0aD0iODAwIiBoZWlnaHQ9IjMzNiIgZm9udC1mYW1pbHk9IkludGVyLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj4KPHRleHQgeD0iNDAwIiB5PSIyMCIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Q3ljbGUtYnktY3ljbGUgc2NoZWR1bGVzIGZvciBkb3V0ID0gYSArIGIgKyBjICsgZDwvdGV4dD4KPHRleHQgeD0iNDAwIiB5PSIzNSIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+YTEgwrcgYTIgwrcgYTMgPSB0aGUgdGhyZWUgY2hhaW5lZCBhZGRzICDCtyAgdyA9IHdyaXRlICDCtyAgIyBhZGRlcnMgPSBtb3N0IGFkZHMgaW4gYW55IG9uZSBjb2x1bW48L3RleHQ+Cjx0ZXh0IHg9IjIwMSIgeT0iNTIiIGZvbnQtc2l6ZT0iMTAuNSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QzE8L3RleHQ+Cjx0ZXh0IHg9IjI1MyIgeT0iNTIiIGZvbnQtc2l6ZT0iMTAuNSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QzI8L3RleHQ+Cjx0ZXh0IHg9IjMwNSIgeT0iNTIiIGZvbnQtc2l6ZT0iMTAuNSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QzM8L3RleHQ+Cjx0ZXh0IHg9IjM1NyIgeT0iNTIiIGZvbnQtc2l6ZT0iMTAuNSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QzQ8L3RleHQ+Cjx0ZXh0IHg9IjQwOSIgeT0iNTIiIGZvbnQtc2l6ZT0iMTAuNSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QzU8L3RleHQ+Cjx0ZXh0IHg9IjQ2MSIgeT0iNTIiIGZvbnQtc2l6ZT0iMTAuNSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QzY8L3RleHQ+Cjx0ZXh0IHg9IjUxMyIgeT0iNTIiIGZvbnQtc2l6ZT0iMTAuNSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Qzc8L3RleHQ+Cjx0ZXh0IHg9IjU2NSIgeT0iNTIiIGZvbnQtc2l6ZT0iMTAuNSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Qzg8L3RleHQ+CjxyZWN0IHg9IjE3OCIgeT0iNjAiIHdpZHRoPSI0NiIgaGVpZ2h0PSIxOSIgcng9IjQiIGZpbGw9IiNkY2VlZjIiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjMiLz4KPHRleHQgeD0iMjAxIiB5PSI3MyIgZm9udC1zaXplPSIxMC41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5hMTwvdGV4dD4KPHJlY3QgeD0iMjMwIiB5PSI2MCIgd2lkdGg9IjQ2IiBoZWlnaHQ9IjE5IiByeD0iNCIgZmlsbD0iI2RjZWVmMiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuMyIvPgo8dGV4dCB4PSIyNTMiIHk9IjczIiBmb250LXNpemU9IjEwLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmEyPC90ZXh0Pgo8cmVjdCB4PSIyODIiIHk9IjYwIiB3aWR0aD0iNDYiIGhlaWdodD0iMTkiIHJ4PSI0IiBmaWxsPSIjZGNlZWYyIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS4zIi8+Cjx0ZXh0IHg9IjMwNSIgeT0iNzMiIGZvbnQtc2l6ZT0iMTAuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+YTM8L3RleHQ+CjxyZWN0IHg9IjMzNCIgeT0iNjAiIHdpZHRoPSI0NiIgaGVpZ2h0PSIxOSIgcng9IjQiIGZpbGw9IiNmZGYxZWEiIHN0cm9rZT0iI2MyNDEwYyIgc3Ryb2tlLXdpZHRoPSIxLjMiLz4KPHRleHQgeD0iMzU3IiB5PSI3MyIgZm9udC1zaXplPSIxMC41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj53PC90ZXh0Pgo8cmVjdCB4PSIzODYiIHk9IjgzIiB3aWR0aD0iNDYiIGhlaWdodD0iMTkiIHJ4PSI0IiBmaWxsPSIjZGNlZWYyIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS4zIi8+Cjx0ZXh0IHg9IjQwOSIgeT0iOTYiIGZvbnQtc2l6ZT0iMTAuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+YTE8L3RleHQ+CjxyZWN0IHg9IjQzOCIgeT0iODMiIHdpZHRoPSI0NiIgaGVpZ2h0PSIxOSIgcng9IjQiIGZpbGw9IiNkY2VlZjIiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjMiLz4KPHRleHQgeD0iNDYxIiB5PSI5NiIgZm9udC1zaXplPSIxMC41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5hMjwvdGV4dD4KPHJlY3QgeD0iNDkwIiB5PSI4MyIgd2lkdGg9IjQ2IiBoZWlnaHQ9IjE5IiByeD0iNCIgZmlsbD0iI2RjZWVmMiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuMyIvPgo8dGV4dCB4PSI1MTMiIHk9Ijk2IiBmb250LXNpemU9IjEwLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmEzPC90ZXh0Pgo8cmVjdCB4PSI1NDIiIHk9IjgzIiB3aWR0aD0iNDYiIGhlaWdodD0iMTkiIHJ4PSI0IiBmaWxsPSIjZmRmMWVhIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMS4zIi8+Cjx0ZXh0IHg9IjU2NSIgeT0iOTYiIGZvbnQtc2l6ZT0iMTAuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+dzwvdGV4dD4KPHRleHQgeD0iMTAiIHk9Ijg0IiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMwZTc0OTAiPk5vIHBpcGVsaW5pbmc8L3RleHQ+Cjx0ZXh0IHg9IjEwIiB5PSI5OCIgZm9udC1zaXplPSIxMC41IiBmaWxsPSIjNTU2MzVmIj4oSUkgPSA0KTwvdGV4dD4KPHRleHQgeD0iNjAyIiB5PSI4NyIgZm9udC1zaXplPSIxMS41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMTQyMDFmIj4xIG91dCAvIDQgY3ljIMK3IDEgYWRkZXI8L3RleHQ+CjxyZWN0IHg9IjE3OCIgeT0iMTE2IiB3aWR0aD0iNDYiIGhlaWdodD0iMTkiIHJ4PSI0IiBmaWxsPSIjZGNlZWYyIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS4zIi8+Cjx0ZXh0IHg9IjIwMSIgeT0iMTI5IiBmb250LXNpemU9IjEwLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmExPC90ZXh0Pgo8cmVjdCB4PSIyMzAiIHk9IjExNiIgd2lkdGg9IjQ2IiBoZWlnaHQ9IjE5IiByeD0iNCIgZmlsbD0iI2RjZWVmMiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuMyIvPgo8dGV4dCB4PSIyNTMiIHk9IjEyOSIgZm9udC1zaXplPSIxMC41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5hMjwvdGV4dD4KPHJlY3QgeD0iMjgyIiB5PSIxMTYiIHdpZHRoPSI0NiIgaGVpZ2h0PSIxOSIgcng9IjQiIGZpbGw9IiNkY2VlZjIiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjMiLz4KPHRleHQgeD0iMzA1IiB5PSIxMjkiIGZvbnQtc2l6ZT0iMTAuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+YTM8L3RleHQ+CjxyZWN0IHg9IjMzNCIgeT0iMTE2IiB3aWR0aD0iNDYiIGhlaWdodD0iMTkiIHJ4PSI0IiBmaWxsPSIjZmRmMWVhIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMS4zIi8+Cjx0ZXh0IHg9IjM1NyIgeT0iMTI5IiBmb250LXNpemU9IjEwLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPnc8L3RleHQ+CjxyZWN0IHg9IjMzNCIgeT0iMTM5IiB3aWR0aD0iNDYiIGhlaWdodD0iMTkiIHJ4PSI0IiBmaWxsPSIjZGNlZWYyIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS4zIi8+Cjx0ZXh0IHg9IjM1NyIgeT0iMTUyIiBmb250LXNpemU9IjEwLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmExPC90ZXh0Pgo8cmVjdCB4PSIzODYiIHk9IjEzOSIgd2lkdGg9IjQ2IiBoZWlnaHQ9IjE5IiByeD0iNCIgZmlsbD0iI2RjZWVmMiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuMyIvPgo8dGV4dCB4PSI0MDkiIHk9IjE1MiIgZm9udC1zaXplPSIxMC41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5hMjwvdGV4dD4KPHJlY3QgeD0iNDM4IiB5PSIxMzkiIHdpZHRoPSI0NiIgaGVpZ2h0PSIxOSIgcng9IjQiIGZpbGw9IiNkY2VlZjIiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjMiLz4KPHRleHQgeD0iNDYxIiB5PSIxNTIiIGZvbnQtc2l6ZT0iMTAuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+YTM8L3RleHQ+CjxyZWN0IHg9IjQ5MCIgeT0iMTM5IiB3aWR0aD0iNDYiIGhlaWdodD0iMTkiIHJ4PSI0IiBmaWxsPSIjZmRmMWVhIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMS4zIi8+Cjx0ZXh0IHg9IjUxMyIgeT0iMTUyIiBmb250LXNpemU9IjEwLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPnc8L3RleHQ+Cjx0ZXh0IHg9IjEwIiB5PSIxNDAiIGZvbnQtc2l6ZT0iMTIuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBlNzQ5MCI+SUkgPSAzPC90ZXh0Pgo8dGV4dCB4PSI2MDIiIHk9IjE0MyIgZm9udC1zaXplPSIxMS41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMTQyMDFmIj4xIG91dCAvIDMgY3ljIMK3IDEgYWRkZXI8L3RleHQ+CjxyZWN0IHg9IjI4MCIgeT0iMTcwIiB3aWR0aD0iNTAiIGhlaWdodD0iNDYiIHJ4PSI1IiBmaWxsPSJub25lIiBzdHJva2U9IiNkMTFkMWQiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWRhc2hhcnJheT0iNSAzIi8+CjxyZWN0IHg9IjE3OCIgeT0iMTcyIiB3aWR0aD0iNDYiIGhlaWdodD0iMTkiIHJ4PSI0IiBmaWxsPSIjZGNlZWYyIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS4zIi8+Cjx0ZXh0IHg9IjIwMSIgeT0iMTg1IiBmb250LXNpemU9IjEwLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmExPC90ZXh0Pgo8cmVjdCB4PSIyMzAiIHk9IjE3MiIgd2lkdGg9IjQ2IiBoZWlnaHQ9IjE5IiByeD0iNCIgZmlsbD0iI2RjZWVmMiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuMyIvPgo8dGV4dCB4PSIyNTMiIHk9IjE4NSIgZm9udC1zaXplPSIxMC41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5hMjwvdGV4dD4KPHJlY3QgeD0iMjgyIiB5PSIxNzIiIHdpZHRoPSI0NiIgaGVpZ2h0PSIxOSIgcng9IjQiIGZpbGw9IiNkY2VlZjIiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjMiLz4KPHRleHQgeD0iMzA1IiB5PSIxODUiIGZvbnQtc2l6ZT0iMTAuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+YTM8L3RleHQ+CjxyZWN0IHg9IjMzNCIgeT0iMTcyIiB3aWR0aD0iNDYiIGhlaWdodD0iMTkiIHJ4PSI0IiBmaWxsPSIjZmRmMWVhIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMS4zIi8+Cjx0ZXh0IHg9IjM1NyIgeT0iMTg1IiBmb250LXNpemU9IjEwLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPnc8L3RleHQ+CjxyZWN0IHg9IjI4MiIgeT0iMTk1IiB3aWR0aD0iNDYiIGhlaWdodD0iMTkiIHJ4PSI0IiBmaWxsPSIjZGNlZWYyIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS4zIi8+Cjx0ZXh0IHg9IjMwNSIgeT0iMjA4IiBmb250LXNpemU9IjEwLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmExPC90ZXh0Pgo8cmVjdCB4PSIzMzQiIHk9IjE5NSIgd2lkdGg9IjQ2IiBoZWlnaHQ9IjE5IiByeD0iNCIgZmlsbD0iI2RjZWVmMiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuMyIvPgo8dGV4dCB4PSIzNTciIHk9IjIwOCIgZm9udC1zaXplPSIxMC41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5hMjwvdGV4dD4KPHJlY3QgeD0iMzg2IiB5PSIxOTUiIHdpZHRoPSI0NiIgaGVpZ2h0PSIxOSIgcng9IjQiIGZpbGw9IiNkY2VlZjIiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjMiLz4KPHRleHQgeD0iNDA5IiB5PSIyMDgiIGZvbnQtc2l6ZT0iMTAuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+YTM8L3RleHQ+CjxyZWN0IHg9IjQzOCIgeT0iMTk1IiB3aWR0aD0iNDYiIGhlaWdodD0iMTkiIHJ4PSI0IiBmaWxsPSIjZmRmMWVhIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMS4zIi8+Cjx0ZXh0IHg9IjQ2MSIgeT0iMjA4IiBmb250LXNpemU9IjEwLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPnc8L3RleHQ+CjxyZWN0IHg9IjM4NiIgeT0iMjE4IiB3aWR0aD0iNDYiIGhlaWdodD0iMTkiIHJ4PSI0IiBmaWxsPSIjZGNlZWYyIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS4zIi8+Cjx0ZXh0IHg9IjQwOSIgeT0iMjMxIiBmb250LXNpemU9IjEwLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmExPC90ZXh0Pgo8cmVjdCB4PSI0MzgiIHk9IjIxOCIgd2lkdGg9IjQ2IiBoZWlnaHQ9IjE5IiByeD0iNCIgZmlsbD0iI2RjZWVmMiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuMyIvPgo8dGV4dCB4PSI0NjEiIHk9IjIzMSIgZm9udC1zaXplPSIxMC41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5hMjwvdGV4dD4KPHJlY3QgeD0iNDkwIiB5PSIyMTgiIHdpZHRoPSI0NiIgaGVpZ2h0PSIxOSIgcng9IjQiIGZpbGw9IiNkY2VlZjIiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjMiLz4KPHRleHQgeD0iNTEzIiB5PSIyMzEiIGZvbnQtc2l6ZT0iMTAuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+YTM8L3RleHQ+CjxyZWN0IHg9IjU0MiIgeT0iMjE4IiB3aWR0aD0iNDYiIGhlaWdodD0iMTkiIHJ4PSI0IiBmaWxsPSIjZmRmMWVhIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMS4zIi8+Cjx0ZXh0IHg9IjU2NSIgeT0iMjMxIiBmb250LXNpemU9IjEwLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPnc8L3RleHQ+Cjx0ZXh0IHg9IjEwIiB5PSIyMDgiIGZvbnQtc2l6ZT0iMTIuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBlNzQ5MCI+SUkgPSAyPC90ZXh0Pgo8dGV4dCB4PSI2MDIiIHk9IjIxMCIgZm9udC1zaXplPSIxMS41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMTQyMDFmIj4xIG91dCAvIDIgY3ljIMK3IDIgYWRkZXJzPC90ZXh0Pgo8cmVjdCB4PSIyODAiIHk9IjI0OCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjY5IiByeD0iNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZDExZDFkIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1kYXNoYXJyYXk9IjUgMyIvPgo8cmVjdCB4PSIxNzgiIHk9IjI1MCIgd2lkdGg9IjQ2IiBoZWlnaHQ9IjE5IiByeD0iNCIgZmlsbD0iI2RjZWVmMiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuMyIvPgo8dGV4dCB4PSIyMDEiIHk9IjI2MyIgZm9udC1zaXplPSIxMC41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5hMTwvdGV4dD4KPHJlY3QgeD0iMjMwIiB5PSIyNTAiIHdpZHRoPSI0NiIgaGVpZ2h0PSIxOSIgcng9IjQiIGZpbGw9IiNkY2VlZjIiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjMiLz4KPHRleHQgeD0iMjUzIiB5PSIyNjMiIGZvbnQtc2l6ZT0iMTAuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+YTI8L3RleHQ+CjxyZWN0IHg9IjI4MiIgeT0iMjUwIiB3aWR0aD0iNDYiIGhlaWdodD0iMTkiIHJ4PSI0IiBmaWxsPSIjZGNlZWYyIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS4zIi8+Cjx0ZXh0IHg9IjMwNSIgeT0iMjYzIiBmb250LXNpemU9IjEwLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmEzPC90ZXh0Pgo8cmVjdCB4PSIzMzQiIHk9IjI1MCIgd2lkdGg9IjQ2IiBoZWlnaHQ9IjE5IiByeD0iNCIgZmlsbD0iI2ZkZjFlYSIgc3Ryb2tlPSIjYzI0MTBjIiBzdHJva2Utd2lkdGg9IjEuMyIvPgo8dGV4dCB4PSIzNTciIHk9IjI2MyIgZm9udC1zaXplPSIxMC41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj53PC90ZXh0Pgo8cmVjdCB4PSIyMzAiIHk9IjI3MyIgd2lkdGg9IjQ2IiBoZWlnaHQ9IjE5IiByeD0iNCIgZmlsbD0iI2RjZWVmMiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuMyIvPgo8dGV4dCB4PSIyNTMiIHk9IjI4NiIgZm9udC1zaXplPSIxMC41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5hMTwvdGV4dD4KPHJlY3QgeD0iMjgyIiB5PSIyNzMiIHdpZHRoPSI0NiIgaGVpZ2h0PSIxOSIgcng9IjQiIGZpbGw9IiNkY2VlZjIiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjMiLz4KPHRleHQgeD0iMzA1IiB5PSIyODYiIGZvbnQtc2l6ZT0iMTAuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+YTI8L3RleHQ+CjxyZWN0IHg9IjMzNCIgeT0iMjczIiB3aWR0aD0iNDYiIGhlaWdodD0iMTkiIHJ4PSI0IiBmaWxsPSIjZGNlZWYyIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS4zIi8+Cjx0ZXh0IHg9IjM1NyIgeT0iMjg2IiBmb250LXNpemU9IjEwLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmEzPC90ZXh0Pgo8cmVjdCB4PSIzODYiIHk9IjI3MyIgd2lkdGg9IjQ2IiBoZWlnaHQ9IjE5IiByeD0iNCIgZmlsbD0iI2ZkZjFlYSIgc3Ryb2tlPSIjYzI0MTBjIiBzdHJva2Utd2lkdGg9IjEuMyIvPgo8dGV4dCB4PSI0MDkiIHk9IjI4NiIgZm9udC1zaXplPSIxMC41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj53PC90ZXh0Pgo8cmVjdCB4PSIyODIiIHk9IjI5NiIgd2lkdGg9IjQ2IiBoZWlnaHQ9IjE5IiByeD0iNCIgZmlsbD0iI2RjZWVmMiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuMyIvPgo8dGV4dCB4PSIzMDUiIHk9IjMwOSIgZm9udC1zaXplPSIxMC41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5hMTwvdGV4dD4KPHJlY3QgeD0iMzM0IiB5PSIyOTYiIHdpZHRoPSI0NiIgaGVpZ2h0PSIxOSIgcng9IjQiIGZpbGw9IiNkY2VlZjIiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjMiLz4KPHRleHQgeD0iMzU3IiB5PSIzMDkiIGZvbnQtc2l6ZT0iMTAuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+YTI8L3RleHQ+CjxyZWN0IHg9IjM4NiIgeT0iMjk2IiB3aWR0aD0iNDYiIGhlaWdodD0iMTkiIHJ4PSI0IiBmaWxsPSIjZGNlZWYyIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS4zIi8+Cjx0ZXh0IHg9IjQwOSIgeT0iMzA5IiBmb250LXNpemU9IjEwLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmEzPC90ZXh0Pgo8cmVjdCB4PSI0MzgiIHk9IjI5NiIgd2lkdGg9IjQ2IiBoZWlnaHQ9IjE5IiByeD0iNCIgZmlsbD0iI2ZkZjFlYSIgc3Ryb2tlPSIjYzI0MTBjIiBzdHJva2Utd2lkdGg9IjEuMyIvPgo8dGV4dCB4PSI0NjEiIHk9IjMwOSIgZm9udC1zaXplPSIxMC41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj53PC90ZXh0Pgo8dGV4dCB4PSIxMCIgeT0iMjg2IiBmb250LXNpemU9IjEyLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMwZTc0OTAiPklJID0gMTwvdGV4dD4KPHRleHQgeD0iNjAyIiB5PSIyODgiIGZvbnQtc2l6ZT0iMTEuNSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzE0MjAxZiI+MSBvdXQgLyAxIGN5YyDCtyAzIGFkZGVyczwvdGV4dD4KPC9zdmc+Cg=="></figure></p>
+<p><figure><img alt="II=1 zoom — the latency diagonal (one iteration's 3-add staircase) versus the throughput bracket (a new result every cycle once full), with three iterations overlapping in the three chain positions" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3MDAgMzMwIiB3aWR0aD0iNzAwIiBoZWlnaHQ9IjMzMCIgZm9udC1mYW1pbHk9IkludGVyLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj4KICA8ZGVmcz4KICAgIDxtYXJrZXIgaWQ9ImFvIiBtYXJrZXJXaWR0aD0iOSIgbWFya2VySGVpZ2h0PSI5IiByZWZYPSI2LjUiIHJlZlk9IjMiIG9yaWVudD0iYXV0byI+CiAgICAgIDxwYXRoIGQ9Ik0wLDAgTDYuNSwzIEwwLDYgWiIgZmlsbD0iI2MyNDEwYyIvPgogICAgPC9tYXJrZXI+CiAgICA8bWFya2VyIGlkPSJhbSIgbWFya2VyV2lkdGg9IjkiIG1hcmtlckhlaWdodD0iOSIgcmVmWD0iNi41IiByZWZZPSIzIiBvcmllbnQ9ImF1dG8iPgogICAgICA8cGF0aCBkPSJNMCwwIEw2LjUsMyBMMCw2IFoiIGZpbGw9IiM1NTYzNWYiLz4KICAgIDwvbWFya2VyPgogIDwvZGVmcz4KCiAgPHRleHQgeD0iMzUwIiB5PSIyNiIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+SUkgPSAxIOKAlCBhIG5ldyBpdGVyYXRpb24gc3RhcnRzIGV2ZXJ5IGN5Y2xlIChhY2N1bXVsYXRlLCAzLWFkZCBjaGFpbik8L3RleHQ+CgogIDwhLS0gY29sdW1uIGhlYWRlcnMgLS0+CiAgPHRleHQgeD0iMTgyIiB5PSI1OCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QzE8L3RleHQ+CiAgPHRleHQgeD0iMjQ2IiB5PSI1OCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QzI8L3RleHQ+CiAgPHRleHQgeD0iMzEwIiB5PSI1OCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QzM8L3RleHQ+CiAgPHRleHQgeD0iMzc0IiB5PSI1OCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QzQ8L3RleHQ+CiAgPHRleHQgeD0iNDM4IiB5PSI1OCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QzU8L3RleHQ+CiAgPHRleHQgeD0iNTAyIiB5PSI1OCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QzY8L3RleHQ+CiAgPHRleHQgeD0iNTY2IiB5PSI1OCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Qzc8L3RleHQ+CgogIDwhLS0gcm93IGxhYmVscyAtLT4KICA8dGV4dCB4PSIxNDIiIHk9Ijk4IiAgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMGU3NDkwIiB0ZXh0LWFuY2hvcj0iZW5kIj5BZGQgMTwvdGV4dD4KICA8dGV4dCB4PSIxNDIiIHk9IjE0OCIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMGU3NDkwIiB0ZXh0LWFuY2hvcj0iZW5kIj5BZGQgMjwvdGV4dD4KICA8dGV4dCB4PSIxNDIiIHk9IjE5OCIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMGU3NDkwIiB0ZXh0LWFuY2hvcj0iZW5kIj5BZGQgMzwvdGV4dD4KCiAgPCEtLSBvY2N1cGllZCBjZWxsczogcm93MCAoQWRkMSkgQzEuLkM3ID0gaXQwLi5pdDYgLS0+CiAgPCEtLSBoZWxwZXI6IGNlbGwgdz02NCBoPTQ0LCBsZWZ0IHggPSAxNTAgKyAoY29sLTEpKjY0LCB0b3AgeSA9IHJvdzA6NzIgcm93MToxMjIgcm93MjoxNzIgLS0+CiAgPCEtLSBSb3cgMCAtLT4KICA8cmVjdCB4PSIxNTAiIHk9IjcyIiAgd2lkdGg9IjYwIiBoZWlnaHQ9IjQ0IiByeD0iNSIgZmlsbD0iI2ZkZjFlYSIgc3Ryb2tlPSIjYzI0MTBjIiBzdHJva2Utd2lkdGg9IjIiLz48dGV4dCB4PSIxODAiIHk9Ijk5IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPml0MDwvdGV4dD4KICA8cmVjdCB4PSIyMTQiIHk9IjcyIiAgd2lkdGg9IjYwIiBoZWlnaHQ9IjQ0IiByeD0iNSIgZmlsbD0iI2RjZWVmMiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuNCIvPjx0ZXh0IHg9IjI0NCIgeT0iOTkiIGZvbnQtc2l6ZT0iMTEuNSIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+aXQxPC90ZXh0PgogIDxyZWN0IHg9IjI3OCIgeT0iNzIiICB3aWR0aD0iNjAiIGhlaWdodD0iNDQiIHJ4PSI1IiBmaWxsPSIjZGNlZWYyIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS40Ii8+PHRleHQgeD0iMzA4IiB5PSI5OSIgZm9udC1zaXplPSIxMS41IiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5pdDI8L3RleHQ+CiAgPHJlY3QgeD0iMzQyIiB5PSI3MiIgIHdpZHRoPSI2MCIgaGVpZ2h0PSI0NCIgcng9IjUiIGZpbGw9IiNkY2VlZjIiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjQiLz48dGV4dCB4PSIzNzIiIHk9Ijk5IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPml0MzwvdGV4dD4KICA8cmVjdCB4PSI0MDYiIHk9IjcyIiAgd2lkdGg9IjYwIiBoZWlnaHQ9IjQ0IiByeD0iNSIgZmlsbD0iI2RjZWVmMiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuNCIvPjx0ZXh0IHg9IjQzNiIgeT0iOTkiIGZvbnQtc2l6ZT0iMTEuNSIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+aXQ0PC90ZXh0PgogIDxyZWN0IHg9IjQ3MCIgeT0iNzIiICB3aWR0aD0iNjAiIGhlaWdodD0iNDQiIHJ4PSI1IiBmaWxsPSIjZGNlZWYyIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS40Ii8+PHRleHQgeD0iNTAwIiB5PSI5OSIgZm9udC1zaXplPSIxMS41IiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5pdDU8L3RleHQ+CiAgPHJlY3QgeD0iNTM0IiB5PSI3MiIgIHdpZHRoPSI2MCIgaGVpZ2h0PSI0NCIgcng9IjUiIGZpbGw9IiNkY2VlZjIiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjQiLz48dGV4dCB4PSI1NjQiIHk9Ijk5IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPml0NjwvdGV4dD4KICA8IS0tIFJvdyAxIC0tPgogIDxyZWN0IHg9IjIxNCIgeT0iMTIyIiB3aWR0aD0iNjAiIGhlaWdodD0iNDQiIHJ4PSI1IiBmaWxsPSIjZmRmMWVhIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMiIvPjx0ZXh0IHg9IjI0NCIgeT0iMTQ5IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPml0MDwvdGV4dD4KICA8cmVjdCB4PSIyNzgiIHk9IjEyMiIgd2lkdGg9IjYwIiBoZWlnaHQ9IjQ0IiByeD0iNSIgZmlsbD0iI2RjZWVmMiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuNCIvPjx0ZXh0IHg9IjMwOCIgeT0iMTQ5IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPml0MTwvdGV4dD4KICA8cmVjdCB4PSIzNDIiIHk9IjEyMiIgd2lkdGg9IjYwIiBoZWlnaHQ9IjQ0IiByeD0iNSIgZmlsbD0iI2RjZWVmMiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuNCIvPjx0ZXh0IHg9IjM3MiIgeT0iMTQ5IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPml0MjwvdGV4dD4KICA8cmVjdCB4PSI0MDYiIHk9IjEyMiIgd2lkdGg9IjYwIiBoZWlnaHQ9IjQ0IiByeD0iNSIgZmlsbD0iI2RjZWVmMiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuNCIvPjx0ZXh0IHg9IjQzNiIgeT0iMTQ5IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPml0MzwvdGV4dD4KICA8cmVjdCB4PSI0NzAiIHk9IjEyMiIgd2lkdGg9IjYwIiBoZWlnaHQ9IjQ0IiByeD0iNSIgZmlsbD0iI2RjZWVmMiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuNCIvPjx0ZXh0IHg9IjUwMCIgeT0iMTQ5IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPml0NDwvdGV4dD4KICA8cmVjdCB4PSI1MzQiIHk9IjEyMiIgd2lkdGg9IjYwIiBoZWlnaHQ9IjQ0IiByeD0iNSIgZmlsbD0iI2RjZWVmMiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuNCIvPjx0ZXh0IHg9IjU2NCIgeT0iMTQ5IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPml0NTwvdGV4dD4KICA8IS0tIFJvdyAyIC0tPgogIDxyZWN0IHg9IjI3OCIgeT0iMTcyIiB3aWR0aD0iNjAiIGhlaWdodD0iNDQiIHJ4PSI1IiBmaWxsPSIjZmRmMWVhIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMiIvPjx0ZXh0IHg9IjMwOCIgeT0iMTk5IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPml0MDwvdGV4dD4KICA8cmVjdCB4PSIzNDIiIHk9IjE3MiIgd2lkdGg9IjYwIiBoZWlnaHQ9IjQ0IiByeD0iNSIgZmlsbD0iI2RjZWVmMiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuNCIvPjx0ZXh0IHg9IjM3MiIgeT0iMTk5IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPml0MTwvdGV4dD4KICA8cmVjdCB4PSI0MDYiIHk9IjE3MiIgd2lkdGg9IjYwIiBoZWlnaHQ9IjQ0IiByeD0iNSIgZmlsbD0iI2RjZWVmMiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuNCIvPjx0ZXh0IHg9IjQzNiIgeT0iMTk5IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPml0MjwvdGV4dD4KICA8cmVjdCB4PSI0NzAiIHk9IjE3MiIgd2lkdGg9IjYwIiBoZWlnaHQ9IjQ0IiByeD0iNSIgZmlsbD0iI2RjZWVmMiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuNCIvPjx0ZXh0IHg9IjUwMCIgeT0iMTk5IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPml0MzwvdGV4dD4KICA8cmVjdCB4PSI1MzQiIHk9IjE3MiIgd2lkdGg9IjYwIiBoZWlnaHQ9IjQ0IiByeD0iNSIgZmlsbD0iI2RjZWVmMiIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuNCIvPjx0ZXh0IHg9IjU2NCIgeT0iMTk5IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPml0NDwvdGV4dD4KCiAgPCEtLSBsYXRlbmN5IGRpYWdvbmFsIChpdDApIC0tPgogIDxsaW5lIHgxPSIxODAiIHkxPSI5NCIgeDI9IjMwMCIgeTI9IjE4OCIgc3Ryb2tlPSIjYzI0MTBjIiBzdHJva2Utd2lkdGg9IjEuOCIgc3Ryb2tlLWRhc2hhcnJheT0iNSA0IiBtYXJrZXItZW5kPSJ1cmwoI2FvKSIvPgoKICA8IS0tIHRocm91Z2hwdXQgYnJhY2tldCB1bmRlciBBZGQzIG91dHB1dHMgLS0+CiAgPGxpbmUgeDE9IjI3OCIgeTE9IjIyNCIgeDI9IjU5NCIgeTI9IjIyNCIgc3Ryb2tlPSIjNTU2MzVmIiBzdHJva2Utd2lkdGg9IjEuNCIgbWFya2VyLWVuZD0idXJsKCNhbSkiLz4KCiAgPCEtLSBhbm5vdGF0aW9uIHJvdyAoc2VwYXJhdGVkKSAtLT4KICA8dGV4dCB4PSIxNTAiIHk9IjI0NiIgZm9udC1zaXplPSIxMS41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjYzI0MTBjIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPmxhdGVuY3kgPSAzIGN5YyAoaXQwKTwvdGV4dD4KICA8dGV4dCB4PSI0NTIiIHk9IjI0NiIgZm9udC1zaXplPSIxMS41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj50aHJvdWdocHV0ID0gMSByZXN1bHQgLyBjeWNsZTwvdGV4dD4KCiAgPCEtLSBjYXB0aW9uIC0tPgogIDx0ZXh0IHg9IjM1MCIgeT0iMjg2IiBmb250LXNpemU9IjEyLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlN0ZWFkeSBzdGF0ZSAoQzMrKTogYWxsIDMgc3RhZ2VzIGJ1c3kg4oCUIDMgaXRlcmF0aW9ucyBpbiBmbGlnaHQg4oeSIDMgYWRkZXJzLjwvdGV4dD4KICA8dGV4dCB4PSIzNTAiIHk9IjMwOCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+TGF0ZW5jeSBpcyBmaXhlZCBhdCAzOyBJSSBidXlzIHRocm91Z2hwdXQgd2l0aCBhcmVhLiBUaHJvdWdocHV0IOKJoCBsYXRlbmN5LjwvdGV4dD4KPC9zdmc+Cg=="></figure></p>
+<p>The three "aha"s:</p>
+<ol>
+<li><strong>II is the throughput knob</strong> — a new result every II cycles once full.</li>
+<li><strong>You buy throughput with area</strong> — II = 1 needs all three chain positions live at
+   once ⇒ <strong>3 adders</strong>; II = 2 ⇒ 2; II = 3 ⇒ 1. This is L1's <em>binding</em> tradeoff (share
+   one unit vs replicate), shown dynamically.</li>
+<li><strong>Latency is fixed at L = 3</strong> in every row — pipelining doesn't shorten the chain,
+   it overlaps independent copies of it. <em>Throughput ≠ latency.</em></li>
+</ol>
+<p>The spatial framing: <strong>II = 1 is spatial parallelism</strong> — you replicated the datapath
+so three iterations run side by side in space, exactly the L1 spine.</p>
+<h3>B. Tighten it into a model</h3>
+<p>Now make latency / throughput / II precise, leaning on the RISC-pipeline analogy:</p>
+<ul>
+<li><strong>Steady state:</strong> throughput = <strong>1 result every II clocks</strong> — so II <em>is</em> the
+  sustained rate; the "every 4 clks" from A was just II = 4 (unpipelined).</li>
+<li><strong>Ramp:</strong> the first result comes after <strong>L</strong> clocks (ramp-up); after the last
+  iteration starts, <strong>L</strong> more clocks to drain (ramp-down). Latency is a one-time cost
+  at the ends; II is paid every iteration.</li>
+<li><strong>Total cycles</strong> for N iterations:
+  $$\text{total} \approx L + (N-1)\times \text{II}$$
+  For large N this is dominated by <strong>N·II</strong> — so <strong>II is what sets sustained
+  performance</strong>; latency is a one-time ramp cost. (N = 1000 gives 3999 clks at II = 4
+  vs 1002 at II = 1 — ~4×.)</li>
+<li><strong>Report vocabulary</strong> (so you can read a real synth report next): <em>Trip Count</em>,
+  <em>Iteration Latency</em>, <em>Initiation Interval (II)</em>, <em>Loop Latency</em>.</li>
+</ul>
+<h3>C. Apply it — the integer dot product to II = 1</h3>
+<p>Now our running example. Drop the <code>if</code> from L1's Stage B and it is the <strong>dense dot
+product = the GEMM inner loop</strong> we optimize in later lectures:</p>
+<pre><code class="language-c">int acc = 0;
+dot: for (int i = 0; i &lt; N; i++) {
+#pragma HLS PIPELINE II=1
+    acc += a[i] * b[i];        // integer/fixed-point
+}
+</code></pre>
+<p>Will this hit II = 1? Two dependencies to weigh:</p>
+<ul>
+<li>The <strong>multiply</strong> <code>a[i]*b[i]</code> has multi-cycle latency (say ~3 clks) — but it is
+  <strong>not loop-carried</strong>: iteration <em>i</em>'s product doesn't depend on <em>i−1</em>. It adds to
+  <strong>iteration latency</strong>, not to II.</li>
+<li>The <strong>accumulate</strong> <code>acc = acc + product</code> <strong>is</strong> loop-carried — <em>i+1</em> needs the
+  <code>acc</code> that <em>i</em> wrote. But with a <strong>single-cycle integer add</strong>, that feedback path
+  closes in <strong>one clock</strong>, so a new iteration can still start every cycle.</li>
+</ul>
+<p>⇒ <strong>II = 1 achievable — the happy path.</strong> The DFG says <em>which</em> edge is loop-carried;
+the timing diagram says <em>why</em> a 1-cycle feedback still tolerates II = 1.</p>
+<p><figure><img alt="Dot-product recurrence DFG — the multiply feeds the accumulate; the loop-carried edge is the acc-to-acc feedback, not the multiply" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgMzIwIiB3aWR0aD0iNjQwIiBoZWlnaHQ9IjMyMCIgZm9udC1mYW1pbHk9IkludGVyLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj4KICA8ZGVmcz4KICAgIDxtYXJrZXIgaWQ9ImFoIiBtYXJrZXJXaWR0aD0iOSIgbWFya2VySGVpZ2h0PSI5IiByZWZYPSI2LjUiIHJlZlk9IjMiIG9yaWVudD0iYXV0byI+CiAgICAgIDxwYXRoIGQ9Ik0wLDAgTDYuNSwzIEwwLDYgWiIgZmlsbD0iIzU1NjM1ZiIvPgogICAgPC9tYXJrZXI+CiAgPC9kZWZzPgoKICA8dGV4dCB4PSIzMjAiIHk9IjI2IiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5hY2MgKz0gYVtpXSAqIGJbaV0gIOKAlCAgd2hhdCBzZXRzIHRoZSBtaW5pbXVtIElJPzwvdGV4dD4KCiAgPCEtLSBpbnB1dHMgLS0+CiAgPHRleHQgeD0iNTUiIHk9IjgwIiAgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+YVtpXTwvdGV4dD4KICA8dGV4dCB4PSI1NSIgeT0iMTA0IiBmb250LXNpemU9IjEzIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5iW2ldPC90ZXh0PgogIDxsaW5lIHgxPSI3OCIgeTE9Ijc2IiB4Mj0iMTUwIiB5Mj0iODYiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CiAgPGxpbmUgeDE9Ijc4IiB5MT0iMTAwIiB4Mj0iMTUwIiB5Mj0iOTQiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYWgpIi8+CgogIDwhLS0gbXVsdGlwbHkgLS0+CiAgPHJlY3QgeD0iMTUyIiB5PSI2NiIgd2lkdGg9Ijk2IiBoZWlnaHQ9IjQ2IiByeD0iNyIgZmlsbD0iI2YxZjZmNyIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8dGV4dCB4PSIyMDAiIHk9Ijg4IiBmb250LXNpemU9IjE1IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMGU3NDkwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7DlzwvdGV4dD4KICA8dGV4dCB4PSIyMDAiIHk9IjEwNCIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+bXVsdGlwbHk8L3RleHQ+CiAgPHRleHQgeD0iMjAwIiB5PSI0NiIgZm9udC1zaXplPSIxMC41IiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5tdWx0aS1jeWNsZSwgYnV0IE5PVCBsb29wLWNhcnJpZWQ8L3RleHQ+CiAgPHRleHQgeD0iMjAwIiB5PSIxMzIiIGZvbnQtc2l6ZT0iMTAuNSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+4oaSIGFkZHMgdG8gbGF0ZW5jeSwgbm90IElJPC90ZXh0PgoKICA8IS0tIHByb2R1Y3QgZWRnZSAtLT4KICA8bGluZSB4MT0iMjQ4IiB5MT0iODkiIHgyPSIzMzAiIHkyPSI4OSIgc3Ryb2tlPSIjNTU2MzVmIiBzdHJva2Utd2lkdGg9IjEuNiIgbWFya2VyLWVuZD0idXJsKCNhaCkiLz4KICA8dGV4dCB4PSIyODkiIHk9IjgwIiBmb250LXNpemU9IjEwLjUiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPnByb2R1Y3Q8L3RleHQ+CgogIDwhLS0gYWRkIC0tPgogIDxyZWN0IHg9IjMzMiIgeT0iNjYiIHdpZHRoPSI5NiIgaGVpZ2h0PSI0NiIgcng9IjciIGZpbGw9IiNmMWY2ZjciIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iMzgwIiB5PSI4OCIgZm9udC1zaXplPSIxNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBlNzQ5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+KzwvdGV4dD4KICA8dGV4dCB4PSIzODAiIHk9IjEwNCIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+YWNjdW11bGF0ZTwvdGV4dD4KCiAgPCEtLSBhZGQgLT4gYWNjIC0tPgogIDxsaW5lIHgxPSI0MjgiIHkxPSI4OSIgeDI9IjUwMCIgeTI9Ijg5IiBzdHJva2U9IiM1NTYzNWYiIHN0cm9rZS13aWR0aD0iMS42IiBtYXJrZXItZW5kPSJ1cmwoI2FoKSIvPgoKICA8IS0tIGFjYyByZWdpc3RlciAoZG91YmxlIGxlZnQgZWRnZSkgLS0+CiAgPHJlY3QgeD0iNTAyIiB5PSI2NiIgd2lkdGg9Ijg2IiBoZWlnaHQ9IjQ2IiByeD0iNCIgZmlsbD0iI2YxZjZmNyIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8bGluZSB4MT0iNTA5IiB5MT0iNjYiIHgyPSI1MDkiIHkyPSIxMTIiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iNTQ4IiB5PSI5NCIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+YWNjPC90ZXh0PgoKICA8IS0tIGZlZWRiYWNrIHBhdGg6IGFjYyAtPiBiYWNrIGludG8gYWRkIC0tPgogIDxwYXRoIGQ9Ik01NDUsMTEyIEw1NDUsMTcwIEwzODAsMTcwIEwzODAsMTEyIiBmaWxsPSJub25lIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMiIgbWFya2VyLWVuZD0idXJsKCNhaCkiLz4KICA8dGV4dCB4PSI0NjIiIHk9IjE4NyIgZm9udC1zaXplPSIxMS41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjYzI0MTBjIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5sb29wLWNhcnJpZWQgZGVwZW5kZW5jeSBvbiBhY2M8L3RleHQ+CgogIDwhLS0gdGhlIHR3byBjYXNlcyAtLT4KICA8cmVjdCB4PSIxNTAiIHk9IjIyMiIgd2lkdGg9IjM0MCIgaGVpZ2h0PSI3MiIgcng9IjgiIGZpbGw9IiNmMWY2ZjciIHN0cm9rZT0iI2QzZGVlMCIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KICA8dGV4dCB4PSIxNzAiIHk9IjI0OCIgZm9udC1zaXplPSIxMyIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBlNzQ5MCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5pbnQgICsgIDogIDEtY3ljbGUgZmVlZGJhY2sgICDihpIgICBJSSA9IDEgICDinJM8L3RleHQ+CiAgPHRleHQgeD0iMTcwIiB5PSIyNzgiIGZvbnQtc2l6ZT0iMTMiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiNjMjQxMGMiIHRleHQtYW5jaG9yPSJzdGFydCI+ZmxvYXQgKyAgOiAgfjQtY3ljbGUgZmVlZGJhY2sgIOKGkiAgIElJIOKJpSA0ICAg4pyXPC90ZXh0PgogIDx0ZXh0IHg9IjMyMCIgeT0iMzEyIiBmb250LXNpemU9IjExIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5JSSBpcyBib3VuZGVkIGJ5IHRoZSBsYXRlbmN5IG9mIHRoZSBsb29wLWNhcnJpZWQgZmVlZGJhY2sgcGF0aC48L3RleHQ+Cjwvc3ZnPgo="></figure></p>
+<p><figure><img alt="Integer dot-product pipeline, cycle by cycle — the multiply as a 3-stage pipeline (M1·M2·M3) with one iteration entering each cycle, feeding a single-cycle acc add (A); i0's M1→M2→M3→A staircase is the 4-cycle latency ramp, while the short A-row feedback arcs hand acc from iteration i to i+1 in the next cycle, so a new iteration issues every clock and A emits one result per cycle" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3NjAgNDUyIiB3aWR0aD0iNzYwIiBoZWlnaHQ9IjQ1MiIgZm9udC1mYW1pbHk9IkludGVyLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj4KICA8ZGVmcz4KICAgIDxtYXJrZXIgaWQ9ImFvIiBtYXJrZXJXaWR0aD0iOSIgbWFya2VySGVpZ2h0PSI5IiByZWZYPSI2LjUiIHJlZlk9IjMiIG9yaWVudD0iYXV0byI+CiAgICAgIDxwYXRoIGQ9Ik0wLDAgTDYuNSwzIEwwLDYgWiIgZmlsbD0iI2MyNDEwYyIvPgogICAgPC9tYXJrZXI+CiAgICA8bWFya2VyIGlkPSJhbSIgbWFya2VyV2lkdGg9IjkiIG1hcmtlckhlaWdodD0iOSIgcmVmWD0iNi41IiByZWZZPSIzIiBvcmllbnQ9ImF1dG8iPgogICAgICA8cGF0aCBkPSJNMCwwIEw2LjUsMyBMMCw2IFoiIGZpbGw9IiM1NTYzNWYiLz4KICAgIDwvbWFya2VyPgogIDwvZGVmcz4KCiAgPHRleHQgeD0iMzgwIiB5PSIyNCIgZm9udC1zaXplPSIxNC41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5JbnRlZ2VyIGRvdCBwcm9kdWN0IOKAlCBtdWx0aS1jeWNsZSBtdWx0aXBseSArIHNpbmdsZS1jeWNsZSBhY2Mg4oeSIHN0aWxsIElJID0gMTwvdGV4dD4KICA8dGV4dCB4PSIzODAiIHk9IjQ0IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmJvZHk6IGFjYyArPSBhW2ldwrdiW2ldICAgwrcgICDDlyA9IDMtY3ljbGUgcGlwZWxpbmVkIG11bHRpcGx5IChNMcK3TTLCt00zKSAgIMK3ICAgQSA9IDEtY3ljbGUgaW50IGFkZCBpbnRvIGFjYzwvdGV4dD4KCiAgPCEtLSBjeWNsZSBoZWFkZXJzICBDaiBjZW50ZXIgPSAxNzAgKyAoai0xKSo2MCAtLT4KICA8dGV4dCB4PSIxNzAiIHk9IjkwIiBmb250LXNpemU9IjEyIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DMTwvdGV4dD4KICA8dGV4dCB4PSIyMzAiIHk9IjkwIiBmb250LXNpemU9IjEyIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DMjwvdGV4dD4KICA8dGV4dCB4PSIyOTAiIHk9IjkwIiBmb250LXNpemU9IjEyIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DMzwvdGV4dD4KICA8dGV4dCB4PSIzNTAiIHk9IjkwIiBmb250LXNpemU9IjEyIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DNDwvdGV4dD4KICA8dGV4dCB4PSI0MTAiIHk9IjkwIiBmb250LXNpemU9IjEyIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DNTwvdGV4dD4KICA8dGV4dCB4PSI0NzAiIHk9IjkwIiBmb250LXNpemU9IjEyIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DNjwvdGV4dD4KICA8dGV4dCB4PSI1MzAiIHk9IjkwIiBmb250LXNpemU9IjEyIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DNzwvdGV4dD4KICA8dGV4dCB4PSI1OTAiIHk9IjkwIiBmb250LXNpemU9IjEyIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DODwvdGV4dD4KICA8dGV4dCB4PSI2NTAiIHk9IjkwIiBmb250LXNpemU9IjEyIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DOTwvdGV4dD4KCiAgPCEtLSBtdWx0aXBseSBncm91cCBicmFjZSArIGxhYmVsIC0tPgogIDx0ZXh0IHRyYW5zZm9ybT0idHJhbnNsYXRlKDMwLDI0Nikgcm90YXRlKC05MCkiIGZvbnQtc2l6ZT0iMTEuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBlNzQ5MCIgdGV4dC1hbmNob3I9InN0YXJ0Ij5tdWx0aXBseSDigJQgMy1jeWNsZSBwaXBlbGluZTwvdGV4dD4KCiAgPCEtLSByb3cgbGFiZWxzIC0tPgogIDx0ZXh0IHg9IjE1MCIgeT0iMTI2IiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMGU3NDkwIiB0ZXh0LWFuY2hvcj0iZW5kIj5NMSAgw5c8L3RleHQ+CiAgPHRleHQgeD0iMTUwIiB5PSIxNzYiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiMwZTc0OTAiIHRleHQtYW5jaG9yPSJlbmQiPk0yICDDlzwvdGV4dD4KICA8dGV4dCB4PSIxNTAiIHk9IjIyNiIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzBlNzQ5MCIgdGV4dC1hbmNob3I9ImVuZCI+TTMgIMOXPC90ZXh0PgogIDx0ZXh0IHg9IjE1MCIgeT0iMzA3IiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjYzI0MTBjIiB0ZXh0LWFuY2hvcj0iZW5kIj5BICArIOKGkiBhY2M8L3RleHQ+CgogIDwhLS0gPT09PT09PSBNdWx0aXBseSBwaXBlbGluZSBjZWxscyAoZGlhZ29uYWwsIG9uZSBpdGVyIGVudGVycyBwZXIgY3ljbGUpID09PT09PT0gLS0+CiAgPCEtLSBNMSAoeT0xMDQpOiBpMEBDMSBpMUBDMiBpMkBDMyBpM0BDNCBpNEBDNSBpNUBDNiAtLT4KICA8cmVjdCB4PSIxNDQiIHk9IjEwNCIgd2lkdGg9IjUyIiBoZWlnaHQ9IjQwIiByeD0iNSIgZmlsbD0iI2ZkZjFlYSIgc3Ryb2tlPSIjYzI0MTBjIiBzdHJva2Utd2lkdGg9IjIiLz48dGV4dCB4PSIxNzAiIHk9IjEyOSIgZm9udC1zaXplPSIxMS41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5pMDwvdGV4dD4KICA8cmVjdCB4PSIyMDQiIHk9IjEwNCIgd2lkdGg9IjUyIiBoZWlnaHQ9IjQwIiByeD0iNSIgZmlsbD0iI2UyZWVmMSIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuNCIvPjx0ZXh0IHg9IjIzMCIgeT0iMTI5IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmkxPC90ZXh0PgogIDxyZWN0IHg9IjI2NCIgeT0iMTA0IiB3aWR0aD0iNTIiIGhlaWdodD0iNDAiIHJ4PSI1IiBmaWxsPSIjZTJlZWYxIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS40Ii8+PHRleHQgeD0iMjkwIiB5PSIxMjkiIGZvbnQtc2l6ZT0iMTEuNSIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+aTI8L3RleHQ+CiAgPHJlY3QgeD0iMzI0IiB5PSIxMDQiIHdpZHRoPSI1MiIgaGVpZ2h0PSI0MCIgcng9IjUiIGZpbGw9IiNlMmVlZjEiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjQiLz48dGV4dCB4PSIzNTAiIHk9IjEyOSIgZm9udC1zaXplPSIxMS41IiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5pMzwvdGV4dD4KICA8cmVjdCB4PSIzODQiIHk9IjEwNCIgd2lkdGg9IjUyIiBoZWlnaHQ9IjQwIiByeD0iNSIgZmlsbD0iI2UyZWVmMSIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuNCIvPjx0ZXh0IHg9IjQxMCIgeT0iMTI5IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmk0PC90ZXh0PgogIDxyZWN0IHg9IjQ0NCIgeT0iMTA0IiB3aWR0aD0iNTIiIGhlaWdodD0iNDAiIHJ4PSI1IiBmaWxsPSIjZTJlZWYxIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS40Ii8+PHRleHQgeD0iNDcwIiB5PSIxMjkiIGZvbnQtc2l6ZT0iMTEuNSIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+aTU8L3RleHQ+CiAgPCEtLSBNMiAoeT0xNTQpOiBpMEBDMiAuLi4gLS0+CiAgPHJlY3QgeD0iMjA0IiB5PSIxNTQiIHdpZHRoPSI1MiIgaGVpZ2h0PSI0MCIgcng9IjUiIGZpbGw9IiNmZGYxZWEiIHN0cm9rZT0iI2MyNDEwYyIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iMjMwIiB5PSIxNzkiIGZvbnQtc2l6ZT0iMTEuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+aTA8L3RleHQ+CiAgPHJlY3QgeD0iMjY0IiB5PSIxNTQiIHdpZHRoPSI1MiIgaGVpZ2h0PSI0MCIgcng9IjUiIGZpbGw9IiNlMmVlZjEiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjQiLz48dGV4dCB4PSIyOTAiIHk9IjE3OSIgZm9udC1zaXplPSIxMS41IiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5pMTwvdGV4dD4KICA8cmVjdCB4PSIzMjQiIHk9IjE1NCIgd2lkdGg9IjUyIiBoZWlnaHQ9IjQwIiByeD0iNSIgZmlsbD0iI2UyZWVmMSIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuNCIvPjx0ZXh0IHg9IjM1MCIgeT0iMTc5IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmkyPC90ZXh0PgogIDxyZWN0IHg9IjM4NCIgeT0iMTU0IiB3aWR0aD0iNTIiIGhlaWdodD0iNDAiIHJ4PSI1IiBmaWxsPSIjZTJlZWYxIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS40Ii8+PHRleHQgeD0iNDEwIiB5PSIxNzkiIGZvbnQtc2l6ZT0iMTEuNSIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+aTM8L3RleHQ+CiAgPHJlY3QgeD0iNDQ0IiB5PSIxNTQiIHdpZHRoPSI1MiIgaGVpZ2h0PSI0MCIgcng9IjUiIGZpbGw9IiNlMmVlZjEiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjQiLz48dGV4dCB4PSI0NzAiIHk9IjE3OSIgZm9udC1zaXplPSIxMS41IiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5pNDwvdGV4dD4KICA8cmVjdCB4PSI1MDQiIHk9IjE1NCIgd2lkdGg9IjUyIiBoZWlnaHQ9IjQwIiByeD0iNSIgZmlsbD0iI2UyZWVmMSIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuNCIvPjx0ZXh0IHg9IjUzMCIgeT0iMTc5IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmk1PC90ZXh0PgogIDwhLS0gTTMgKHk9MjA0KTogaTBAQzMgLi4uIC0tPgogIDxyZWN0IHg9IjI2NCIgeT0iMjA0IiB3aWR0aD0iNTIiIGhlaWdodD0iNDAiIHJ4PSI1IiBmaWxsPSIjZmRmMWVhIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMiIvPjx0ZXh0IHg9IjI5MCIgeT0iMjI5IiBmb250LXNpemU9IjExLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmkwPC90ZXh0PgogIDxyZWN0IHg9IjMyNCIgeT0iMjA0IiB3aWR0aD0iNTIiIGhlaWdodD0iNDAiIHJ4PSI1IiBmaWxsPSIjZTJlZWYxIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS40Ii8+PHRleHQgeD0iMzUwIiB5PSIyMjkiIGZvbnQtc2l6ZT0iMTEuNSIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+aTE8L3RleHQ+CiAgPHJlY3QgeD0iMzg0IiB5PSIyMDQiIHdpZHRoPSI1MiIgaGVpZ2h0PSI0MCIgcng9IjUiIGZpbGw9IiNlMmVlZjEiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjQiLz48dGV4dCB4PSI0MTAiIHk9IjIyOSIgZm9udC1zaXplPSIxMS41IiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5pMjwvdGV4dD4KICA8cmVjdCB4PSI0NDQiIHk9IjIwNCIgd2lkdGg9IjUyIiBoZWlnaHQ9IjQwIiByeD0iNSIgZmlsbD0iI2UyZWVmMSIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjEuNCIvPjx0ZXh0IHg9IjQ3MCIgeT0iMjI5IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmkzPC90ZXh0PgogIDxyZWN0IHg9IjUwNCIgeT0iMjA0IiB3aWR0aD0iNTIiIGhlaWdodD0iNDAiIHJ4PSI1IiBmaWxsPSIjZTJlZWYxIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS40Ii8+PHRleHQgeD0iNTMwIiB5PSIyMjkiIGZvbnQtc2l6ZT0iMTEuNSIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+aTQ8L3RleHQ+CiAgPHJlY3QgeD0iNTY0IiB5PSIyMDQiIHdpZHRoPSI1MiIgaGVpZ2h0PSI0MCIgcng9IjUiIGZpbGw9IiNlMmVlZjEiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjQiLz48dGV4dCB4PSI1OTAiIHk9IjIyOSIgZm9udC1zaXplPSIxMS41IiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5pNTwvdGV4dD4KCiAgPCEtLSA9PT09PT09IEFjY3VtdWxhdGUgYWRkIHJvdyAoeT0yODQpOiBvbmUgcGVyIGN5Y2xlLCBmcm9tIEM0ID09PT09PT0gLS0+CiAgPCEtLSBmZWVkYmFjayBhcmNzIChhY2MgaGFuZGVkIGZvcndhcmQgaW4gMSBjeWNsZSkgLS0+CiAgPHBhdGggZD0iTTM1MCwyODQgUTM4MCwyNjAgNDEwLDI4NCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYzI0MTBjIiBzdHJva2Utd2lkdGg9IjEuOCIgbWFya2VyLWVuZD0idXJsKCNhbykiLz4KICA8cGF0aCBkPSJNNDEwLDI4NCBRNDQwLDI2MCA0NzAsMjg0IiBmaWxsPSJub25lIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMS44IiBtYXJrZXItZW5kPSJ1cmwoI2FvKSIvPgogIDxwYXRoIGQ9Ik00NzAsMjg0IFE1MDAsMjYwIDUzMCwyODQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2MyNDEwYyIgc3Ryb2tlLXdpZHRoPSIxLjgiIG1hcmtlci1lbmQ9InVybCgjYW8pIi8+CiAgPHBhdGggZD0iTTUzMCwyODQgUTU2MCwyNjAgNTkwLDI4NCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYzI0MTBjIiBzdHJva2Utd2lkdGg9IjEuOCIgbWFya2VyLWVuZD0idXJsKCNhbykiLz4KICA8cGF0aCBkPSJNNTkwLDI4NCBRNjIwLDI2MCA2NTAsMjg0IiBmaWxsPSJub25lIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMS44IiBtYXJrZXItZW5kPSJ1cmwoI2FvKSIvPgogIDx0ZXh0IHg9IjUxMyIgeT0iMjUwIiBmb250LXNpemU9IjEwLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiNjMjQxMGMiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmFjYzogcmVhZHkgbmV4dCBjeWNsZSAoMS1jeWNsZSBhZGQpPC90ZXh0PgoKICA8cmVjdCB4PSIzMjQiIHk9IjI4NCIgd2lkdGg9IjUyIiBoZWlnaHQ9IjQyIiByeD0iNSIgZmlsbD0iI2ZkZjFlYSIgc3Ryb2tlPSIjYzI0MTBjIiBzdHJva2Utd2lkdGg9IjIiLz48dGV4dCB4PSIzNTAiIHk9IjMxMCIgZm9udC1zaXplPSIxMS41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5pMDwvdGV4dD4KICA8cmVjdCB4PSIzODQiIHk9IjI4NCIgd2lkdGg9IjUyIiBoZWlnaHQ9IjQyIiByeD0iNSIgZmlsbD0iI2ZiZTlkZiIgc3Ryb2tlPSIjYzI0MTBjIiBzdHJva2Utd2lkdGg9IjEuNSIvPjx0ZXh0IHg9IjQxMCIgeT0iMzEwIiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmkxPC90ZXh0PgogIDxyZWN0IHg9IjQ0NCIgeT0iMjg0IiB3aWR0aD0iNTIiIGhlaWdodD0iNDIiIHJ4PSI1IiBmaWxsPSIjZmJlOWRmIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMS41Ii8+PHRleHQgeD0iNDcwIiB5PSIzMTAiIGZvbnQtc2l6ZT0iMTEuNSIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+aTI8L3RleHQ+CiAgPHJlY3QgeD0iNTA0IiB5PSIyODQiIHdpZHRoPSI1MiIgaGVpZ2h0PSI0MiIgcng9IjUiIGZpbGw9IiNmYmU5ZGYiIHN0cm9rZT0iI2MyNDEwYyIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48dGV4dCB4PSI1MzAiIHk9IjMxMCIgZm9udC1zaXplPSIxMS41IiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5pMzwvdGV4dD4KICA8cmVjdCB4PSI1NjQiIHk9IjI4NCIgd2lkdGg9IjUyIiBoZWlnaHQ9IjQyIiByeD0iNSIgZmlsbD0iI2ZiZTlkZiIgc3Ryb2tlPSIjYzI0MTBjIiBzdHJva2Utd2lkdGg9IjEuNSIvPjx0ZXh0IHg9IjU5MCIgeT0iMzEwIiBmb250LXNpemU9IjExLjUiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmk0PC90ZXh0PgogIDxyZWN0IHg9IjYyNCIgeT0iMjg0IiB3aWR0aD0iNTIiIGhlaWdodD0iNDIiIHJ4PSI1IiBmaWxsPSIjZmJlOWRmIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMS41Ii8+PHRleHQgeD0iNjUwIiB5PSIzMTAiIGZvbnQtc2l6ZT0iMTEuNSIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+aTU8L3RleHQ+CgogIDwhLS0gaTAgbGF0ZW5jeSBzdGFpcmNhc2U6IE0xQEMxIC0+IE0yQEMyIC0+IE0zQEMzIC0+IEFAQzQgLS0+CiAgPHBvbHlsaW5lIHBvaW50cz0iMTcwLDEyNCAyMzAsMTc0IDI5MCwyMjQgMzUwLDMwNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYzI0MTBjIiBzdHJva2Utd2lkdGg9IjEuNiIgc3Ryb2tlLWRhc2hhcnJheT0iNSA0Ii8+CiAgPHRleHQgeD0iMTQ2IiB5PSIyNzQiIGZvbnQtc2l6ZT0iMTAuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI2MyNDEwYyIgdGV4dC1hbmNob3I9InN0YXJ0Ij5pMCBsYXRlbmN5ID0gNCBjeWMgICgzw5cgKyAxKyk8L3RleHQ+CgogIDwhLS0gdGhyb3VnaHB1dCBicmFja2V0IHVuZGVyIEEgcm93IC0tPgogIDxsaW5lIHgxPSIzNTAiIHkxPSIzNDAiIHgyPSI2NzYiIHkyPSIzNDAiIHN0cm9rZT0iIzU1NjM1ZiIgc3Ryb2tlLXdpZHRoPSIxLjQiIG1hcmtlci1zdGFydD0idXJsKCNhbSkiIG1hcmtlci1lbmQ9InVybCgjYW0pIi8+CiAgPHRleHQgeD0iNTEzIiB5PSIzNTgiIGZvbnQtc2l6ZT0iMTEuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+b25lIHJlc3VsdCBldmVyeSBjeWNsZSAg4oaSICB0aHJvdWdocHV0ID0gMS9jbGs8L3RleHQ+CgogIDwhLS0gY2FsbG91dCAtLT4KICA8cmVjdCB4PSI5MCIgeT0iMzcyIiB3aWR0aD0iNTgwIiBoZWlnaHQ9IjcwIiByeD0iOCIgZmlsbD0iI2YxZjZmNyIgc3Ryb2tlPSIjZDNkZWUwIiBzdHJva2Utd2lkdGg9IjEuNSIvPgogIDx0ZXh0IHg9IjM4MCIgeT0iMzk2IiBmb250LXNpemU9IjEyIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5NdWx0aXBseSBpcyBtdWx0aS1jeWNsZSBidXQgTk9UIGxvb3AtY2FycmllZCDihpIgaXQgb25seSBsZW5ndGhlbnMgbGF0ZW5jeSAodGhlIG9uZS10aW1lIHJhbXApLjwvdGV4dD4KICA8dGV4dCB4PSIzODAiIHk9IjQxNiIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+VGhlIGxvb3AtY2FycmllZCBhY2MgdXNlcyBhIDEtY3ljbGUgYWRkIOKGkiB0aGUgbmV4dCBpdGVyYXRpb24gY2FuIHN0YXJ0IGV2ZXJ5IGNsb2NrLjwvdGV4dD4KICA8dGV4dCB4PSIzODAiIHk9IjQzNSIgZm9udC1zaXplPSIxMi41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMGU3NDkwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5JSSA9IOKMiCBmZWVkYmFjayBsYXRlbmN5IMO3IGRpc3RhbmNlIOKMiSA9IOKMiCAxIMO3IDEg4oyJID0gMSAgIOKckzwvdGV4dD4KPC9zdmc+Cg=="></figure></p>
+<p>Two things to trace on the integer diagram: (i) i0's staircase M1→M2→M3→A — that
+4-cycle diagonal is <strong>latency</strong> (multiply depth 3 + add 1), a one-time ramp because
+the multiply is <strong>not loop-carried</strong>; (ii) the short feedback arcs on the A row hand
+<code>acc</code> from iteration <em>i</em> to <em>i+1</em> in the <strong>next</strong> cycle, so a new iteration issues
+<strong>every clock</strong> and the A row emits <strong>one result per cycle</strong>. The multiply's latency
+never touches II; only the loop-carried <code>acc</code> does. The one-line rule to carry into
+Part VI:</p>
+<p>$$\text{II} \ge \left\lceil \frac{\text{feedback-op latency}}{\text{dependence distance}} \right\rceil = \left\lceil \frac{1}{1} \right\rceil = 1.$$</p>
+<p>On a real report you read <strong>II = 1</strong>, iteration latency = multiply depth + 1, loop
+latency ≈ L + (N−1) — the three numbers made concrete.</p>
+<p>Tie back to <strong>Part IV</strong> so you don't over-learn "pipeline = fast": II = 1 means the
+datapath <em>can</em> eat one element per cycle — worth it only if memory can feed it. For a
+streamed kernel (vadd) it can't (memory-bound); for the <strong>reused</strong> GEMM, tiling into
+BRAM makes II = 1 pay off — that is the 223× we reach later.</p>
+<h3>D. Handoff to the cliffhanger</h3>
+<p>One pointed question sets up Part VI: <em>what in the dot product decided that II = 1 was
+allowed?</em> The <strong>1-cycle feedback</strong> on <code>acc</code>. So: <strong>what if <code>acc</code> is a <code>float</code>?</strong></p>
+<h2>Part VI — Cliffhanger</h2>
+<p>You just learned <em>pipeline → II = 1 → fast</em>. Now the <strong>one-line change that quietly
+breaks it</strong> — and we stop before the resolution, because the breakdown and the fix are
+the next lecture's whole reason to exist.</p>
+<h3>The one-line change</h3>
+<p>Same dot product, same pragma — flip the accumulator's type:</p>
+<pre><code class="language-c">float acc = 0;                    // was: int
+dot: for (int i = 0; i &lt; N; i++) {
+#pragma HLS PIPELINE II=1          // unchanged — we still *ask* for II=1
+    acc += a[i] * b[i];
+}
+</code></pre>
+<p>Nothing else moved. The pragma still says <code>II = 1</code>.</p>
+<h3>Predict it — you have the tool</h3>
+<p>Using the rule from Part V.C — <em>II is bounded by the latency of the loop-carried
+feedback path</em> — what changed?</p>
+<ul>
+<li>Integer add closed the <code>acc</code> feedback in <strong>1 clock</strong> → II = 1 was legal.</li>
+<li>A <strong>float add is multi-cycle</strong> (~4 clocks on this fabric). Iteration <em>i+1</em>'s add
+  needs <em>i</em>'s <code>acc</code>, which isn't ready for ~4 clocks — so the next iteration <strong>can't
+  start every cycle</strong>. The feedback path now <em>forces</em> <strong>II ≈ 4</strong>, no matter what the
+  pragma asks.</li>
+</ul>
+<p>So the honest prediction you can make yourself: <strong>HLS cannot honor <code>II = 1</code> here.</strong> It
+relaxes II to ~the float-add latency (and says so in the log) — the "obvious" pragma
+silently underdelivers ~4× on the one loop that matters.</p>
+<p><figure><img alt="Float dot-product stall, cycle by cycle — same 3-stage multiply on top, but the loop-carried acc now runs through a 4-stage float add (A1·A2·A3·A4); i0's staircase spans seven stages (latency = 3 + 4), and because acc is loop-carried, i1 cannot enter A1 until i0's acc emerges from A4, so only one iteration is ever in the adder and both units run at 1/4 utilization ⇒ II ≈ 4" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3NDAgNTM0IiB3aWR0aD0iNzQwIiBoZWlnaHQ9IjUzNCIgZm9udC1mYW1pbHk9IkludGVyLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj4KICA8ZGVmcz4KICAgIDxtYXJrZXIgaWQ9ImFvIiBtYXJrZXJXaWR0aD0iOSIgbWFya2VySGVpZ2h0PSI5IiByZWZYPSI2LjUiIHJlZlk9IjMiIG9yaWVudD0iYXV0byI+CiAgICAgIDxwYXRoIGQ9Ik0wLDAgTDYuNSwzIEwwLDYgWiIgZmlsbD0iI2MyNDEwYyIvPgogICAgPC9tYXJrZXI+CiAgICA8bWFya2VyIGlkPSJhbSIgbWFya2VyV2lkdGg9IjkiIG1hcmtlckhlaWdodD0iOSIgcmVmWD0iNi41IiByZWZZPSIzIiBvcmllbnQ9ImF1dG8iPgogICAgICA8cGF0aCBkPSJNMCwwIEw2LjUsMyBMMCw2IFoiIGZpbGw9IiM1NTYzNWYiLz4KICAgIDwvbWFya2VyPgogIDwvZGVmcz4KCiAgPHRleHQgeD0iMzcwIiB5PSIyNCIgZm9udC1zaXplPSIxNC41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5GbG9hdCBkb3QgcHJvZHVjdCDigJQgc2FtZSBtdWx0aXBseSwgYnV0IHRoZSBhZGQgaXMgYSA0LWN5Y2xlIHJlY3VycmVuY2Ug4oeSIElJIOKJiCA0PC90ZXh0PgogIDx0ZXh0IHg9IjM3MCIgeT0iNDQiIGZvbnQtc2l6ZT0iMTEuNSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Ym9keTogYWNjICs9IGFbaV3Ct2JbaV0gICDCtyAgIMOXID0gMy1jeWNsZSBtdWx0aXBseSAoZmluZSkgICDCtyAgIGZsb2F0ICsgPSA0LXN0YWdlIHBpcGVsaW5lIHRoZSBsb29wLWNhcnJpZWQgYWNjIGNhbid0IGZpbGw8L3RleHQ+CgogIDwhLS0gY3ljbGUgaGVhZGVycyAgQ2ogY2VudGVyID0gMTQ1ICsgKGotMSkqNTAgLS0+CiAgPHRleHQgeD0iMTQ1IiB5PSI5NCIgZm9udC1zaXplPSIxMS41IiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DMTwvdGV4dD4KICA8dGV4dCB4PSIxOTUiIHk9Ijk0IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkMyPC90ZXh0PgogIDx0ZXh0IHg9IjI0NSIgeT0iOTQiIGZvbnQtc2l6ZT0iMTEuNSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QzM8L3RleHQ+CiAgPHRleHQgeD0iMjk1IiB5PSI5NCIgZm9udC1zaXplPSIxMS41IiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DNDwvdGV4dD4KICA8dGV4dCB4PSIzNDUiIHk9Ijk0IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkM1PC90ZXh0PgogIDx0ZXh0IHg9IjM5NSIgeT0iOTQiIGZvbnQtc2l6ZT0iMTEuNSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QzY8L3RleHQ+CiAgPHRleHQgeD0iNDQ1IiB5PSI5NCIgZm9udC1zaXplPSIxMS41IiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DNzwvdGV4dD4KICA8dGV4dCB4PSI0OTUiIHk9Ijk0IiBmb250LXNpemU9IjExLjUiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkM4PC90ZXh0PgogIDx0ZXh0IHg9IjU0NSIgeT0iOTQiIGZvbnQtc2l6ZT0iMTEuNSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Qzk8L3RleHQ+CiAgPHRleHQgeD0iNTk1IiB5PSI5NCIgZm9udC1zaXplPSIxMS41IiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DMTA8L3RleHQ+CiAgPHRleHQgeD0iNjQ1IiB5PSI5NCIgZm9udC1zaXplPSIxMS41IiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DMTE8L3RleHQ+CgogIDwhLS0gZ3JvdXAgYnJhY2tldHMgLS0+CiAgPGxpbmUgeDE9IjQ2IiB5MT0iMTA4IiB4Mj0iNDYiIHkyPSIyMzAiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjYiLz4KICA8dGV4dCB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzOCwyMDUpIHJvdGF0ZSgtOTApIiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMGU3NDkwIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPm11bHRpcGx5IMK3IDMtY3ljPC90ZXh0PgogIDxsaW5lIHgxPSI0NiIgeTE9IjI0MCIgeDI9IjQ2IiB5Mj0iNDA0IiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMS42Ii8+CiAgPHRleHQgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzgsNDAyKSByb3RhdGUoLTkwKSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI2MyNDEwYyIgdGV4dC1hbmNob3I9InN0YXJ0Ij5mbG9hdCBhZGQgwrcgNC1jeWMgcGlwZWxpbmU8L3RleHQ+CgogIDwhLS0gcm93IGxhYmVscyAtLT4KICA8dGV4dCB4PSIxMTIiIHk9IjEzMyIgZm9udC1zaXplPSIxMS41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMGU3NDkwIiB0ZXh0LWFuY2hvcj0iZW5kIj5NMSAgw5c8L3RleHQ+CiAgPHRleHQgeD0iMTEyIiB5PSIxNzUiIGZvbnQtc2l6ZT0iMTEuNSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzBlNzQ5MCIgdGV4dC1hbmNob3I9ImVuZCI+TTIgIMOXPC90ZXh0PgogIDx0ZXh0IHg9IjExMiIgeT0iMjE3IiBmb250LXNpemU9IjExLjUiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiMwZTc0OTAiIHRleHQtYW5jaG9yPSJlbmQiPk0zICDDlzwvdGV4dD4KICA8dGV4dCB4PSIxMTIiIHk9IjI2NSIgZm9udC1zaXplPSIxMS41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjYzI0MTBjIiB0ZXh0LWFuY2hvcj0iZW5kIj5BMSAgKzwvdGV4dD4KICA8dGV4dCB4PSIxMTIiIHk9IjMwNyIgZm9udC1zaXplPSIxMS41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjYzI0MTBjIiB0ZXh0LWFuY2hvcj0iZW5kIj5BMiAgKzwvdGV4dD4KICA8dGV4dCB4PSIxMTIiIHk9IjM0OSIgZm9udC1zaXplPSIxMS41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjYzI0MTBjIiB0ZXh0LWFuY2hvcj0iZW5kIj5BMyAgKzwvdGV4dD4KICA8dGV4dCB4PSIxMTIiIHk9IjM5MSIgZm9udC1zaXplPSIxMS41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjYzI0MTBjIiB0ZXh0LWFuY2hvcj0iZW5kIj5BNCAgKzwvdGV4dD4KCiAgPCEtLSBpc3N1ZS1zcGFjaW5nIGRhc2hlZCBsaW5lcyBhdCBDMSAoaTApIGFuZCBDNSAoaTEpIC0tPgogIDxsaW5lIHgxPSIxNDUiIHkxPSIxMDQiIHgyPSIxNDUiIHkyPSI0MTAiIHN0cm9rZT0iIzk0YTNiOCIgc3Ryb2tlLXdpZHRoPSIxLjIiIHN0cm9rZS1kYXNoYXJyYXk9IjUgNCIvPgogIDxsaW5lIHgxPSIzNDUiIHkxPSIxMDQiIHgyPSIzNDUiIHkyPSI0MTAiIHN0cm9rZT0iIzk0YTNiOCIgc3Ryb2tlLXdpZHRoPSIxLjIiIHN0cm9rZS1kYXNoYXJyYXk9IjUgNCIvPgoKICA8IS0tID09PT09IGkwIChvcmFuZ2UpOiBtdWwgQzEtQzMsIGFkZCBDNC1DNyA9PT09PSAtLT4KICA8cmVjdCB4PSIxMjQiIHk9IjEwOCIgd2lkdGg9IjQyIiBoZWlnaHQ9IjM4IiByeD0iNSIgZmlsbD0iI2ZkZjFlYSIgc3Ryb2tlPSIjYzI0MTBjIiBzdHJva2Utd2lkdGg9IjIiLz48dGV4dCB4PSIxNDUiIHk9IjEzMiIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+aTA8L3RleHQ+CiAgPHJlY3QgeD0iMTc0IiB5PSIxNTAiIHdpZHRoPSI0MiIgaGVpZ2h0PSIzOCIgcng9IjUiIGZpbGw9IiNmZGYxZWEiIHN0cm9rZT0iI2MyNDEwYyIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iMTk1IiB5PSIxNzQiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmkwPC90ZXh0PgogIDxyZWN0IHg9IjIyNCIgeT0iMTkyIiB3aWR0aD0iNDIiIGhlaWdodD0iMzgiIHJ4PSI1IiBmaWxsPSIjZmRmMWVhIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMiIvPjx0ZXh0IHg9IjI0NSIgeT0iMjE2IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5pMDwvdGV4dD4KICA8cmVjdCB4PSIyNzQiIHk9IjI0MCIgd2lkdGg9IjQyIiBoZWlnaHQ9IjM4IiByeD0iNSIgZmlsbD0iI2ZkZjFlYSIgc3Ryb2tlPSIjYzI0MTBjIiBzdHJva2Utd2lkdGg9IjIiLz48dGV4dCB4PSIyOTUiIHk9IjI2NCIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+aTA8L3RleHQ+CiAgPHJlY3QgeD0iMzI0IiB5PSIyODIiIHdpZHRoPSI0MiIgaGVpZ2h0PSIzOCIgcng9IjUiIGZpbGw9IiNmZGYxZWEiIHN0cm9rZT0iI2MyNDEwYyIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iMzQ1IiB5PSIzMDYiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmkwPC90ZXh0PgogIDxyZWN0IHg9IjM3NCIgeT0iMzI0IiB3aWR0aD0iNDIiIGhlaWdodD0iMzgiIHJ4PSI1IiBmaWxsPSIjZmRmMWVhIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMiIvPjx0ZXh0IHg9IjM5NSIgeT0iMzQ4IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5pMDwvdGV4dD4KICA8cmVjdCB4PSI0MjQiIHk9IjM2NiIgd2lkdGg9IjQyIiBoZWlnaHQ9IjM4IiByeD0iNSIgZmlsbD0iI2ZkZjFlYSIgc3Ryb2tlPSIjYzI0MTBjIiBzdHJva2Utd2lkdGg9IjIiLz48dGV4dCB4PSI0NDUiIHk9IjM5MCIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+aTA8L3RleHQ+CgogIDwhLS0gPT09PT0gaTEgKHRlYWwpOiBtdWwgQzUtQzcsIGFkZCBDOC1DMTEgPT09PT0gLS0+CiAgPHJlY3QgeD0iMzI0IiB5PSIxMDgiIHdpZHRoPSI0MiIgaGVpZ2h0PSIzOCIgcng9IjUiIGZpbGw9IiNlMmVlZjEiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48dGV4dCB4PSIzNDUiIHk9IjEzMiIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+aTE8L3RleHQ+CiAgPHJlY3QgeD0iMzc0IiB5PSIxNTAiIHdpZHRoPSI0MiIgaGVpZ2h0PSIzOCIgcng9IjUiIGZpbGw9IiNlMmVlZjEiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48dGV4dCB4PSIzOTUiIHk9IjE3NCIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+aTE8L3RleHQ+CiAgPHJlY3QgeD0iNDI0IiB5PSIxOTIiIHdpZHRoPSI0MiIgaGVpZ2h0PSIzOCIgcng9IjUiIGZpbGw9IiNlMmVlZjEiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48dGV4dCB4PSI0NDUiIHk9IjIxNiIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+aTE8L3RleHQ+CiAgPHJlY3QgeD0iNDc0IiB5PSIyNDAiIHdpZHRoPSI0MiIgaGVpZ2h0PSIzOCIgcng9IjUiIGZpbGw9IiNlMmVlZjEiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48dGV4dCB4PSI0OTUiIHk9IjI2NCIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+aTE8L3RleHQ+CiAgPHJlY3QgeD0iNTI0IiB5PSIyODIiIHdpZHRoPSI0MiIgaGVpZ2h0PSIzOCIgcng9IjUiIGZpbGw9IiNlMmVlZjEiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48dGV4dCB4PSI1NDUiIHk9IjMwNiIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+aTE8L3RleHQ+CiAgPHJlY3QgeD0iNTc0IiB5PSIzMjQiIHdpZHRoPSI0MiIgaGVpZ2h0PSIzOCIgcng9IjUiIGZpbGw9IiNlMmVlZjEiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48dGV4dCB4PSI1OTUiIHk9IjM0OCIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+aTE8L3RleHQ+CiAgPHJlY3QgeD0iNjI0IiB5PSIzNjYiIHdpZHRoPSI0MiIgaGVpZ2h0PSIzOCIgcng9IjUiIGZpbGw9IiNlMmVlZjEiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48dGV4dCB4PSI2NDUiIHk9IjM5MCIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+aTE8L3RleHQ+CgogIDwhLS0gYnViYmxlczogQTEgaWRsZSBhdCBDNSxDNixDNyB3aGlsZSBpMCB3YWxrcyBkb3duIHRoZSBhZGRlciAtLT4KICA8cmVjdCB4PSIzMjQiIHk9IjI0MCIgd2lkdGg9IjQyIiBoZWlnaHQ9IjM4IiByeD0iNSIgZmlsbD0iI2ZkZWNlYyIgc3Ryb2tlPSIjZDExZDFkIiBzdHJva2Utd2lkdGg9IjEuMiIgc3Ryb2tlLWRhc2hhcnJheT0iNCAzIi8+PHRleHQgeD0iMzQ1IiB5PSIyNjQiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiNkMTFkMWQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPuKAlDwvdGV4dD4KICA8cmVjdCB4PSIzNzQiIHk9IjI0MCIgd2lkdGg9IjQyIiBoZWlnaHQ9IjM4IiByeD0iNSIgZmlsbD0iI2ZkZWNlYyIgc3Ryb2tlPSIjZDExZDFkIiBzdHJva2Utd2lkdGg9IjEuMiIgc3Ryb2tlLWRhc2hhcnJheT0iNCAzIi8+PHRleHQgeD0iMzk1IiB5PSIyNjQiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiNkMTFkMWQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPuKAlDwvdGV4dD4KICA8cmVjdCB4PSI0MjQiIHk9IjI0MCIgd2lkdGg9IjQyIiBoZWlnaHQ9IjM4IiByeD0iNSIgZmlsbD0iI2ZkZWNlYyIgc3Ryb2tlPSIjZDExZDFkIiBzdHJva2Utd2lkdGg9IjEuMiIgc3Ryb2tlLWRhc2hhcnJheT0iNCAzIi8+PHRleHQgeD0iNDQ1IiB5PSIyNjQiIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiNkMTFkMWQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPuKAlDwvdGV4dD4KCiAgPCEtLSBpMCBsYXRlbmN5IHN0YWlyY2FzZSAoNyBzdGFnZXMpIC0tPgogIDxwb2x5bGluZSBwb2ludHM9IjE0NSwxMjcgMTk1LDE2OSAyNDUsMjExIDI5NSwyNTkgMzQ1LDMwMSAzOTUsMzQzIDQ0NSwzODUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2MyNDEwYyIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1kYXNoYXJyYXk9IjUgNCIvPgogIDx0ZXh0IHg9IjQ4NiIgeT0iMTI4IiBmb250LXNpemU9IjEwLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiNjMjQxMGMiIHRleHQtYW5jaG9yPSJzdGFydCI+aTAgbGF0ZW5jeSA9IDMow5cpICsgNCgrKSA9IDcgY3ljPC90ZXh0PgoKICA8IS0tIGZlZWRiYWNrOiBBNCBvZiBpMCAoQzcpIC0+IEExIG9mIGkxIChDOCksIDQgY3ljbGVzIGxhdGVyIC0tPgogIDxwYXRoIGQ9Ik00NDUsNDA0IEMgNTQwLDQxMiA1NjYsMzAwIDQ5NiwyNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2MyNDEwYyIgc3Ryb2tlLXdpZHRoPSIyIiBtYXJrZXItZW5kPSJ1cmwoI2FvKSIvPgogIDx0ZXh0IHg9IjYwMCIgeT0iMzAwIiBmb250LXNpemU9IjEwLjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiNjMjQxMGMiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmFjYyByZWFkeTwvdGV4dD4KICA8dGV4dCB4PSI2MDAiIHk9IjMxNSIgZm9udC1zaXplPSIxMC41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjYzI0MTBjIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5hZnRlciA0IGN5YzwvdGV4dD4KCiAgPCEtLSBJSSBicmFja2V0IChpc3N1ZSBzcGFjaW5nIEMxLi5DNSkgLS0+CiAgPGxpbmUgeDE9IjE0NSIgeTE9IjQxOCIgeDI9IjM0NSIgeTI9IjQxOCIgc3Ryb2tlPSIjNTU2MzVmIiBzdHJva2Utd2lkdGg9IjEuNCIgbWFya2VyLXN0YXJ0PSJ1cmwoI2FtKSIgbWFya2VyLWVuZD0idXJsKCNhbSkiLz4KICA8dGV4dCB4PSIyNDUiIHk9IjQzNCIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+SUkgPSA0IGN5Y2xlczwvdGV4dD4KICA8dGV4dCB4PSI0NzAiIHk9IjQxOCIgZm9udC1zaXplPSIxMSIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9InN0YXJ0Ij5hZGRlciBpZGxlIDMgb2YgZXZlcnkgNCBjeWNsZXMgKGJ1YmJsZXMpPC90ZXh0PgoKICA8IS0tIGNhbGxvdXQgLS0+CiAgPHJlY3QgeD0iNzAiIHk9IjQ0NiIgd2lkdGg9IjYwMCIgaGVpZ2h0PSI3OCIgcng9IjgiIGZpbGw9IiNmMWY2ZjciIHN0cm9rZT0iI2QzZGVlMCIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KICA8dGV4dCB4PSIzNzAiIHk9IjQ3MCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+TXVsdGlwbHkgKDMtY3ljKSBpcyBmaW5lIOKAlCBwaXBlbGluZWQsIG5vdCBsb29wLWNhcnJpZWQ7IGl0IG9ubHkgYWRkcyBsYXRlbmN5LjwvdGV4dD4KICA8dGV4dCB4PSIzNzAiIHk9IjQ5MCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+VGhlIGxvb3AtY2FycmllZCBhY2MgcnVucyB0aHJvdWdoIGEgNC1jeWNsZSBmbG9hdCBhZGQg4oaSIHRoZSBuZXh0IGFkZCB3YWl0cyA0IGN5Y2xlcy48L3RleHQ+CiAgPHRleHQgeD0iMzcwIiB5PSI1MTIiIGZvbnQtc2l6ZT0iMTIuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI2MyNDEwYyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+SUkgPSDijIggNCDDtyAxIOKMiSA9IDQgICDigJQgICBwcmFnbWEgYXNrZWQgSUkgPSAxOyBoYXJkd2FyZSBmb3JjZWQgSUkg4omIIDQgICDinJc8L3RleHQ+Cjwvc3ZnPgo="></figure></p>
+<p>The float diagram is deliberately the <strong>same layout</strong> as the integer one: identical
+<strong>M1·M2·M3 multiply block on top</strong>, so only the add block changed. In the int diagram
+the add was <strong>one row</strong> (1 cycle); here it is <strong>four rows</strong> (A1·A2·A3·A4). Trace i0's
+staircase through all seven stages (latency = 3 mul + 4 add = <strong>7 cyc</strong>); i1 issues
+<strong>4 cycles after</strong> i0. Because the accumulate is loop-carried, i1's add <strong>cannot enter
+A1 until i0's <code>acc</code> emerges from A4</strong> — so only <strong>one</strong> iteration is ever in the
+adder, the other three stages sit idle, and both the multiply and adder run at <strong>1/4
+utilization</strong>. Same rule, one term changed:</p>
+<p>$$\text{II} \ge \left\lceil \frac{\text{float-add latency}}{\text{distance}} \right\rceil = \left\lceil \frac{4}{1} \right\rceil = 4.$$</p>
+<p>The teaching beat is the A/B: integer feedback op = 1 cycle → II = 1, next to float
+feedback op = 4 cycles → II = 4 — <strong>the recurrence latency, not the pragma, sets II.</strong></p>
+<p>Name the thing: a <strong>loop-carried dependency through a multi-cycle op is a
+recurrence</strong> — <em>the</em> reason "just add pragmas" fails. And it is not a toy: this <code>acc</code>
+is the <strong>GEMM inner product</strong>, so this recurrence is the wall standing between you and
+the 223×.</p>
+<h3>What the next lecture delivers</h3>
+<p>We stop here on purpose. The next lecture answers:</p>
+<ul>
+<li><em>why</em> it happens precisely (dependence distance vs op latency), and</li>
+<li>how to <strong>break the recurrence</strong> — partial-sum / tree reduction, unroll-and-
+  reassociate, or drop to fixed-point — to <em>earn</em> II = 1 back.</li>
+</ul>
+<h3>The arc</h3>
+<ul>
+<li><strong>(I–II)</strong> you can now build and run any kernel end-to-end;</li>
+<li><strong>(III)</strong> the demo makes that concrete on the U50;</li>
+<li><strong>(IV)</strong> roofline tells you whether a kernel is even worth optimizing;</li>
+<li><strong>(V)</strong> pipelining takes a <em>benign</em> loop to II = 1;</li>
+<li><strong>(VI)</strong> add one real dependency and the obvious pragma fails — that is the next lecture, the
+  linchpin.</li>
+</ul>
+<p>L1 built the dot product, L2 pipelined it, and the next lecture makes it survive a real dependency.</p>
+<h2>References</h2>
+<ul>
+<li>AMD Alveo U50 product page / data sheet:
+  <a href="https://www.amd.com/en/products/accelerators/alveo/u50/a-u50-p00g-pq-g.html">https://www.amd.com/en/products/accelerators/alveo/u50/a-u50-p00g-pq-g.html</a></li>
+<li>AMD Alveo U50 product brief (PDF):
+  <a href="https://www.xilinx.com/publications/product-briefs/alveo-u50-product-brief-v2.pdf">https://www.xilinx.com/publications/product-briefs/alveo-u50-product-brief-v2.pdf</a></li>
+<li>U50 spec numbers used above: 872,000 LUT · 1,743,000 FF · 5,952 DSP · 8 GB HBM2 ·
+  316 GB/s peak (201 GB/s nominal) · UltraScale+ · 75 W.</li>
+</ul>
+</main>
+</body>
+</html>
