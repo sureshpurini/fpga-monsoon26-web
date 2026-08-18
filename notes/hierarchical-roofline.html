@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hierarchical Roofline Analysis — a 3×3 filter through the memory pyramid</title>
+<meta name="description" content="L2 supplement for FPGA — Designing High-Performance Kernels (Monsoon 2026): the hierarchical roofline model worked through a 3x3 image filter, showing how caching reused data (weights in registers, image in BRAM) lifts arithmetic intensity off the HBM roof.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#4f46e5;--brand-2:#06b6d4;--ink:#1d2330;--ink-soft:#5a6477;
+--line:#e6e9f2;--bg:#f4f6fb;--surface:#fff;--code-bg:#f1f3fb;--accent:#f59e0b;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+line-height:1.7;-webkit-font-smoothing:antialiased;}
+.topbar{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.85);
+backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line);}
+.topbar .in{max-width:820px;margin:0 auto;padding:.8rem 24px;display:flex;
+justify-content:space-between;align-items:center;}
+.topbar a{color:var(--brand);text-decoration:none;font-weight:600;font-size:.9rem;}
+.topbar .home{color:var(--ink-soft);}
+main{max-width:820px;margin:2rem auto 4rem;padding:2.5rem;background:var(--surface);
+border:1px solid var(--line);border-radius:16px;
+box-shadow:0 10px 30px -12px rgba(20,25,50,.15);}
+h1{font-family:'Fraunces',serif;font-size:2rem;line-height:1.15;letter-spacing:-.01em;
+margin:0 0 .3rem;}
+h2{font-family:'Fraunces',serif;font-size:1.5rem;letter-spacing:-.01em;
+margin:2.6rem 0 .9rem;padding-top:1.2rem;border-top:1px solid var(--line);color:#161b28;}
+h3{font-size:1.15rem;margin:1.8rem 0 .5rem;color:#232a3a;}
+p{margin:.9rem 0;color:#28303f;}
+a{color:var(--brand);}
+em{color:var(--ink-soft);}
+ul,ol{padding-left:1.3rem;}
+li{margin:.3rem 0;}
+code{font-family:'SFMono-Regular',Menlo,Consolas,monospace;font-size:.88em;
+background:var(--code-bg);padding:.12em .4em;border-radius:5px;color:#1c2540;}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+padding:1rem 1.15rem;overflow-x:auto;line-height:1.5;}
+pre code{background:none;padding:0;font-size:.86rem;}
+table{border-collapse:collapse;width:100%;margin:1.2rem 0;font-size:.92rem;
+display:block;overflow-x:auto;}
+th{background:var(--brand);color:#fff;text-align:left;padding:.55rem .8rem;
+font-weight:600;font-size:.82rem;}
+td{padding:.55rem .8rem;border-bottom:1px solid var(--line);vertical-align:top;
+color:#333c4d;}
+tr:nth-child(even) td{background:#fafbff;}
+blockquote{margin:1.4rem 0;padding:1rem 1.3rem;background:
+linear-gradient(135deg,rgba(79,70,229,.06),rgba(6,182,212,.05));
+border-left:4px solid var(--accent);border-radius:10px;color:#2b3343;}
+blockquote p{margin:.3rem 0;}
+figure{margin:1.6rem 0;text-align:center;}
+figure img{max-width:100%;height:auto;}
+.subtitle{color:var(--ink-soft);font-style:italic;margin-top:0;}
+@media(max-width:640px){main{padding:1.5rem 1.2rem;margin:1rem;border-radius:12px;}
+h1{font-size:1.6rem}h2{font-size:1.3rem}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="in">
+<a class="home" href="../index.html">← Course home</a>
+<a href="L2.html" target="_blank" rel="noopener">L2 handout →</a>
+</div></div>
+<main>
+<h1>Hierarchical Roofline Analysis</h1>
+<h2>A 3×3 filter, walked up the memory pyramid</h2>
+<p><em>L2 supplement · FPGA — Designing High-Performance Kernels · Monsoon 2026</em></p>
+<p>In lecture we drew <strong>one</strong> roofline: a single slanted <strong>HBM</strong> roof (316 GB/s) and
+a flat compute roof, with <code>vadd</code> sitting far down the memory slope because it
+touches each byte once and has <strong>nothing to reuse</strong>. This note picks a kernel that
+<em>does</em> have reuse — a <strong>3×3 image filter</strong> — and shows that the honest picture is
+not one roofline but a <strong>stack of them, one per memory tier</strong>. The same kernel has
+a <strong>different arithmetic intensity against HBM, against BRAM, and against
+registers</strong>, and <em>optimization is the act of moving reused data up the pyramid
+until the slow roof (HBM) stops being the one that binds you.</em></p>
+<blockquote>
+<p><strong>The one idea:</strong> a kernel does not have <em>an</em> arithmetic intensity — it has one
+<strong>per level of the memory hierarchy</strong>. Draw a roof for each level; the
+achievable performance is the <strong>lowest</strong> roof your data placement leaves you
+under. Caching a reused operand on-chip <strong>raises its level's intensity</strong> and
+lifts you off the HBM roof.</p>
+</blockquote>
+<hr />
+<h2>The kernel, and why it is the right example</h2>
+<p>A 3×3 filter computes each output pixel from a 3×3 window of the input:</p>
+<pre><code class="language-c">// O = 3x3 filtered I ;  W = 9 filter weights
+for (int i = 0; i &lt; H; i++)
+  for (int j = 0; j &lt; W_; j++) {
+    int acc = 0;
+    for (int u = 0; u &lt; 3; u++)
+      for (int v = 0; v &lt; 3; v++)
+        acc += W[u][v] * I[i+u][j+v];   // 9 multiply-accumulates
+    O[i][j] = acc;
+  }
+</code></pre>
+<p><strong>Work per output pixel = 9 MACs = 18 operations</strong> (we count a MAC as 2 ops — one
+multiply, one add — to match the roofline convention from lecture).</p>
+<p>What makes it the right teaching example is that its three operands have <strong>wildly
+different reuse</strong>, so each one wants to live in a <em>different</em> tier:</p>
+<table>
+<thead>
+<tr>
+<th>Operand</th>
+<th>Amount of data</th>
+<th>Reuse (times each value is used)</th>
+<th>Wants to live in</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Filter weights</strong></td>
+<td>9 values — tiny</td>
+<td><strong>every output pixel</strong> (millions of times)</td>
+<td><strong>registers</strong></td>
+</tr>
+<tr>
+<td><strong>Image pixels</strong></td>
+<td>the whole image</td>
+<td><strong>9×</strong> (each pixel falls in 9 windows)</td>
+<td><strong>BRAM</strong></td>
+</tr>
+<tr>
+<td><strong>Output pixels</strong></td>
+<td>the whole output</td>
+<td><strong>1×</strong> (written once, never re-read)</td>
+<td><strong>streams to HBM</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Matching each operand to a tier <strong>by its (size, reuse)</strong> is the entire optimization
+— and it is exactly what the three stages below do, one operand at a time.</p>
+<blockquote>
+<p><strong>Assumptions (so the numbers stay clean).</strong> 8-bit pixels, weights, and output
+— <strong>1 byte each</strong>, which is realistic for images and plays to the FPGA's love of
+low precision. A large image, so we ignore borders and startup. 1 MAC = 2 ops.</p>
+</blockquote>
+<hr />
+<h2>The three roofs, in three numbers (U50)</h2>
+<p>From the lecture's memory pyramid — the same UltraScale+ Alveo U50 — here are the
+three <strong>bandwidth roofs</strong> we will care about:</p>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Bandwidth (aggregate, on-chip parallel)</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>HBM</strong> (off-chip)</td>
+<td><strong>316 GB/s</strong></td>
+<td>but a <em>single</em> <code>m_axi</code> port sees only ~<strong>10 GB/s</strong> — full BW needs banking across 32 channels</td>
+</tr>
+<tr>
+<td><strong>BRAM</strong> (on-chip)</td>
+<td><strong>≈ 3.6 TB/s</strong></td>
+<td>hundreds of independent blocks, each with its own ports</td>
+</tr>
+<tr>
+<td><strong>Registers</strong></td>
+<td><strong>≈ 65 TB/s</strong></td>
+<td>fully spatial — effectively free bandwidth for tiny, hot data</td>
+</tr>
+<tr>
+<td><em>compute roof</em></td>
+<td><strong>≈ 3.6 TOP/s</strong> (INT)</td>
+<td>a DSP does 1 MAC/cycle; INT8 packing doubles it to ~7.1 TOP/s</td>
+</tr>
+</tbody>
+</table>
+<p>Bandwidth <strong>rises ~200×</strong> from HBM to registers while capacity <strong>falls ~40,000×</strong>.
+That inversion is why the game is <em>"load a reused value up the pyramid once, then
+hit it from the fast roof many times."</em></p>
+<hr />
+<h2>Stage 1 — everything from HBM, every time</h2>
+<p>The naive kernel reads all nine weights <strong>and</strong> all nine window pixels straight
+from HBM for <strong>every</strong> output pixel, and writes the result back:</p>
+<ul>
+<li>HBM bytes per output = <strong>9</strong> image reads + <strong>9</strong> weight reads + <strong>1</strong> write = <strong>19 B</strong></li>
+<li>ops per output = <strong>18</strong></li>
+</ul>
+<blockquote>
+<p><strong>AI (vs HBM)  =  18 ops ÷ 19 B  ≈  0.95 op/B</strong></p>
+</blockquote>
+<p>That is <code>vadd</code> territory: deep in the memory-bound region. Its ceiling is the HBM
+roof — about <strong>0.95 × 316 GB/s ≈ 0.30 TOP/s</strong> at full bandwidth (and only ~0.95 ×
+10 GB/s ≈ <strong>9.5 GOP/s</strong> if the ports collapse to one HBM channel). The DSPs are
+almost idle; the kernel is starving for bytes it keeps <strong>re-fetching</strong>.</p>
+<hr />
+<h2>Stage 2 — put the weights in registers</h2>
+<p>The nine weights are <strong>constant across the whole image</strong>, so load them <strong>once</strong>
+into registers and read them from there forever after. They vanish from the HBM
+byte count (nine one-time reads, amortized to ~0 over a large image):</p>
+<ul>
+<li>HBM bytes per output = <strong>9</strong> image reads + <strong>1</strong> write = <strong>10 B</strong></li>
+</ul>
+<blockquote>
+<p><strong>AI (vs HBM)  =  18 ÷ 10  =  1.8 op/B</strong></p>
+</blockquote>
+<p>The intensity <strong>roughly doubled</strong> — the weights were half the HBM reads — for the
+price of nine registers. Ceiling ≈ 1.8 × 316 GB/s ≈ <strong>0.57 TOP/s</strong>. We are still
+HBM-bound, but now the bottleneck is unmistakably the <strong>image traffic</strong>: every
+pixel is <em>still</em> being read <strong>nine times</strong> from HBM, once for each window it
+belongs to. That redundancy is Stage 3's target.</p>
+<blockquote>
+<p><strong>Why registers, not BRAM, for the weights?</strong> They are tiny (9 values) and the
+hottest data in the kernel — read every cycle. Registers give <strong>~65 TB/s</strong> and
+single-cycle access; spending nine of them to erase a whole operand from HBM is
+the best trade in the kernel.</p>
+</blockquote>
+<hr />
+<h2>Stage 3 — hold the image in BRAM</h2>
+<p>Now bring the image on-chip: as the window slides, keep the few rows it needs in
+<strong>BRAM</strong> (a <em>line buffer</em> — see the box below). Each pixel is loaded from HBM
+<strong>exactly once</strong>, parked in BRAM, and then read <strong>nine times from BRAM</strong> as the
+window passes over it. Two tiers now carry traffic, and the kernel has a
+<strong>different intensity against each</strong>:</p>
+<p><strong>Against HBM</strong> — per output, only <strong>1</strong> new pixel comes in and <strong>1</strong> result goes
+out:</p>
+<blockquote>
+<p><strong>AI (vs HBM)  =  18 ÷ 2  =  9 op/B</strong></p>
+</blockquote>
+<p><strong>Against BRAM</strong> — the nine reuse-reads now land on BRAM:</p>
+<blockquote>
+<p><strong>AI (vs BRAM)  =  18 ÷ 9  =  2 op/B</strong></p>
+</blockquote>
+<p>Read those two lines carefully — they are the whole point of a <em>hierarchical</em>
+roofline:</p>
+<ul>
+<li>The <strong>HBM</strong> intensity jumped <strong>1.8 → 9</strong> (a 5× lift), because the image is now
+  loaded once instead of nine times. Ceiling ≈ 9 × 316 GB/s ≈ <strong>2.8 TOP/s</strong> — up
+  against the compute roof, ~<strong>10× faster</strong> than Stage 1.</li>
+<li>The <strong>BRAM</strong> intensity is only <strong>2 op/B</strong> — <em>lower</em> than the HBM number! — but
+  it is measured against a <strong>~3.6 TB/s</strong> roof, so its ceiling is ≈ 2 × 3.6 TB/s ≈
+  <strong>7.2 TOP/s</strong>, comfortably <strong>above</strong> the compute roof.</li>
+</ul>
+<p>So after Stage 3 the <strong>BRAM roof has headroom to spare</strong>, and the thing now
+holding the kernel back is the <strong>HBM stream-in/stream-out</strong> (2.8 TOP/s) bumping
+against the <strong>compute roof</strong> (3.6 TOP/s). The memory hierarchy did its job: it
+moved the binding constraint off the cheap, redundant HBM refetches and up near
+the compute limit.</p>
+<hr />
+<h2>The hierarchical roofline, in one picture</h2>
+<p><figure><img alt="Hierarchical roofline: three roofs (HBM, BRAM, compute) with the three stages marching up the HBM slope toward the compute roof" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3ODAgNTAwIiB3aWR0aD0iNzgwIiBoZWlnaHQ9IjUwMCIgZm9udC1mYW1pbHk9IkludGVyLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj4KICA8ZGVmcz4KICAgIDxtYXJrZXIgaWQ9ImF4IiBtYXJrZXJXaWR0aD0iOSIgbWFya2VySGVpZ2h0PSI5IiByZWZYPSI2LjUiIHJlZlk9IjMiIG9yaWVudD0iYXV0byI+PHBhdGggZD0iTTAsMCBMNi41LDMgTDAsNiBaIiBmaWxsPSIjMTQyMDFmIi8+PC9tYXJrZXI+CiAgICA8bWFya2VyIGlkPSJtZyIgbWFya2VyV2lkdGg9IjkiIG1hcmtlckhlaWdodD0iOSIgcmVmWD0iNi41IiByZWZZPSIzIiBvcmllbnQ9ImF1dG8iPjxwYXRoIGQ9Ik0wLDAgTDYuNSwzIEwwLDYgWiIgZmlsbD0iI2MyNDEwYyIvPjwvbWFya2VyPgogIDwvZGVmcz4KCiAgPHRleHQgeD0iMzkwIiB5PSIyNiIgZm9udC1zaXplPSIxMi45IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5IaWVyYXJjaGljYWwgcm9vZmxpbmUg4oCUIG9uZSByb29mIHBlciBtZW1vcnkgdGllcjsgY2FjaGluZyByZXVzZSBjbGltYnMgdGhlIEhCTSByb29mPC90ZXh0PgoKICA8IS0tIGF4ZXMgLS0+CiAgPGxpbmUgeDE9IjExMCIgeTE9IjQzMCIgeDI9IjcwMCIgeTI9IjQzMCIgc3Ryb2tlPSIjMTQyMDFmIiBzdHJva2Utd2lkdGg9IjEuNiIgbWFya2VyLWVuZD0idXJsKCNheCkiLz4KICA8bGluZSB4MT0iMTEwIiB5MT0iNDMwIiB4Mj0iMTEwIiB5Mj0iMTIwIiBzdHJva2U9IiMxNDIwMWYiIHN0cm9rZS13aWR0aD0iMS42IiBtYXJrZXItZW5kPSJ1cmwoI2F4KSIvPgogIDx0ZXh0IHg9IjQwNSIgeT0iNDY4IiBmb250LXNpemU9IjExLjIiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmFyaXRobWV0aWMgaW50ZW5zaXR5ICAob3BzIC8gYnl0ZSkgIOKGkiAgbG9nPC90ZXh0PgogIDx0ZXh0IHg9IjM0IiB5PSIyNzUiIGZvbnQtc2l6ZT0iMTEuMiIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgdHJhbnNmb3JtPSJyb3RhdGUoLTkwIDM0IDI3NSkiPmF0dGFpbmFibGUgb3BzL3MgIOKGkiAgbG9nPC90ZXh0PgoKICA8IS0tIHggdGlja3MgLS0+CiAgPGcgZm9udC1zaXplPSI5LjUiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPgogICAgPGxpbmUgeDE9IjEyMCIgeTE9IjQzMCIgeDI9IjEyMCIgeTI9IjQzNSIgc3Ryb2tlPSIjNTU2MzVmIi8+PHRleHQgeD0iMTIwIiB5PSI0NDgiPjAuMTwvdGV4dD4KICAgIDxsaW5lIHgxPSIyNjAiIHkxPSI0MzAiIHgyPSIyNjAiIHkyPSI0MzUiIHN0cm9rZT0iIzU1NjM1ZiIvPjx0ZXh0IHg9IjI2MCIgeT0iNDQ4Ij4xPC90ZXh0PgogICAgPGxpbmUgeDE9IjQwMCIgeTE9IjQzMCIgeDI9IjQwMCIgeTI9IjQzNSIgc3Ryb2tlPSIjNTU2MzVmIi8+PHRleHQgeD0iNDAwIiB5PSI0NDgiPjEwPC90ZXh0PgogICAgPGxpbmUgeDE9IjU0MCIgeTE9IjQzMCIgeDI9IjU0MCIgeTI9IjQzNSIgc3Ryb2tlPSIjNTU2MzVmIi8+PHRleHQgeD0iNTQwIiB5PSI0NDgiPjEwMDwvdGV4dD4KICA8L2c+CiAgPCEtLSB5IHRpY2tzIC0tPgogIDxnIGZvbnQtc2l6ZT0iOS4wIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0iZW5kIj4KICAgIDxsaW5lIHgxPSIxMDUiIHkxPSI0MzAiIHgyPSIxMTAiIHkyPSI0MzAiIHN0cm9rZT0iIzU1NjM1ZiIvPjx0ZXh0IHg9IjEwMiIgeT0iNDM0Ij4xMCBHPC90ZXh0PgogICAgPGxpbmUgeDE9IjEwNSIgeTE9IjM2MCIgeDI9IjExMCIgeTI9IjM2MCIgc3Ryb2tlPSIjNTU2MzVmIi8+PHRleHQgeD0iMTAyIiB5PSIzNjQiPjEwMCBHPC90ZXh0PgogICAgPGxpbmUgeDE9IjEwNSIgeTE9IjI5MCIgeDI9IjExMCIgeTI9IjI5MCIgc3Ryb2tlPSIjNTU2MzVmIi8+PHRleHQgeD0iMTAyIiB5PSIyOTQiPjEgVDwvdGV4dD4KICAgIDxsaW5lIHgxPSIxMDUiIHkxPSIyMjAiIHgyPSIxMTAiIHkyPSIyMjAiIHN0cm9rZT0iIzU1NjM1ZiIvPjx0ZXh0IHg9IjEwMiIgeT0iMjI0Ij4xMCBUPC90ZXh0PgogICAgPGxpbmUgeDE9IjEwNSIgeTE9IjE1MCIgeDI9IjExMCIgeTI9IjE1MCIgc3Ryb2tlPSIjNTU2MzVmIi8+PHRleHQgeD0iMTAyIiB5PSIxNTQiPjEwMCBUPC90ZXh0PgogIDwvZz4KCiAgPCEtLSByZWdpc3RlcnMgcm9vZiAoZmFpbnQsIGFsd2F5cyBhYm92ZSBjb21wdXRlKSAtLT4KICA8bGluZSB4MT0iMTEwIiB5MT0iMjM4IiB4Mj0iMzI2IiB5Mj0iMTMwIiBzdHJva2U9IiM3YzNhZWQiIHN0cm9rZS13aWR0aD0iMS42IiBzdHJva2UtZGFzaGFycmF5PSI2IDUiIG9wYWNpdHk9IjAuNjUiLz4KICA8dGV4dCB4PSIxNTAiIHk9IjE5NiIgZm9udC1zaXplPSI5LjUiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiM3YzNhZWQiIHRyYW5zZm9ybT0icm90YXRlKC0yNyAxNTAgMTk2KSIgb3BhY2l0eT0iMC44Ij5yZWdpc3RlcnMgwrcgNjUgVEIvcyAobmV2ZXIgYmluZHMpPC90ZXh0PgoKICA8IS0tIEJSQU0gcm9vZjogc29saWQgdG8gcmlkZ2UsIGRhc2hlZCBjb250aW51YXRpb24gYWJvdmUgY29tcHV0ZSAtLT4KICA8bGluZSB4MT0iMTEwIiB5MT0iMzI2IiB4Mj0iMjYwIiB5Mj0iMjUxIiBzdHJva2U9IiMxNTgwM2QiIHN0cm9rZS13aWR0aD0iMyIvPgogIDxsaW5lIHgxPSIyNjAiIHkxPSIyNTEiIHgyPSIzNDUiIHkyPSIyMDgiIHN0cm9rZT0iIzE1ODAzZCIgc3Ryb2tlLXdpZHRoPSIxLjgiIHN0cm9rZS1kYXNoYXJyYXk9IjUgNCIgb3BhY2l0eT0iMC43Ii8+CiAgPHRleHQgeD0iMTUwIiB5PSIzMDAiIGZvbnQtc2l6ZT0iMTAuMyIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE1ODAzZCIgdHJhbnNmb3JtPSJyb3RhdGUoLTI3IDE1MCAzMDApIj5CUkFNIMK3IDMuNiBUQi9zPC90ZXh0PgoKICA8IS0tIEhCTSByb29mIC0tPgogIDxsaW5lIHgxPSIxMTAiIHkxPSI0MDAiIHgyPSI0MDgiIHkyPSIyNTEiIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIzIi8+CiAgPHRleHQgeD0iMTg1IiB5PSIzNzIiIGZvbnQtc2l6ZT0iMTAuMyIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBlNzQ5MCIgdHJhbnNmb3JtPSJyb3RhdGUoLTI3IDE4NSAzNzIpIj5IQk0gwrcgMzE2IEdCL3M8L3RleHQ+CgogIDwhLS0gY29tcHV0ZSByb29mIChmbGF0KSAtLT4KICA8bGluZSB4MT0iMjYwIiB5MT0iMjUxIiB4Mj0iNjkyIiB5Mj0iMjUxIiBzdHJva2U9IiMxNDIwMWYiIHN0cm9rZS13aWR0aD0iMyIvPgogIDx0ZXh0IHg9IjU2MCIgeT0iMjQzIiBmb250LXNpemU9IjEwLjMiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNDIwMWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmNvbXB1dGUgcm9vZiDiiYggMy42IFRPUC9zICAoNy4xIElOVDgpPC90ZXh0PgoKICA8IS0tIHJlZ2lvbiBoaW50IC0tPgogIDx0ZXh0IHg9IjYwMCIgeT0iMzAwIiBmb250LXNpemU9IjkuOSIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzU1NjM1ZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Y29tcHV0ZS1ib3VuZCDihpI8L3RleHQ+CgogIDwhLS0gbWFyY2ggYXJyb3dzIGFsb25nIHRoZSBIQk0gcm9vZiAtLT4KICA8cGF0aCBkPSJNMjYzLDMyNCBMMjkwLDMxMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYzI0MTBjIiBzdHJva2Utd2lkdGg9IjEuNiIgc3Ryb2tlLWRhc2hhcnJheT0iNCAzIiBtYXJrZXItZW5kPSJ1cmwoI21nKSIvPgogIDxwYXRoIGQ9Ik0zMDMsMzA0IEwzODgsMjYxIiBmaWxsPSJub25lIiBzdHJva2U9IiNjMjQxMGMiIHN0cm9rZS13aWR0aD0iMS42IiBzdHJva2UtZGFzaGFycmF5PSI0IDMiIG1hcmtlci1lbmQ9InVybCgjbWcpIi8+CgogIDwhLS0gc3RhZ2UgZG90cyBvbiB0aGUgSEJNIHJvb2YgLS0+CiAgPGNpcmNsZSBjeD0iMjU3IiBjeT0iMzI3IiByPSI2LjUiIGZpbGw9IiNjMjQxMGMiLz48dGV4dCB4PSIyNDgiIHk9IjMyMiIgZm9udC1zaXplPSIxMC44IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjYzI0MTBjIiB0ZXh0LWFuY2hvcj0iZW5kIj7ikaA8L3RleHQ+CiAgPGNpcmNsZSBjeD0iMjk2IiBjeT0iMzA3IiByPSI2LjUiIGZpbGw9IiNjMjQxMGMiLz48dGV4dCB4PSIyODgiIHk9IjMwMCIgZm9udC1zaXplPSIxMC44IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjYzI0MTBjIiB0ZXh0LWFuY2hvcj0iZW5kIj7ikaE8L3RleHQ+CiAgPGNpcmNsZSBjeD0iMzk0IiBjeT0iMjU4IiByPSI3LjUiIGZpbGw9IiNjMjQxMGMiLz48dGV4dCB4PSI0MDQiIHk9IjI1NiIgZm9udC1zaXplPSIxMC44IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjYzI0MTBjIiB0ZXh0LWFuY2hvcj0ic3RhcnQiPuKRojwvdGV4dD4KCiAgPCEtLSBzdGFnZSAzIEJSQU0gaGVhZHJvb20gcG9pbnQgLS0+CiAgPGNpcmNsZSBjeD0iMzAyIiBjeT0iMjMwIiByPSI2LjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE1ODAzZCIgc3Ryb2tlLXdpZHRoPSIyLjIiLz4KICA8dGV4dCB4PSIzMTIiIHk9IjIyMiIgZm9udC1zaXplPSI5LjAiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNTgwM2QiIHRleHQtYW5jaG9yPSJzdGFydCI+4pGiIHZzIEJSQU06IEFJIDIg4oaSIDcuMiBUT1AvczwvdGV4dD4KICA8dGV4dCB4PSIzMTIiIHk9IjIzNiIgZm9udC1zaXplPSI4LjYiIGZpbGw9IiMxNTgwM2QiIHRleHQtYW5jaG9yPSJzdGFydCI+KGFib3ZlIGNvbXB1dGUg4oCUIEJSQU0gaGFzIGhlYWRyb29tKTwvdGV4dD4KCiAgPCEtLSBsZWdlbmQgLS0+CiAgPHJlY3QgeD0iNDUyIiB5PSIzMzAiIHdpZHRoPSIyNjgiIGhlaWdodD0iOTIiIHJ4PSI5IiBmaWxsPSIjZjFmNmY3IiBzdHJva2U9IiNkM2RlZTAiIHN0cm9rZS13aWR0aD0iMS40Ii8+CiAgPHRleHQgeD0iNDY2IiB5PSIzNTAiIGZvbnQtc2l6ZT0iOS41IiBmaWxsPSIjMTQyMDFmIj48dHNwYW4gZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI2MyNDEwYyI+4pGgPC90c3Bhbj4gYWxsIGZyb20gSEJNIOKAlCBBSSAwLjk1IOKGkiAwLjMwIFRPUC9zPC90ZXh0PgogIDx0ZXh0IHg9IjQ2NiIgeT0iMzcwIiBmb250LXNpemU9IjkuNSIgZmlsbD0iIzE0MjAxZiI+PHRzcGFuIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiNjMjQxMGMiPuKRoTwvdHNwYW4+IHdlaWdodHMg4oaSIHJlZ2lzdGVycyDigJQgQUkgMS44IOKGkiAwLjU3IFRPUC9zPC90ZXh0PgogIDx0ZXh0IHg9IjQ2NiIgeT0iMzkwIiBmb250LXNpemU9IjkuNSIgZmlsbD0iIzE0MjAxZiI+PHRzcGFuIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiNjMjQxMGMiPuKRojwvdHNwYW4+IGltYWdlIOKGkiBCUkFNIOKAlCBBSSA5IOKGkiAyLjggVE9QL3M8L3RleHQ+CiAgPHRleHQgeD0iNDY2IiB5PSI0MTAiIGZvbnQtc2l6ZT0iOS4wIiBmaWxsPSIjNTU2MzVmIj5hdHRhaW5hYmxlID0gbG93ZXN0IHJvb2YgeW91IGFyZSB1bmRlcjwvdGV4dD4KPC9zdmc+Cg=="></figure></p>
+<p>Read it like this:</p>
+<ul>
+<li>Each <strong>memory tier is its own slanted roof</strong> (<code>perf = AI × bandwidth</code>); higher
+  bandwidth ⇒ higher line. The <strong>flat compute roof</strong> caps them all.</li>
+<li>The <strong>three orange dots are the three stages</strong>, plotted at their <code>AI_HBM</code>. They
+  <strong>march up the HBM roof</strong>: 0.95 → 1.8 → 9, climbing from ~0.3 TOP/s toward the
+  compute roof as we cache more reuse on-chip.</li>
+<li>Stage 3 also has a point on the <strong>BRAM roof</strong> (<code>AI_BRAM = 2</code>), sitting <strong>above</strong>
+  the compute roof — i.e. once the image lives in BRAM, its bandwidth is <em>not</em> the
+  limit. The <strong>attainable</strong> performance is always the <strong>lowest</strong> roof you are
+  under: <code>min(compute, AI_HBM×BW_HBM, AI_BRAM×BW_BRAM)</code>.</li>
+</ul>
+<p>The move that matters is not "make AI bigger" in the abstract — it is <strong>change
+which roof binds you.</strong> Stage by stage we lift off the HBM roof; by Stage 3 the
+HBM roof has been pushed up next to the compute roof and BRAM is nowhere near
+binding.</p>
+<hr />
+<h2>Match each operand to a tier</h2>
+<p><figure><img alt="Reuse-driven data placement: weights in registers, image rows in BRAM, image and output streamed through HBM once" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3ODAgNDMwIiB3aWR0aD0iNzgwIiBoZWlnaHQ9IjQzMCIgZm9udC1mYW1pbHk9IkludGVyLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj4KICA8ZGVmcz4KICAgIDxtYXJrZXIgaWQ9ImciIG1hcmtlcldpZHRoPSI5IiBtYXJrZXJIZWlnaHQ9IjkiIHJlZlg9IjYuNSIgcmVmWT0iMyIgb3JpZW50PSJhdXRvIj48cGF0aCBkPSJNMCwwIEw2LjUsMyBMMCw2IFoiIGZpbGw9IiMxNTgwM2QiLz48L21hcmtlcj4KICAgIDxtYXJrZXIgaWQ9InQiIG1hcmtlcldpZHRoPSI5IiBtYXJrZXJIZWlnaHQ9IjkiIHJlZlg9IjYuNSIgcmVmWT0iMyIgb3JpZW50PSJhdXRvIj48cGF0aCBkPSJNMCwwIEw2LjUsMyBMMCw2IFoiIGZpbGw9IiMwZTc0OTAiLz48L21hcmtlcj4KICAgIDxtYXJrZXIgaWQ9Im8iIG1hcmtlcldpZHRoPSI5IiBtYXJrZXJIZWlnaHQ9IjkiIHJlZlg9IjYuNSIgcmVmWT0iMyIgb3JpZW50PSJhdXRvIj48cGF0aCBkPSJNMCwwIEw2LjUsMyBMMCw2IFoiIGZpbGw9IiNjMjQxMGMiLz48L21hcmtlcj4KICAgIDxtYXJrZXIgaWQ9ImsiIG1hcmtlcldpZHRoPSI5IiBtYXJrZXJIZWlnaHQ9IjkiIHJlZlg9IjYuNSIgcmVmWT0iMyIgb3JpZW50PSJhdXRvIj48cGF0aCBkPSJNMCwwIEw2LjUsMyBMMCw2IFoiIGZpbGw9IiM1NTYzNWYiLz48L21hcmtlcj4KICA8L2RlZnM+CgogIDx0ZXh0IHg9IjM5MCIgeT0iMjYiIGZvbnQtc2l6ZT0iMTIuOSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Um91dGUgZWFjaCBvcGVyYW5kIHRvIHRoZSB0aWVyIGl0cyByZXVzZSBlYXJuczwvdGV4dD4KCiAgPCEtLSBsZWZ0IHB5cmFtaWQgYXhpcyAtLT4KICA8bGluZSB4MT0iMjYiIHkxPSIzNDQiIHgyPSIyNiIgeTI9IjYwIiBzdHJva2U9IiM1NTYzNWYiIHN0cm9rZS13aWR0aD0iMS41IiBtYXJrZXItZW5kPSJ1cmwoI2spIi8+CiAgPHRleHQgeD0iMjAiIHk9IjIxMCIgZm9udC1zaXplPSI5LjAiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIHRyYW5zZm9ybT0icm90YXRlKC05MCAyMCAyMTApIj5iYW5kd2lkdGgg4oaRICAgwrcgICBjYXBhY2l0eSDihpM8L3RleHQ+CgogIDwhLS0gUkVHSVNURVJTIC0tPgogIDxyZWN0IHg9IjQ0IiB5PSI1OCIgd2lkdGg9IjM0NCIgaGVpZ2h0PSI3MiIgcng9IjkiIGZpbGw9IiNlN2Y1ZWMiIHN0cm9rZT0iIzE1ODAzZCIgc3Ryb2tlLXdpZHRoPSIxLjgiLz4KICA8dGV4dCB4PSI2MCIgeT0iODIiIGZvbnQtc2l6ZT0iMTAuOCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE1ODAzZCI+UkVHSVNURVJTIMK3IH42NSBUQi9zPC90ZXh0PgogIDx0ZXh0IHg9IjYwIiB5PSIxMDIiIGZvbnQtc2l6ZT0iOS45IiBmaWxsPSIjMTQyMDFmIj45IGZpbHRlciB3ZWlnaHRzPC90ZXh0PgogIDx0ZXh0IHg9IjYwIiB5PSIxMjAiIGZvbnQtc2l6ZT0iOS4wIiBmaWxsPSIjNTU2MzVmIj5sb2FkZWQgb25jZSDihpIgcmV1c2VkIGJ5IGV2ZXJ5IG91dHB1dCBwaXhlbDwvdGV4dD4KICA8dGV4dCB4PSIzNzYiIHk9Ijk0IiBmb250LXNpemU9IjkuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE1ODAzZCIgdGV4dC1hbmNob3I9ImVuZCI+cmV1c2Ugw5dtaWxsaW9uczwvdGV4dD4KCiAgPCEtLSBCUkFNIC0tPgogIDxyZWN0IHg9IjQ0IiB5PSIxNjQiIHdpZHRoPSIzNDQiIGhlaWdodD0iNzIiIHJ4PSI5IiBmaWxsPSIjZTJlZWYxIiBzdHJva2U9IiMwZTc0OTAiIHN0cm9rZS13aWR0aD0iMS44Ii8+CiAgPHRleHQgeD0iNjAiIHk9IjE4OCIgZm9udC1zaXplPSIxMC44IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMGU3NDkwIj5CUkFNIMK3IH4zLjYgVEIvczwvdGV4dD4KICA8dGV4dCB4PSI2MCIgeT0iMjA4IiBmb250LXNpemU9IjkuOSIgZmlsbD0iIzE0MjAxZiI+aW1hZ2UgbGluZSBidWZmZXIgKGEgZmV3IHJvd3MpPC90ZXh0PgogIDx0ZXh0IHg9IjYwIiB5PSIyMjYiIGZvbnQtc2l6ZT0iOS4wIiBmaWxsPSIjNTU2MzVmIj5lYWNoIHBpeGVsIGxvYWRlZCBvbmNlIOKGkiByZXVzZWQgOcOXPC90ZXh0PgogIDx0ZXh0IHg9IjM3NiIgeT0iMjAwIiBmb250LXNpemU9IjkuNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzBlNzQ5MCIgdGV4dC1hbmNob3I9ImVuZCI+cmV1c2Ugw5c5PC90ZXh0PgoKICA8IS0tIEhCTSAtLT4KICA8cmVjdCB4PSI0NCIgeT0iMjcwIiB3aWR0aD0iMzQ0IiBoZWlnaHQ9IjcyIiByeD0iOSIgZmlsbD0iI2ZkZjRlZSIgc3Ryb2tlPSIjYzI0MTBjIiBzdHJva2Utd2lkdGg9IjEuOCIvPgogIDx0ZXh0IHg9IjYwIiB5PSIyOTQiIGZvbnQtc2l6ZT0iMTAuOCIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI2MyNDEwYyI+SEJNIMK3IDMxNiBHQi9zPC90ZXh0PgogIDx0ZXh0IHg9IjYwIiB5PSIzMTQiIGZvbnQtc2l6ZT0iOS45IiBmaWxsPSIjMTQyMDFmIj5mdWxsIGltYWdlIGluIMK3IG91dHB1dCBvdXQ8L3RleHQ+CiAgPHRleHQgeD0iNjAiIHk9IjMzMiIgZm9udC1zaXplPSI5LjAiIGZpbGw9IiM1NTYzNWYiPnN0cmVhbWVkIG9uY2UgZWFjaCDihpIgbm8gcmV1c2U8L3RleHQ+CiAgPHRleHQgeD0iMzc2IiB5PSIzMDYiIGZvbnQtc2l6ZT0iOS41IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjYzI0MTBjIiB0ZXh0LWFuY2hvcj0iZW5kIj5yZXVzZSDDlzE8L3RleHQ+CgogIDwhLS0gUEUgZGF0YXBhdGggLS0+CiAgPHJlY3QgeD0iNTg2IiB5PSIxNTAiIHdpZHRoPSIxNTgiIGhlaWdodD0iMTE4IiByeD0iMTAiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iIzE0MjAxZiIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHRleHQgeD0iNjY1IiB5PSIxOTYiIGZvbnQtc2l6ZT0iMTEuMiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzE0MjAxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UEUgZGF0YXBhdGg8L3RleHQ+CiAgPHRleHQgeD0iNjY1IiB5PSIyMTgiIGZvbnQtc2l6ZT0iOS45IiBmaWxsPSIjMTQyMDFmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj45IE1BQyAvIG91dHB1dDwvdGV4dD4KICA8dGV4dCB4PSI2NjUiIHk9IjIzNiIgZm9udC1zaXplPSI5LjAiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPj0gMTggb3BzIC8gb3V0cHV0PC90ZXh0PgoKICA8IS0tIHJlZ2lzdGVycyAtPiBQRSAtLT4KICA8cGF0aCBkPSJNMzg4LDk0IEMgNDc4LDExMCA1MjgsMTUwIDU4NCwxODYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE1ODAzZCIgc3Ryb2tlLXdpZHRoPSIyIiBtYXJrZXItZW5kPSJ1cmwoI2cpIi8+CiAgPHRleHQgeD0iNDg2IiB5PSIxMjgiIGZvbnQtc2l6ZT0iOS4wIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjMTU4MDNkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj45IHdlaWdodHMgLyBvdXQ8L3RleHQ+CgogIDwhLS0gQlJBTSAtPiBQRSAtLT4KICA8cGF0aCBkPSJNMzg4LDIwNiBMNTg0LDIxNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMGU3NDkwIiBzdHJva2Utd2lkdGg9IjIiIG1hcmtlci1lbmQ9InVybCgjdCkiLz4KICA8dGV4dCB4PSI0ODYiIHk9IjIwMCIgZm9udC1zaXplPSI5LjAiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiMwZTc0OTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPjkgcGl4ZWwgcmVhZHMgLyBvdXQ8L3RleHQ+CgogIDwhLS0gSEJNIC0+IEJSQU0gKHN0YWdlIHRoZSBpbWFnZSBvbi1jaGlwKSAtLT4KICA8cGF0aCBkPSJNMjEwLDI3MCBMMjEwLDI0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYzI0MTBjIiBzdHJva2Utd2lkdGg9IjIiIG1hcmtlci1lbmQ9InVybCgjbykiLz4KICA8dGV4dCB4PSIyMTgiIHk9IjI1OCIgZm9udC1zaXplPSI4LjYiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiNjMjQxMGMiIHRleHQtYW5jaG9yPSJzdGFydCI+bG9hZCBlYWNoIHBpeGVsIG9uY2U8L3RleHQ+CgogIDwhLS0gUEUgLT4gSEJNIChvdXRwdXQgc3RyZWFtKSAtLT4KICA8cGF0aCBkPSJNNjY1LDI2OCBMNjY1LDM4NCBMMzAwLDM4NCBMMzAwLDM0NCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYzI0MTBjIiBzdHJva2Utd2lkdGg9IjIiIG1hcmtlci1lbmQ9InVybCgjbykiLz4KICA8dGV4dCB4PSI0NzAiIHk9IjQwMCIgZm9udC1zaXplPSI5LjAiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiNjMjQxMGMiIHRleHQtYW5jaG9yPSJtaWRkbGUiPjEgb3V0cHV0IHdyaXRlIC8gb3V0PC90ZXh0PgoKICA8IS0tIHB1bmNobGluZSAtLT4KICA8dGV4dCB4PSI2NjUiIHk9IjMwMCIgZm9udC1zaXplPSI5LjAiIGZpbGw9IiM1NTYzNWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPmV2ZXJ5IGFycm93IG9mZiBIQk08L3RleHQ+CiAgPHRleHQgeD0iNjY1IiB5PSIzMTUiIGZvbnQtc2l6ZT0iOS4wIiBmaWxsPSIjNTU2MzVmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5yYWlzZXMgQUlfSEJNPC90ZXh0Pgo8L3N2Zz4K"></figure></p>
+<p>The whole optimization is this diagram: <strong>route each operand to the tier its reuse
+earns.</strong> Weights (reused everywhere) go to <strong>registers</strong>; image pixels (reused 9×)
+go to <strong>BRAM</strong>; the image and output (touched once) just <strong>stream through HBM</strong>.
+Every arrow you can delete from HBM — by holding a reused value one level up —
+raises <code>AI_HBM</code> and slides you off the slow roof.</p>
+<hr />
+<h2>The scoreboard</h2>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>What we cached</th>
+<th style="text-align: center;">HBM B/out</th>
+<th style="text-align: center;"><strong>AI vs HBM</strong></th>
+<th style="text-align: center;">AI vs BRAM</th>
+<th>Binds on</th>
+<th style="text-align: center;">Ceiling (aggregate)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1</strong></td>
+<td>nothing</td>
+<td style="text-align: center;">19</td>
+<td style="text-align: center;"><strong>0.95</strong></td>
+<td style="text-align: center;">—</td>
+<td>HBM</td>
+<td style="text-align: center;">~0.30 TOP/s</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>weights → registers</td>
+<td style="text-align: center;">10</td>
+<td style="text-align: center;"><strong>1.8</strong></td>
+<td style="text-align: center;">—</td>
+<td>HBM</td>
+<td style="text-align: center;">~0.57 TOP/s</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>+ image rows → BRAM</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;"><strong>9.0</strong></td>
+<td style="text-align: center;">2.0</td>
+<td>HBM ↔ compute</td>
+<td style="text-align: center;">~2.8 TOP/s</td>
+</tr>
+</tbody>
+</table>
+<p>Same silicon, same arithmetic — <strong>~10× more attainable performance</strong>, bought
+entirely by <em>where the reused data lives</em>.</p>
+<blockquote>
+<p><strong>How Stage 3 actually keeps the image in BRAM — the line buffer (teaser).</strong> You
+do <strong>not</strong> store the whole image on-chip. A 3×3 window only ever needs <strong>three
+rows</strong> at a time, so you keep a <strong>line buffer</strong> — three BRAM row-buffers and a
+3×3 shift-register window — and slide it across. Each incoming pixel is written
+to BRAM once and shifts through the window over the next three rows, feeding the
+nine MACs from on-chip. That sliding-window / line-buffer datapath is <strong>L4/L5</strong>
+(on-chip reuse, streaming, <code>#pragma HLS ARRAY_PARTITION</code> for the window); here we
+only needed its <em>effect</em> on the byte counts.</p>
+</blockquote>
+<hr />
+<h2>Takeaways</h2>
+<ol>
+<li><strong>A kernel has one arithmetic intensity per memory tier, not one overall.</strong> The
+   hierarchical roofline draws a roof per tier and you live under the <strong>lowest</strong>
+   one your data placement leaves you against.</li>
+<li><strong>Optimization = moving reused data up the pyramid</strong> so the slow (HBM) roof
+   stops binding. You are not chasing FLOPs; you are chasing <em>which roof binds</em>.</li>
+<li><strong>Route operands by (size × reuse):</strong> tiny-and-hot → registers; medium-reuse →
+   BRAM; touch-once → stream through HBM. The 3×3 filter needs all three.</li>
+<li><strong>The last wall is honest:</strong> Stage 3 still streams every pixel through one HBM
+   path (~10 GB/s per port). Banking across HBM channels to reclaim the full 316
+   GB/s — and the line buffer that realizes the BRAM reuse — is <strong>L4</strong>.</li>
+</ol>
+<hr />
+<h2>Further reading</h2>
+<ul>
+<li><strong>Hierarchical / cache-aware roofline</strong> — S. Williams et al., <em>Roofline: An
+  Insightful Visual Performance Model</em> (CACM 2009), extended per-cache-level by
+  LBNL's hierarchical roofline and by A. Ilic et al., <em>Cache-Aware Roofline Model</em>
+  (IEEE CAL 2014). The multi-roof idea in this note is theirs, applied to on-chip
+  FPGA memories.</li>
+<li><strong>Line buffers / sliding-window convolution on FPGAs</strong> — the standard HLS
+  pattern for Stage 3; picked up in L4/L5.</li>
+<li>Lecture 2 notes (<code>lectures/L2/notes.md</code>), Part IV — the single-roofline version
+  and the U50 memory-pyramid numbers this note builds on.</li>
+</ul>
+</main>
+</body>
+</html>
