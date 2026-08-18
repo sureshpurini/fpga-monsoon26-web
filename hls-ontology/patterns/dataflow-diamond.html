@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dataflow Diamond Pattern - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="dataflow-diamond-pattern">Dataflow Diamond Pattern</h1>
+<p>The diamond pattern is a fundamental dataflow topology with fork and join stages.</p>
+<h2 id="architecture">Architecture</h2>
+<div class="highlight"><pre><span></span><code>         input
+            │
+       ┌────▼────┐
+       │  funcA  │  (Fork: 1 input → 2 outputs)
+       └──┬───┬──┘
+       c1 │   │ c2
+     ┌────▼┐ ┌▼────┐
+     │funcB│ │funcC│  (Parallel paths)
+     └────┬┘ └┬────┘
+       c3 │   │ c4
+       ┌──▼───▼──┐
+       │  funcD  │  (Join: 2 inputs → 1 output)
+       └────┬────┘
+            │
+         output
+</code></pre></div>
+
+<h2 id="data-transformation">Data Transformation</h2>
+<p>Each function applies a specific operation:</p>
+<div class="highlight"><pre><span></span><code>input[i] → funcA → t = input[i] * 3
+                   ├── c1 → funcB → c3 = t + 25
+                   └── c2 → funcC → c4 = t * 2
+                                    ↓
+funcD: output = c3 + c4 * 2 = (t + 25) + (t * 2) * 2
+                            = (3*input + 25) + (6*input) * 2
+                            = 3*input + 25 + 12*input
+                            = 15*input + 25
+</code></pre></div>
+
+<hr />
+<h2 id="implementation-1-simple-fifos-implicit-channels">Implementation 1: Simple FIFOs (Implicit Channels)</h2>
+<p>Arrays become FIFO channels automatically under <code>#pragma HLS DATAFLOW</code>.</p>
+<h3 id="header">Header</h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// diamond.h</span>
+<span class="cp">#define N 100</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">data_t</span><span class="p">;</span>
+
+<span class="c1">// Top function</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">diamond</span><span class="p">(</span><span class="n">data_t</span><span class="w"> </span><span class="n">vecIn</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">data_t</span><span class="w"> </span><span class="n">vecOut</span><span class="p">[</span><span class="n">N</span><span class="p">]);</span>
+
+<span class="c1">// Sub functions</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">funcA</span><span class="p">(</span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">out1</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">out2</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">funcB</span><span class="p">(</span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">funcC</span><span class="p">(</span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">funcD</span><span class="p">(</span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">in1</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">in2</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">);</span>
+</code></pre></div>
+
+<h3 id="top-function">Top Function</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;diamond.h&quot;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">diamond</span><span class="p">(</span><span class="n">data_t</span><span class="w"> </span><span class="n">vecIn</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">data_t</span><span class="w"> </span><span class="n">vecOut</span><span class="p">[</span><span class="n">N</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">data_t</span><span class="w"> </span><span class="n">c1</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">c2</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">c3</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">c4</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="w">    </span><span class="n">funcA</span><span class="p">(</span><span class="n">vecIn</span><span class="p">,</span><span class="w"> </span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">);</span>
+<span class="w">    </span><span class="n">funcB</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c3</span><span class="p">);</span>
+<span class="w">    </span><span class="n">funcC</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">c4</span><span class="p">);</span>
+<span class="w">    </span><span class="n">funcD</span><span class="p">(</span><span class="n">c3</span><span class="p">,</span><span class="w"> </span><span class="n">c4</span><span class="p">,</span><span class="w"> </span><span class="n">vecOut</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="funca-fork-1-input-2-outputs">funcA - Fork (1 input → 2 outputs)</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">funcA</span><span class="p">(</span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">out1</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">out2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF</span>
+<span class="nl">Loop0</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE</span>
+<span class="w">        </span><span class="n">data_t</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w">  </span><span class="c1">// Multiply by 3</span>
+<span class="w">        </span><span class="n">out1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t</span><span class="p">;</span><span class="w">           </span><span class="c1">// Send to path 1 (funcB)</span>
+<span class="w">        </span><span class="n">out2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t</span><span class="p">;</span><span class="w">           </span><span class="c1">// Send to path 2 (funcC)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="funcb-path-1-processing">funcB - Path 1 Processing</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">funcB</span><span class="p">(</span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF</span>
+<span class="nl">Loop0</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">25</span><span class="p">;</span><span class="w">   </span><span class="c1">// Add 25</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="funcc-path-2-processing">funcC - Path 2 Processing</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">funcC</span><span class="p">(</span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF</span>
+<span class="nl">Loop0</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">    </span><span class="c1">// Multiply by 2</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="funcd-join-2-inputs-1-output">funcD - Join (2 inputs → 1 output)</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">funcD</span><span class="p">(</span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">in1</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">in2</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF</span>
+<span class="nl">Loop0</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">in2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">  </span><span class="c1">// Combine: path1 + path2*2</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Source:</strong> <code>Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Channels/simple_fifos/</code></p>
+<hr />
+<h2 id="implementation-2-explicit-hlsstream">Implementation 2: Explicit hls::stream</h2>
+<p>More control with explicit stream API, vectorized data types, and memory interface.</p>
+<h3 id="header_1">Header</h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// diamond.h</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_stream.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_vector.h&gt;</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">data_t</span><span class="p">;</span>
+<span class="cp">#define NUM_WORDS 16</span>
+
+<span class="c1">// Each vector is 64 bytes (16 x 4 bytes) for efficient memory access</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">uint32_t</span><span class="p">,</span><span class="w"> </span><span class="n">NUM_WORDS</span><span class="o">&gt;</span><span class="w"> </span><span class="n">vecOf16Words</span><span class="p">;</span>
+
+<span class="k">extern</span><span class="w"> </span><span class="s">&quot;C&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="c1">// Top function (kernel)</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">diamond</span><span class="p">(</span><span class="n">vecOf16Words</span><span class="o">*</span><span class="w"> </span><span class="n">vecIn</span><span class="p">,</span><span class="w"> </span><span class="n">vecOf16Words</span><span class="o">*</span><span class="w"> </span><span class="n">vecOut</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Sub functions</span>
+<span class="kt">void</span><span class="w"> </span><span class="n">load</span><span class="p">(</span><span class="n">vecOf16Words</span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">compute_A</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">               </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out1</span><span class="p">,</span>
+<span class="w">               </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out2</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">compute_B</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">               </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">compute_C</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">               </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">compute_D</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in1</span><span class="p">,</span>
+<span class="w">               </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in2</span><span class="p">,</span>
+<span class="w">               </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">store</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">vecOf16Words</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">);</span>
+</code></pre></div>
+
+<h3 id="top-function-kernel">Top Function (Kernel)</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;diamond.h&quot;</span>
+
+<span class="k">extern</span><span class="w"> </span><span class="s">&quot;C&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">diamond</span><span class="p">(</span><span class="n">vecOf16Words</span><span class="o">*</span><span class="w"> </span><span class="n">vecIn</span><span class="p">,</span><span class="w"> </span><span class="n">vecOf16Words</span><span class="o">*</span><span class="w"> </span><span class="n">vecOut</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=vecIn depth=32</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=vecOut depth=32</span>
+
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;</span><span class="w"> </span><span class="n">c0</span><span class="p">,</span><span class="w"> </span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">c3</span><span class="p">,</span><span class="w"> </span><span class="n">c4</span><span class="p">,</span><span class="w"> </span><span class="n">c5</span><span class="p">;</span>
+<span class="w">    </span><span class="n">assert</span><span class="p">(</span><span class="n">size</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">16</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="w">    </span><span class="n">load</span><span class="p">(</span><span class="n">vecIn</span><span class="p">,</span><span class="w"> </span><span class="n">c0</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">);</span><span class="w">           </span><span class="c1">// Memory → Stream</span>
+<span class="w">    </span><span class="n">compute_A</span><span class="p">(</span><span class="n">c0</span><span class="p">,</span><span class="w"> </span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">);</span><span class="w">     </span><span class="c1">// Fork</span>
+<span class="w">    </span><span class="n">compute_B</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c3</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">);</span><span class="w">         </span><span class="c1">// Path 1</span>
+<span class="w">    </span><span class="n">compute_C</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">c4</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">);</span><span class="w">         </span><span class="c1">// Path 2</span>
+<span class="w">    </span><span class="n">compute_D</span><span class="p">(</span><span class="n">c3</span><span class="p">,</span><span class="w"> </span><span class="n">c4</span><span class="p">,</span><span class="w"> </span><span class="n">c5</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">);</span><span class="w">     </span><span class="c1">// Join</span>
+<span class="w">    </span><span class="n">store</span><span class="p">(</span><span class="n">c5</span><span class="p">,</span><span class="w"> </span><span class="n">vecOut</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">);</span><span class="w">         </span><span class="c1">// Stream → Memory</span>
+<span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="load-memory-to-stream">load - Memory to Stream</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="n">vecOf16Words</span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="nl">Loop_Ld</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">size</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PERFORMANCE target_ti=32</span>
+<span class="cp">#pragma HLS LOOP_TRIPCOUNT max=32</span>
+<span class="w">        </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span><span class="w">  </span><span class="c1">// Read from DDR, write to stream</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="compute_a-fork">compute_A - Fork</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">compute_A</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">               </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out1</span><span class="p">,</span>
+<span class="w">               </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out2</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="nl">Loop_A</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">size</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PERFORMANCE target_ti=32</span>
+<span class="cp">#pragma HLS LOOP_TRIPCOUNT max=32</span>
+<span class="w">        </span><span class="n">vecOf16Words</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">        </span><span class="n">out1</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">t</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span><span class="w">  </span><span class="c1">// Vector multiply: all 16 elements * 3</span>
+<span class="w">        </span><span class="n">out2</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">t</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="compute_b-path-1">compute_B - Path 1</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">compute_B</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">               </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="nl">Loop_B</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">size</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PERFORMANCE target_ti=32</span>
+<span class="cp">#pragma HLS LOOP_TRIPCOUNT max=32</span>
+<span class="w">        </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">25</span><span class="p">);</span><span class="w">  </span><span class="c1">// Vector add: all 16 elements + 25</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="compute_c-path-2">compute_C - Path 2</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">compute_C</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">               </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="nl">Loop_C</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">size</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PERFORMANCE target_ti=32</span>
+<span class="cp">#pragma HLS LOOP_TRIPCOUNT max=32</span>
+<span class="w">        </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w">   </span><span class="c1">// Vector multiply: all 16 elements * 2</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="compute_d-join">compute_D - Join</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">compute_D</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in1</span><span class="p">,</span>
+<span class="w">               </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in2</span><span class="p">,</span>
+<span class="w">               </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="nl">Loop_D</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">size</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PERFORMANCE target_ti=32</span>
+<span class="cp">#pragma HLS LOOP_TRIPCOUNT max=32</span>
+<span class="w">        </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">in1</span><span class="p">.</span><span class="n">read</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">in2</span><span class="p">.</span><span class="n">read</span><span class="p">());</span><span class="w">  </span><span class="c1">// Vector add</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="store-stream-to-memory">store - Stream to Memory</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">store</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">vecOf16Words</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="nl">Loop_St</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">size</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PERFORMANCE target_ti=32</span>
+<span class="cp">#pragma HLS LOOP_TRIPCOUNT max=32</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span><span class="w">  </span><span class="c1">// Read from stream, write to DDR</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Source:</strong> <code>Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Channels/using_fifos/</code></p>
+<hr />
+<h2 id="implementation-3-stream-of-blocks">Implementation 3: Stream of Blocks</h2>
+<p>Block-level streaming with random access within blocks using RAII locks.</p>
+<h3 id="header_2">Header</h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// diamond.h</span>
+<span class="cp">#pragma once</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_stream.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_streamofblocks.h&quot;</span>
+
+<span class="cp">#define N 100</span>
+<span class="cp">#define NUM_BLOCKS 10</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">data_t</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">data_t</span><span class="w"> </span><span class="n">block_data_t</span><span class="p">[</span><span class="n">NUM_BLOCKS</span><span class="p">];</span><span class="w">  </span><span class="c1">// Block of 10 elements</span>
+
+<span class="c1">// Top function</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">diamond</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">vecIn</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">vecOut</span><span class="p">);</span>
+
+<span class="c1">// Sub functions</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">funcA</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">           </span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out1</span><span class="p">,</span>
+<span class="w">           </span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out2</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">funcB</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">           </span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">funcC</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">           </span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">funcD</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in1</span><span class="p">,</span>
+<span class="w">           </span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in2</span><span class="p">,</span>
+<span class="w">           </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">);</span>
+</code></pre></div>
+
+<h3 id="top-function_1">Top Function</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;diamond.h&quot;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">diamond</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">vecIn</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">vecOut</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE ap_ctrl_chain port=return</span>
+
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">c3</span><span class="p">,</span><span class="w"> </span><span class="n">c4</span><span class="p">;</span>
+
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="w">    </span><span class="n">funcA</span><span class="p">(</span><span class="n">vecIn</span><span class="p">,</span><span class="w"> </span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">);</span>
+<span class="w">    </span><span class="n">funcB</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c3</span><span class="p">);</span>
+<span class="w">    </span><span class="n">funcC</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">c4</span><span class="p">);</span>
+<span class="w">    </span><span class="n">funcD</span><span class="p">(</span><span class="n">c3</span><span class="p">,</span><span class="w"> </span><span class="n">c4</span><span class="p">,</span><span class="w"> </span><span class="n">vecOut</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="funca-fork-stream-blocks">funcA - Fork (Stream → Blocks)</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">funcA</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">           </span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out1</span><span class="p">,</span>
+<span class="w">           </span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF</span>
+
+<span class="nl">funcA_Loop0</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">NUM_BLOCKS</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">  </span><span class="c1">// 10 iterations</span>
+<span class="cp">#pragma HLS PIPELINE II=10</span>
+
+<span class="w">        </span><span class="c1">// Obtain write locks for both output channels</span>
+<span class="w">        </span><span class="c1">// Locks are RAII - released at end of loop iteration</span>
+<span class="w">        </span><span class="n">hls</span><span class="o">::</span><span class="n">write_lock</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">out1L</span><span class="p">(</span><span class="n">out1</span><span class="p">);</span>
+<span class="w">        </span><span class="n">hls</span><span class="o">::</span><span class="n">write_lock</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">out2L</span><span class="p">(</span><span class="n">out2</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// Read 10 elements from stream, write to blocks</span>
+<span class="w">    </span><span class="nl">funcA_Loop1</span><span class="p">:</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NUM_BLOCKS</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">data_t</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<span class="w">            </span><span class="n">out1L</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t</span><span class="p">;</span><span class="w">  </span><span class="c1">// Random access OK within block</span>
+<span class="w">            </span><span class="n">out2L</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span><span class="w">  </span><span class="c1">// write_locks released here (RAII)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="funcb-path-1-block-block">funcB - Path 1 (Block → Block)</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">funcB</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">           </span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF</span>
+
+<span class="nl">funcB_Loop0</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">NUM_BLOCKS</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=5</span>
+
+<span class="w">        </span><span class="c1">// Obtain read lock on input, write lock on output</span>
+<span class="w">        </span><span class="n">hls</span><span class="o">::</span><span class="n">read_lock</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">inL</span><span class="p">(</span><span class="n">in</span><span class="p">);</span>
+<span class="w">        </span><span class="n">hls</span><span class="o">::</span><span class="n">write_lock</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">outL</span><span class="p">(</span><span class="n">out</span><span class="p">);</span>
+
+<span class="w">    </span><span class="nl">funcB_Loop1</span><span class="p">:</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NUM_BLOCKS</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span>
+<span class="w">            </span><span class="n">outL</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">inL</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">25</span><span class="p">;</span><span class="w">  </span><span class="c1">// Random access: read any index</span>
+<span class="w">    </span><span class="p">}</span><span class="w">  </span><span class="c1">// Locks released here</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="funcc-path-2-block-block">funcC - Path 2 (Block → Block)</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">funcC</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">           </span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF</span>
+
+<span class="nl">Loop0</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">NUM_BLOCKS</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=5</span>
+
+<span class="w">        </span><span class="n">hls</span><span class="o">::</span><span class="n">read_lock</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">inL</span><span class="p">(</span><span class="n">in</span><span class="p">);</span>
+<span class="w">        </span><span class="n">hls</span><span class="o">::</span><span class="n">write_lock</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">outL</span><span class="p">(</span><span class="n">out</span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NUM_BLOCKS</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">j</span><span class="p">)</span>
+<span class="w">            </span><span class="n">outL</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">inL</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="funcd-join-blocks-stream">funcD - Join (Blocks → Stream)</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">funcD</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in1</span><span class="p">,</span>
+<span class="w">           </span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in2</span><span class="p">,</span>
+<span class="w">           </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF</span>
+
+<span class="nl">Loop0</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">NUM_BLOCKS</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=10</span>
+
+<span class="w">        </span><span class="c1">// Two read locks for the two input paths</span>
+<span class="w">        </span><span class="n">hls</span><span class="o">::</span><span class="n">read_lock</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">in1L</span><span class="p">(</span><span class="n">in1</span><span class="p">);</span>
+<span class="w">        </span><span class="n">hls</span><span class="o">::</span><span class="n">read_lock</span><span class="o">&lt;</span><span class="n">block_data_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">in2L</span><span class="p">(</span><span class="n">in2</span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NUM_BLOCKS</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">j</span><span class="p">)</span>
+<span class="w">            </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">in1L</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">in2L</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w">  </span><span class="c1">// Combine and write to stream</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Source:</strong> <code>Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Channels/using_stream_of_blocks/</code></p>
+<hr />
+<h2 id="when-to-use-each">When to Use Each</h2>
+<table>
+<thead>
+<tr>
+<th>Variant</th>
+<th>Use When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Simple FIFOs</td>
+<td>Learning, simple cases, fixed sizes, no external memory</td>
+</tr>
+<tr>
+<td>Explicit hls::stream</td>
+<td>Variable sizes, need depth control, external memory (DDR/HBM)</td>
+</tr>
+<tr>
+<td>Stream of blocks</td>
+<td>Need random access within blocks, block-level synchronization</td>
+</tr>
+</tbody>
+</table>
+<h2 id="key-pragmas">Key Pragmas</h2>
+<table>
+<thead>
+<tr>
+<th>Pragma</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#pragma HLS DATAFLOW</code></td>
+<td>Enable concurrent function execution</td>
+</tr>
+<tr>
+<td><code>#pragma HLS INLINE OFF</code></td>
+<td>Keep functions as separate hardware modules</td>
+</tr>
+<tr>
+<td><code>#pragma HLS PIPELINE</code></td>
+<td>Pipeline the inner loops</td>
+</tr>
+<tr>
+<td><code>#pragma HLS INTERFACE m_axi</code></td>
+<td>Memory-mapped AXI interface for DDR access</td>
+</tr>
+<tr>
+<td><code>#pragma HLS PERFORMANCE target_ti=N</code></td>
+<td>Target transaction interval</td>
+</tr>
+<tr>
+<td><code>#pragma HLS LOOP_TRIPCOUNT max=N</code></td>
+<td>Help tool estimate loop bounds</td>
+</tr>
+</tbody>
+</table>
+<h2 id="performance">Performance</h2>
+<p>With dataflow, functions execute concurrently:</p>
+<div class="highlight"><pre><span></span><code>Without DATAFLOW (Sequential):
+│funcA│→│funcB│→│funcC│→│funcD│  Total: 4N cycles
+
+With DATAFLOW (Concurrent):
+│funcA[0]│funcA[1]│funcA[2]│...
+        │funcB[0]│funcB[1]│...
+        │funcC[0]│funcC[1]│...
+                │funcD[0]│funcD[1]│...  Total: ~N+3 cycles
+</code></pre></div>
+
+<p><strong>Speedup:</strong> ~4x for this diamond pattern (approaches number of pipeline stages)</p>
+<hr />
+<h2 id="code-generation-guidelines">Code Generation Guidelines</h2>
+<h3 id="kernel-template-simple-fifos">Kernel Template (Simple FIFOs)</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">kernel_name</span><span class="p">(</span><span class="n">data_t</span><span class="w"> </span><span class="n">input</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">data_t</span><span class="w"> </span><span class="n">output</span><span class="p">[</span><span class="n">N</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Channel declarations (become PIPOs by default)</span>
+<span class="w">    </span><span class="n">data_t</span><span class="w"> </span><span class="n">c1</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">c2</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">c3</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">c4</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="w">    </span><span class="n">fork_func</span><span class="p">(</span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">);</span><span class="w">    </span><span class="c1">// 1 input → 2 outputs</span>
+<span class="w">    </span><span class="n">path1_func</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c3</span><span class="p">);</span><span class="w">          </span><span class="c1">// Parallel path 1</span>
+<span class="w">    </span><span class="n">path2_func</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">c4</span><span class="p">);</span><span class="w">          </span><span class="c1">// Parallel path 2</span>
+<span class="w">    </span><span class="n">join_func</span><span class="p">(</span><span class="n">c3</span><span class="p">,</span><span class="w"> </span><span class="n">c4</span><span class="p">,</span><span class="w"> </span><span class="n">output</span><span class="p">);</span><span class="w">   </span><span class="c1">// 2 inputs → 1 output</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="kernel-template-explicit-hlsstream">Kernel Template (Explicit hls::stream)</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">kernel_name</span><span class="p">(</span><span class="n">vecType</span><span class="o">*</span><span class="w"> </span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="n">vecType</span><span class="o">*</span><span class="w"> </span><span class="n">output</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=input depth=&lt;size&gt;</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=output depth=&lt;size&gt;</span>
+
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vecType</span><span class="o">&gt;</span><span class="w"> </span><span class="n">c0</span><span class="p">,</span><span class="w"> </span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">c3</span><span class="p">,</span><span class="w"> </span><span class="n">c4</span><span class="p">,</span><span class="w"> </span><span class="n">c5</span><span class="p">;</span>
+
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="w">    </span><span class="n">load</span><span class="p">(</span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="n">c0</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">);</span><span class="w">           </span><span class="c1">// Memory → Stream</span>
+<span class="w">    </span><span class="n">fork_func</span><span class="p">(</span><span class="n">c0</span><span class="p">,</span><span class="w"> </span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">);</span><span class="w">     </span><span class="c1">// Fork</span>
+<span class="w">    </span><span class="n">path1_func</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c3</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">);</span><span class="w">        </span><span class="c1">// Parallel path 1</span>
+<span class="w">    </span><span class="n">path2_func</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">c4</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">);</span><span class="w">        </span><span class="c1">// Parallel path 2</span>
+<span class="w">    </span><span class="n">join_func</span><span class="p">(</span><span class="n">c3</span><span class="p">,</span><span class="w"> </span><span class="n">c4</span><span class="p">,</span><span class="w"> </span><span class="n">c5</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">);</span><span class="w">     </span><span class="c1">// Join</span>
+<span class="w">    </span><span class="n">store</span><span class="p">(</span><span class="n">c5</span><span class="p">,</span><span class="w"> </span><span class="n">output</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">);</span><span class="w">         </span><span class="c1">// Stream → Memory</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="fork-stage-template">Fork Stage Template</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">fork_func</span><span class="p">(</span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">out1</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">out2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF</span>
+<span class="nl">Loop</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE</span>
+<span class="w">        </span><span class="n">data_t</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w">    </span><span class="c1">// Read once</span>
+<span class="w">        </span><span class="n">out1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t</span><span class="p">;</span><span class="w">         </span><span class="c1">// Write to path 1</span>
+<span class="w">        </span><span class="n">out2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t</span><span class="p">;</span><span class="w">         </span><span class="c1">// Write to path 2</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="join-stage-template">Join Stage Template</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">join_func</span><span class="p">(</span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">in1</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">in2</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF</span>
+<span class="nl">Loop</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">combine</span><span class="p">(</span><span class="n">in1</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="w"> </span><span class="n">in2</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span><span class="w">  </span><span class="c1">// Combine both paths</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="key-constraints">Key Constraints</h3>
+<table>
+<thead>
+<tr>
+<th>Constraint</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dataflow pragma</td>
+<td>Must have <code>#pragma HLS DATAFLOW</code> in kernel</td>
+</tr>
+<tr>
+<td>Function inlining</td>
+<td>Use <code>#pragma HLS INLINE OFF</code> on all stage functions</td>
+</tr>
+<tr>
+<td>Element count</td>
+<td>Fork outputs and join inputs must have matching counts</td>
+</tr>
+<tr>
+<td>Single producer/consumer</td>
+<td>Each channel must have exactly one writer and one reader</td>
+</tr>
+</tbody>
+</table>
+<h3 id="required-pragmas">Required Pragmas</h3>
+<table>
+<thead>
+<tr>
+<th>Pragma</th>
+<th>Required?</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#pragma HLS DATAFLOW</code></td>
+<td>Yes</td>
+<td>Enable concurrent function execution</td>
+</tr>
+<tr>
+<td><code>#pragma HLS INLINE OFF</code></td>
+<td>Yes</td>
+<td>Keep functions as separate hardware modules</td>
+</tr>
+<tr>
+<td><code>#pragma HLS PIPELINE</code></td>
+<td>Recommended</td>
+<td>Pipeline inner loops for throughput</td>
+</tr>
+<tr>
+<td><code>#pragma HLS INTERFACE m_axi</code></td>
+<td>For DDR access</td>
+<td>Memory-mapped interface</td>
+</tr>
+<tr>
+<td><code>#pragma HLS PERFORMANCE target_ti=N</code></td>
+<td>Optional</td>
+<td>Target transaction interval</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="test-bench-generation-guidelines">Test Bench Generation Guidelines</h2>
+<h3 id="array-interface-test-bench">Array Interface Test Bench</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;diamond.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;fstream&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">data_t</span><span class="w"> </span><span class="n">test</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+<span class="w">    </span><span class="n">data_t</span><span class="w"> </span><span class="n">outcome</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">retval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">ofstream</span><span class="w"> </span><span class="kt">FILE</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Initialize test vector</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">test</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">data_t</span><span class="p">)</span><span class="n">i</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">FILE</span><span class="p">.</span><span class="n">open</span><span class="p">(</span><span class="s">&quot;result.dat&quot;</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Execute DUT multiple times</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">iter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">iter</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"> </span><span class="n">iter</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">diamond</span><span class="p">(</span><span class="n">test</span><span class="p">,</span><span class="w"> </span><span class="n">outcome</span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="kt">FILE</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">outcome</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="kt">FILE</span><span class="p">.</span><span class="n">close</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Verify against golden</span>
+<span class="w">    </span><span class="n">retval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">system</span><span class="p">(</span><span class="s">&quot;diff --brief -w result.dat result.golden.dat&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">retval</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Test failed!&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Test passed!&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="vector-interface-test-bench">Vector Interface Test Bench</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;diamond.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;vector&gt;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">totalNumWords</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">512</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;</span><span class="w"> </span><span class="n">test</span><span class="p">(</span><span class="mi">32</span><span class="p">);</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">vecOf16Words</span><span class="o">&gt;</span><span class="w"> </span><span class="n">outcome</span><span class="p">(</span><span class="mi">32</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Initialize nested vectors</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">totalNumWords</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">16</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">16</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">test</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">data_t</span><span class="p">)</span><span class="n">j</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Execute with .data() pointer</span>
+<span class="w">    </span><span class="n">diamond</span><span class="p">(</span><span class="n">test</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span><span class="w"> </span><span class="n">outcome</span><span class="p">.</span><span class="n">data</span><span class="p">(),</span><span class="w"> </span><span class="n">totalNumWords</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">16</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Verify...</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="stream-interface-test-bench">Stream Interface Test Bench</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;diamond.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_stream.h&gt;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">data_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">test</span><span class="p">;</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">data_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">outcome</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">iter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">iter</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"> </span><span class="n">iter</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Write inputs to stream</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">test</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="c1">// Execute DUT</span>
+<span class="w">        </span><span class="n">diamond</span><span class="p">(</span><span class="n">test</span><span class="p">,</span><span class="w"> </span><span class="n">outcome</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// Read outputs from stream</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">data_t</span><span class="w"> </span><span class="n">outp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">outcome</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">            </span><span class="c1">// Verify or save outp...</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="test-bench-requirements">Test Bench Requirements</h3>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Interface match</td>
+<td>Declare inputs/outputs matching kernel signature</td>
+</tr>
+<tr>
+<td>Multiple iterations</td>
+<td>Run 3+ times to verify consistent behavior</td>
+</tr>
+<tr>
+<td>Golden file</td>
+<td>Pre-compute expected outputs for <code>result.golden.dat</code></td>
+</tr>
+<tr>
+<td>Return code</td>
+<td>Return 0 for PASS, non-zero for FAIL</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="optimization-guidance-for-agents">Optimization Guidance for Agents</h2>
+<h3 id="when-to-apply-this-pattern">When to Apply This Pattern</h3>
+<div class="highlight"><pre><span></span><code>Decision tree:
+├── Does the algorithm have natural fork-join structure?
+│   ├── Yes → Use diamond pattern
+│   └── No → Consider linear pipeline or other topology
+├── Are the parallel paths independent?
+│   ├── Yes → Diamond is appropriate
+│   └── No → May need different synchronization
+├── Do paths have similar latency?
+│   ├── Yes → Simple arrays (PIPO) work well
+│   └── No → Consider explicit streams with depth tuning
+└── Need random access within data blocks?
+    ├── Yes → Use stream_of_blocks variant
+    └── No → Use simple FIFOs or explicit streams
+</code></pre></div>
+
+<h3 id="performance-optimization">Performance Optimization</h3>
+<table>
+<thead>
+<tr>
+<th>Optimization</th>
+<th>How to Apply</th>
+<th>Expected Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Vectorize data</td>
+<td>Use <code>hls::vector&lt;T, N&gt;</code> for wider memory bus</td>
+<td>16x throughput with 512-bit bus</td>
+</tr>
+<tr>
+<td>Separate memory bundles</td>
+<td>Different <code>bundle=</code> for input/output</td>
+<td>Enable parallel DDR access</td>
+</tr>
+<tr>
+<td>Pipeline all loops</td>
+<td>Add <code>#pragma HLS PIPELINE</code> to each stage</td>
+<td>Achieve II=1</td>
+</tr>
+<tr>
+<td>Balance path latencies</td>
+<td>Match iteration counts and processing</td>
+<td>Prevent stalls</td>
+</tr>
+</tbody>
+</table>
+<h3 id="resource-vs-performance-trade-offs">Resource vs Performance Trade-offs</h3>
+<table>
+<thead>
+<tr>
+<th>Choice</th>
+<th>Performance Impact</th>
+<th>Resource Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Simple arrays (PIPO)</td>
+<td>Automatic double-buffering</td>
+<td>2× array size in BRAM</td>
+</tr>
+<tr>
+<td>Explicit hls::stream</td>
+<td>Fine-grained streaming</td>
+<td>Smaller FIFO buffers</td>
+</tr>
+<tr>
+<td>Stream of blocks</td>
+<td>Random access + streaming</td>
+<td>Block size × 2 in BRAM</td>
+</tr>
+<tr>
+<td>Higher vector width</td>
+<td>More parallelism</td>
+<td>More DSPs, wider datapaths</td>
+</tr>
+</tbody>
+</table>
+<h3 id="parameter-tuning">Parameter Tuning</h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Low Value</th>
+<th>High Value</th>
+<th>Guidance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Array size N</td>
+<td>Less BRAM</td>
+<td>More buffering</td>
+<td>Match data batch size</td>
+</tr>
+<tr>
+<td>Vector width</td>
+<td>Fewer resources</td>
+<td>Higher throughput</td>
+<td>Match memory bus width (512-bit = 16×32-bit)</td>
+</tr>
+<tr>
+<td>Stream depth</td>
+<td>Less BRAM</td>
+<td>More buffering</td>
+<td>Depth ≥ latency difference between paths</td>
+</tr>
+<tr>
+<td>Block size (stream_of_blocks)</td>
+<td>Fine granularity</td>
+<td>Coarse granularity</td>
+<td>Balance access pattern vs overhead</td>
+</tr>
+</tbody>
+</table>
+<h3 id="common-pitfalls">Common Pitfalls</h3>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Symptom</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Missing INLINE OFF</td>
+<td>Functions merged, no parallelism</td>
+<td>Add <code>#pragma HLS INLINE OFF</code> to all stage functions</td>
+</tr>
+<tr>
+<td>Mismatched element counts</td>
+<td>Deadlock or incorrect results</td>
+<td>Ensure fork outputs = join inputs</td>
+</tr>
+<tr>
+<td>Multiple readers/writers</td>
+<td>Vitis HLS error</td>
+<td>Each channel: exactly 1 producer, 1 consumer</td>
+</tr>
+<tr>
+<td>Unbalanced paths</td>
+<td>One path stalls waiting</td>
+<td>Balance processing or increase stream depth</td>
+</tr>
+<tr>
+<td>Forgetting DATAFLOW pragma</td>
+<td>Sequential execution</td>
+<td>Add <code>#pragma HLS DATAFLOW</code> to kernel</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related-patterns">Related Patterns</h2>
+<ul>
+<li><a href="autorestart.md">Autorestart</a> - Continuous execution with diamond topology</li>
+<li><a href="merge-split.md">Merge-Split</a> - Fan-out/fan-in for N parallel paths</li>
+</ul>
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Channels/simple_fifos/">Vitis-HLS-Introductory-Examples/.../simple_fifos/</a></td>
+<td>Basic diamond with implicit channels</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Channels/using_fifos/">Vitis-HLS-Introductory-Examples/.../using_fifos/</a></td>
+<td>Diamond with explicit hls::stream and vectors</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Channels/using_stream_of_blocks/">Vitis-HLS-Introductory-Examples/.../using_stream_of_blocks/</a></td>
+<td>Diamond with block-level streaming</td>
+</tr>
+</tbody>
+</table>
+    </main>
+</body>
+</html>

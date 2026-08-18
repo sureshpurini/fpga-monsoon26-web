@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data-Driven Splitter Pattern - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="data-driven-splitter-pattern">Data-Driven Splitter Pattern</h1>
+<p>Conditional data routing using <code>hls::task</code> for data-driven task-level parallelism. Routes each data element to exactly one output path based on a runtime condition.</p>
+<h2 id="overview">Overview</h2>
+<p>Unlike fork patterns that duplicate data to all paths, the splitter pattern examines each element and sends it to exactly ONE output based on a condition. Uses <code>hls::task</code> for persistent, infinitely-running task instances.</p>
+<div class="highlight"><pre><span></span><code>            ┌─→ path_a_buf ─→ process_a() ─→ out_a  (condition true)
+in ─→ splitter()
+            └─→ path_b_buf ─→ process_b() ─→ out_b  (condition false)
+</code></pre></div>
+
+<h2 id="key-constructs">Key Constructs</h2>
+<table>
+<thead>
+<tr>
+<th>Construct</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hls::task</code></td>
+<td>Creates persistent task running infinitely</td>
+</tr>
+<tr>
+<td><code>hls_thread_local</code></td>
+<td>Storage class for task/stream persistence</td>
+</tr>
+<tr>
+<td><code>hls::stream&lt;T, DEPTH&gt;</code></td>
+<td>FIFO with explicit depth as template parameter</td>
+</tr>
+</tbody>
+</table>
+<h2 id="syntax">Syntax</h2>
+<div class="highlight"><pre><span></span><code><span class="c1">// Stream with depth template parameter</span>
+<span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="n">DEPTH</span><span class="o">&gt;</span><span class="w"> </span><span class="n">stream_name</span><span class="p">;</span>
+
+<span class="c1">// Task declaration</span>
+<span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">task</span><span class="w"> </span><span class="n">task_name</span><span class="p">(</span><span class="n">function</span><span class="p">,</span><span class="w"> </span><span class="n">stream_args</span><span class="p">...);</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>T</code></td>
+<td>type</td>
+<td>Data type to stream</td>
+</tr>
+<tr>
+<td><code>DEPTH</code></td>
+<td>int</td>
+<td>FIFO depth (elements)</td>
+</tr>
+<tr>
+<td><code>function</code></td>
+<td>func</td>
+<td>Task body function</td>
+</tr>
+<tr>
+<td><code>stream_args</code></td>
+<td>streams</td>
+<td>Input/output streams</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="complete-example">Complete Example</h2>
+<p>From <a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Data_driven/simple_data_driven/test.cpp">Vitis-HLS-Introductory-Examples/.../simple_data_driven/test.cpp</a>:</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_task.h&quot;</span>
+
+<span class="cp">#define N 10</span>
+
+<span class="c1">// Splitter: routes odd/even numbers to different paths</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">splitter</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">odds_buf</span><span class="p">,</span>
+<span class="w">              </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">evens_buf</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">data</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">        </span><span class="n">evens_buf</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">        </span><span class="n">odds_buf</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Process odd numbers: add 1</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">odds</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Process even numbers: add 2</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">evens</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Top function with data-driven tasks</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">odds_and_evens</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out1</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Internal streams - MUST be hls_thread_local</span>
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">s1</span><span class="p">;</span><span class="w"> </span><span class="c1">// odds buffer</span>
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">s2</span><span class="p">;</span><span class="w"> </span><span class="c1">// evens buffer</span>
+
+<span class="w">    </span><span class="c1">// Tasks - MUST be hls_thread_local</span>
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">task</span><span class="w"> </span><span class="n">t1</span><span class="p">(</span><span class="n">splitter</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">s1</span><span class="p">,</span><span class="w"> </span><span class="n">s2</span><span class="p">);</span>
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">task</span><span class="w"> </span><span class="n">t2</span><span class="p">(</span><span class="n">odds</span><span class="p">,</span><span class="w"> </span><span class="n">s1</span><span class="p">,</span><span class="w"> </span><span class="n">out1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">task</span><span class="w"> </span><span class="n">t3</span><span class="p">(</span><span class="n">evens</span><span class="p">,</span><span class="w"> </span><span class="n">s2</span><span class="p">,</span><span class="w"> </span><span class="n">out2</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="code-generation-guidelines">Code Generation Guidelines</h2>
+<h3 id="kernel-template">Kernel Template</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_task.h&quot;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">splitter</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">              </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out_a</span><span class="p">,</span>
+<span class="w">              </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out_b</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">T</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">CONDITION</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+<span class="w">        </span><span class="n">out_a</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">        </span><span class="n">out_b</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">process_a</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">TRANSFORM_A</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">()));</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">process_b</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">TRANSFORM_B</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">()));</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">top</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">         </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out_a</span><span class="p">,</span>
+<span class="w">         </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out_b</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="n">DEPTH</span><span class="o">&gt;</span><span class="w"> </span><span class="n">buf_a</span><span class="p">;</span>
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="n">DEPTH</span><span class="o">&gt;</span><span class="w"> </span><span class="n">buf_b</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">task</span><span class="w"> </span><span class="n">t1</span><span class="p">(</span><span class="n">splitter</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">buf_a</span><span class="p">,</span><span class="w"> </span><span class="n">buf_b</span><span class="p">);</span>
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">task</span><span class="w"> </span><span class="n">t2</span><span class="p">(</span><span class="n">process_a</span><span class="p">,</span><span class="w"> </span><span class="n">buf_a</span><span class="p">,</span><span class="w"> </span><span class="n">out_a</span><span class="p">);</span>
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">task</span><span class="w"> </span><span class="n">t3</span><span class="p">(</span><span class="n">process_b</span><span class="p">,</span><span class="w"> </span><span class="n">buf_b</span><span class="p">,</span><span class="w"> </span><span class="n">out_b</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="task-function-template">Task Function Template</h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// Task functions run infinitely - NO explicit loop needed</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">task_func</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Single iteration - task framework handles repetition</span>
+<span class="w">    </span><span class="n">T</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span><span class="w">   </span><span class="c1">// Blocking read</span>
+<span class="w">    </span><span class="n">T</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">process</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">result</span><span class="p">);</span><span class="w">    </span><span class="c1">// Blocking write</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="key-constraints">Key Constraints</h3>
+<table>
+<thead>
+<tr>
+<th>Constraint</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Storage class</td>
+<td>All <code>hls::stream</code> and <code>hls::task</code> MUST use <code>hls_thread_local</code></td>
+</tr>
+<tr>
+<td>Task functions</td>
+<td>No explicit loops - run infinitely by framework</td>
+</tr>
+<tr>
+<td>Communication</td>
+<td>Only via <code>hls::stream</code> (no shared memory between tasks)</td>
+</tr>
+<tr>
+<td>Splitter output</td>
+<td>Must write to exactly ONE output per input read</td>
+</tr>
+</tbody>
+</table>
+<h3 id="required-pragmas">Required Pragmas</h3>
+<table>
+<thead>
+<tr>
+<th>Pragma</th>
+<th>Required?</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>None</td>
+<td>-</td>
+<td>Data-driven TLP uses <code>hls::task</code>, not pragmas</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="test-bench-generation-guidelines">Test Bench Generation Guidelines</h2>
+<h3 id="test-bench-template">Test Bench Template</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;test.h&quot;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 1. Declare streams with appropriate depths</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"> </span><span class="n">in</span><span class="p">;</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">out1</span><span class="p">;</span><span class="w">  </span><span class="c1">// For path A</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">out2</span><span class="p">;</span><span class="w">  </span><span class="c1">// For path B</span>
+
+<span class="w">    </span><span class="c1">// 2. Feed input data</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">        </span><span class="n">in</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// 3. Execute DUT</span>
+<span class="w">    </span><span class="n">odds_and_evens</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">out1</span><span class="p">,</span><span class="w"> </span><span class="n">out2</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// 4. Verify outputs</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">sum1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">sum2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">        </span><span class="n">sum1</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">out1</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">        </span><span class="n">sum2</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">out2</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// 5. Check expected results</span>
+<span class="w">    </span><span class="c1">// Odds (1,3,5,7,9) + 1 each = 2+4+6+8+10 = 30</span>
+<span class="w">    </span><span class="c1">// Evens (0,2,4,6,8) + 2 each = 2+4+6+8+10 = 30</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">sum1</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">30</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">sum2</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">30</span><span class="p">))</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">// FAIL</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">  </span><span class="c1">// PASS</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="stream-interface-notes">Stream Interface Notes</h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// For data-driven TLP, use hls::stream for all I/O</span>
+<span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="n">DEPTH</span><span class="o">&gt;</span><span class="w"> </span><span class="n">input_stream</span><span class="p">;</span>
+<span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="n">DEPTH</span><span class="o">&gt;</span><span class="w"> </span><span class="n">output_stream</span><span class="p">;</span>
+
+<span class="c1">// Write all inputs before calling DUT</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">    </span><span class="n">input_stream</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">test_data</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+
+<span class="c1">// Call DUT once - tasks run until streams exhausted</span>
+<span class="n">dut</span><span class="p">(</span><span class="n">input_stream</span><span class="p">,</span><span class="w"> </span><span class="n">output_stream_a</span><span class="p">,</span><span class="w"> </span><span class="n">output_stream_b</span><span class="p">);</span>
+
+<span class="c1">// Read all outputs after DUT completes</span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">output_stream_a</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+
+<h3 id="verification-methods">Verification Methods</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>When to Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sum verification</td>
+<td>When order varies but total is predictable</td>
+</tr>
+<tr>
+<td>Count verification</td>
+<td>When distribution is known</td>
+</tr>
+<tr>
+<td>Element-by-element</td>
+<td>When order is deterministic</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="optimization-guidance-for-agents">Optimization Guidance for Agents</h2>
+<h3 id="when-to-apply-this-pattern">When to Apply This Pattern</h3>
+<div class="highlight"><pre><span></span><code>Decision tree:
+├── Need to route data to different paths based on value?
+│   ├── Yes → Continue
+│   └── No → Use fork pattern (dataflow-diamond)
+├── Data rate varies per path?
+│   ├── Yes → Data-driven splitter (this pattern)
+│   └── No → Control-driven DATAFLOW may suffice
+├── Paths have different processing times?
+│   └── Yes → Increase stream depth for slower path
+</code></pre></div>
+
+<h3 id="performance-optimization">Performance Optimization</h3>
+<table>
+<thead>
+<tr>
+<th>Optimization</th>
+<th>How to Apply</th>
+<th>Expected Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stream depth</td>
+<td>Increase <code>DEPTH</code> in <code>hls::stream&lt;T, DEPTH&gt;</code></td>
+<td>Prevents stalls from imbalanced distribution</td>
+</tr>
+<tr>
+<td>Task pipelining</td>
+<td>Add <code>#pragma HLS PIPELINE II=1</code> inside task functions</td>
+<td>Improves throughput per task</td>
+</tr>
+<tr>
+<td>Wider data</td>
+<td>Use <code>hls::vector&lt;T, N&gt;</code> as stream type</td>
+<td>Higher bandwidth</td>
+</tr>
+</tbody>
+</table>
+<h3 id="resource-vs-performance-trade-offs">Resource vs Performance Trade-offs</h3>
+<table>
+<thead>
+<tr>
+<th>Choice</th>
+<th>Performance Impact</th>
+<th>Resource Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Small stream depth</td>
+<td>May stall on imbalanced data</td>
+<td>Fewer BRAMs</td>
+</tr>
+<tr>
+<td>Large stream depth</td>
+<td>Absorbs data bursts</td>
+<td>More BRAMs</td>
+</tr>
+<tr>
+<td>More parallel paths</td>
+<td>Higher throughput</td>
+<td>More logic per path</td>
+</tr>
+</tbody>
+</table>
+<h3 id="parameter-tuning">Parameter Tuning</h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Low Value</th>
+<th>High Value</th>
+<th>Guidance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stream DEPTH</td>
+<td>Stalls on bursts</td>
+<td>Absorbs imbalance</td>
+<td>Start with N/num_paths, increase if stalls</td>
+</tr>
+<tr>
+<td>Num paths</td>
+<td>Simpler logic</td>
+<td>Higher parallelism</td>
+<td>Match natural data categories</td>
+</tr>
+</tbody>
+</table>
+<h3 id="common-pitfalls">Common Pitfalls</h3>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Symptom</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Missing <code>hls_thread_local</code></td>
+<td>Synthesis error</td>
+<td>Add to ALL streams and tasks</td>
+</tr>
+<tr>
+<td>Explicit loops in task</td>
+<td>Task runs once then stops</td>
+<td>Remove loops - framework handles repetition</td>
+</tr>
+<tr>
+<td>Shared memory between tasks</td>
+<td>Race conditions</td>
+<td>Use only <code>hls::stream</code> for communication</td>
+</tr>
+<tr>
+<td>Unbalanced stream depth</td>
+<td>Deadlock or stalls</td>
+<td>Size depth for worst-case imbalance</td>
+</tr>
+<tr>
+<td>Splitter writes to multiple outputs</td>
+<td>Data duplication</td>
+<td>Write to exactly ONE output per input</td>
+</tr>
+<tr>
+<td>Unbalanced stream reads</td>
+<td>Deadlock</td>
+<td>Each task must read same count as upstream writes</td>
+</tr>
+<tr>
+<td>Reusing task functions</td>
+<td>Shared tasks/streams</td>
+<td>Use template uniquification</td>
+</tr>
+<tr>
+<td>Task array without unroll</td>
+<td>Tasks not instantiated</td>
+<td>Add <code>#pragma HLS unroll</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="data-driven-vs-control-driven">Data-Driven vs Control-Driven</h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Data-Driven (hls::task)</th>
+<th>Control-Driven (#pragma HLS DATAFLOW)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Execution trigger</td>
+<td>Data availability</td>
+<td>Control flow</td>
+</tr>
+<tr>
+<td>Loop structure</td>
+<td>Implicit (continuous)</td>
+<td>Explicit loops required</td>
+</tr>
+<tr>
+<td>Keyword</td>
+<td><code>hls_thread_local hls::task</code></td>
+<td><code>#pragma HLS DATAFLOW</code></td>
+</tr>
+<tr>
+<td>Best for</td>
+<td>Variable data rates, conditional routing</td>
+<td>Fixed iteration counts</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related-patterns">Related Patterns</h2>
+<ul>
+<li><a href="dataflow-diamond.md">dataflow-diamond</a> - Fork-join when all paths need all data</li>
+<li><a href="merge-split.md">merge-split</a> - Round-robin or load-balanced distribution</li>
+</ul>
+<h2 id="related-types">Related Types</h2>
+<ul>
+<li><a href="../types/hls-task.md">hls::task</a> - Data-driven task type</li>
+<li><a href="../types/hls-stream.md">hls::stream</a> - FIFO communication</li>
+</ul>
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Data_driven/simple_data_driven/test.cpp">simple_data_driven/test.cpp</a></td>
+<td>Odd/even splitter example</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Data_driven/simple_data_driven/test_tb.cpp">simple_data_driven/test_tb.cpp</a></td>
+<td>Test bench with sum verification</td>
+</tr>
+</tbody>
+</table>
+    </main>
+</body>
+</html>

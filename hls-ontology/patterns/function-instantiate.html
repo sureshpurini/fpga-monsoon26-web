@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Function Instantiate - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="function-instantiate">Function Instantiate</h1>
+<p>Create separate optimized hardware instances of a function for each unique constant parameter value. Enables constant propagation and per-call-site optimization.</p>
+<h2 id="overview">Overview</h2>
+<p>When a function is called multiple times with different constant arguments, <code>FUNCTION_INSTANTIATE</code> creates a specialized hardware instance for each unique value, enabling compile-time optimization.</p>
+<div class="highlight"><pre><span></span><code>WITHOUT FUNCTION_INSTANTIATE:           WITH FUNCTION_INSTANTIATE:
+┌────────────────────────────────┐      ┌────────────────────────────────┐
+│  foo(inval, incr)              │      │  foo_0()   { return inval; }   │
+│  {                             │      │  foo_1()   { return inval+1; } │
+│    return inval + incr;        │      │  foo_100() { return inval+100;}│
+│  }                             │      │                                │
+│                                │      │  THREE separate instances      │
+│  ONE shared instance           │      │  Each optimized for its value  │
+│  incr is runtime variable      │      │  Can run in parallel           │
+└────────────────────────────────┘      └────────────────────────────────┘
+</code></pre></div>
+
+<h2 id="key-constructs">Key Constructs</h2>
+<table>
+<thead>
+<tr>
+<th>Construct</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#pragma HLS FUNCTION_INSTANTIATE variable=&lt;param&gt;</code></td>
+<td>Create instance per unique value</td>
+</tr>
+<tr>
+<td><code>#pragma HLS INLINE OFF</code></td>
+<td><strong>Required</strong> - keeps function separate</td>
+</tr>
+</tbody>
+</table>
+<h2 id="syntax">Syntax</h2>
+<div class="highlight"><pre><span></span><code><span class="n">ReturnType</span><span class="w"> </span><span class="nf">func</span><span class="p">(</span><span class="n">InputType</span><span class="w"> </span><span class="n">inval</span><span class="p">,</span><span class="w"> </span><span class="n">ConstType</span><span class="w"> </span><span class="n">param</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF                          </span><span class="c1">// Required!</span>
+<span class="cp">#pragma HLS FUNCTION_INSTANTIATE variable=param </span><span class="c1">// Instantiate on param</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">compute</span><span class="p">(</span><span class="n">inval</span><span class="p">,</span><span class="w"> </span><span class="n">param</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>variable</code></td>
+<td>Parameter to instantiate on (must be constant at each call site)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="complete-example">Complete Example</h2>
+<p>From <a href="../../Vitis-HLS-Introductory-Examples/Pipelining/Functions/function_instantiate/example.cpp">Pipelining/Functions/function_instantiate/example.cpp</a>:</p>
+<div class="highlight"><pre><span></span><code><span class="kt">char</span><span class="w"> </span><span class="nf">foo</span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="n">inval</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">incr</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF                      </span><span class="c1">// Keep as separate function</span>
+<span class="cp">#pragma HLS FUNCTION_INSTANTIATE variable=incr  </span><span class="c1">// Instantiate per incr value</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">inval</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">incr</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">top</span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="n">inval1</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">inval2</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">inval3</span><span class="p">,</span>
+<span class="w">         </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">outval1</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">outval2</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">outval3</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="o">*</span><span class="n">outval1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">foo</span><span class="p">(</span><span class="n">inval1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">      </span><span class="c1">// Creates foo_0: return inval (no add!)</span>
+<span class="w">    </span><span class="o">*</span><span class="n">outval2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">foo</span><span class="p">(</span><span class="n">inval2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w">      </span><span class="c1">// Creates foo_1: return inval + 1</span>
+<span class="w">    </span><span class="o">*</span><span class="n">outval3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">foo</span><span class="p">(</span><span class="n">inval3</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span><span class="w">    </span><span class="c1">// Creates foo_100: return inval + 100</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="what-happens">What Happens</h3>
+<table>
+<thead>
+<tr>
+<th>Call Site</th>
+<th>Instance Created</th>
+<th>Optimization</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>foo(inval1, 0)</code></td>
+<td><code>foo_0</code></td>
+<td><code>return inval + 0</code> → <code>return inval</code> (no adder)</td>
+</tr>
+<tr>
+<td><code>foo(inval2, 1)</code></td>
+<td><code>foo_1</code></td>
+<td><code>return inval + 1</code> (simple increment)</td>
+</tr>
+<tr>
+<td><code>foo(inval3, 100)</code></td>
+<td><code>foo_100</code></td>
+<td><code>return inval + 100</code> (constant add)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="why-inline-off-is-required">Why INLINE OFF is Required</h2>
+<div class="highlight"><pre><span></span><code><span class="c1">// WITHOUT INLINE OFF - function is merged into caller</span>
+<span class="kt">char</span><span class="w"> </span><span class="nf">foo</span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="n">inval</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">incr</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS FUNCTION_INSTANTIATE variable=incr  </span><span class="c1">// NO EFFECT!</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">inval</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">incr</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="c1">// foo() is inlined → no separate function exists → nothing to instantiate</span>
+
+<span class="c1">// WITH INLINE OFF - function stays separate</span>
+<span class="kt">char</span><span class="w"> </span><span class="nf">foo</span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="n">inval</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">incr</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF                          </span><span class="c1">// Keeps foo() separate</span>
+<span class="cp">#pragma HLS FUNCTION_INSTANTIATE variable=incr  </span><span class="c1">// Now works!</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">inval</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">incr</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="optimization-benefits">Optimization Benefits</h2>
+<h3 id="1-constant-propagation">1. Constant Propagation</h3>
+<p>Each instance knows its parameter at compile time:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Original: return x + incr;</span>
+
+<span class="c1">// foo_0:   return x + 0;  → return x;      // No adder needed!</span>
+<span class="c1">// foo_1:   return x + 1;  → return x + 1;  // Simple increment</span>
+<span class="c1">// foo_100: return x + 100; → return x + 100; // Constant adder</span>
+</code></pre></div>
+
+<h3 id="2-parallel-execution">2. Parallel Execution</h3>
+<p>Separate instances can run concurrently:</p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">top</span><span class="p">(...)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="o">*</span><span class="n">out1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">foo</span><span class="p">(</span><span class="n">in1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">    </span><span class="c1">// Instance 1 ─┐</span>
+<span class="w">    </span><span class="o">*</span><span class="n">out2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">foo</span><span class="p">(</span><span class="n">in2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w">    </span><span class="c1">// Instance 2 ─┼─► Can execute in parallel</span>
+<span class="w">    </span><span class="o">*</span><span class="n">out3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">foo</span><span class="p">(</span><span class="n">in3</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span><span class="w">  </span><span class="c1">// Instance 3 ─┘</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="3-dead-code-elimination">3. Dead Code Elimination</h3>
+<p>Mode flags enable branch removal:</p>
+<div class="highlight"><pre><span></span><code><span class="n">data_t</span><span class="w"> </span><span class="nf">compute</span><span class="p">(</span><span class="n">data_t</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">mode</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF</span>
+<span class="cp">#pragma HLS FUNCTION_INSTANTIATE variable=mode</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mode</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">x</span><span class="p">;</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mode</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// compute_0: only &quot;return x&quot; remains (other branches eliminated)</span>
+<span class="c1">// compute_1: only &quot;return x + 1&quot; remains</span>
+<span class="c1">// compute_2: only &quot;return x * 2&quot; remains</span>
+</code></pre></div>
+
+<hr />
+<h2 id="code-generation-guidelines">Code Generation Guidelines</h2>
+<h3 id="function-template">Function Template</h3>
+<div class="highlight"><pre><span></span><code><span class="n">ReturnType</span><span class="w"> </span><span class="nf">func</span><span class="p">(</span><span class="n">InputType</span><span class="w"> </span><span class="n">inval</span><span class="p">,</span><span class="w"> </span><span class="n">ConstType</span><span class="w"> </span><span class="n">param</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF</span>
+<span class="cp">#pragma HLS FUNCTION_INSTANTIATE variable=param</span>
+<span class="w">    </span><span class="c1">// param is compile-time constant in each instance</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">compute</span><span class="p">(</span><span class="n">inval</span><span class="p">,</span><span class="w"> </span><span class="n">param</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="caller-template">Caller Template</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">top</span><span class="p">(...)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="o">*</span><span class="n">out1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">func</span><span class="p">(</span><span class="n">in1</span><span class="p">,</span><span class="w"> </span><span class="n">CONST_A</span><span class="p">);</span><span class="w">  </span><span class="c1">// Instance for CONST_A</span>
+<span class="w">    </span><span class="o">*</span><span class="n">out2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">func</span><span class="p">(</span><span class="n">in2</span><span class="p">,</span><span class="w"> </span><span class="n">CONST_B</span><span class="p">);</span><span class="w">  </span><span class="c1">// Instance for CONST_B</span>
+<span class="w">    </span><span class="o">*</span><span class="n">out3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">func</span><span class="p">(</span><span class="n">in3</span><span class="p">,</span><span class="w"> </span><span class="n">CONST_C</span><span class="p">);</span><span class="w">  </span><span class="c1">// Instance for CONST_C</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="key-constraints">Key Constraints</h3>
+<table>
+<thead>
+<tr>
+<th>Constraint</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>INLINE OFF</td>
+<td>Must be specified (otherwise pragma has no effect)</td>
+</tr>
+<tr>
+<td>Constant parameter</td>
+<td>Must be compile-time constant at each call site</td>
+</tr>
+<tr>
+<td>Resource cost</td>
+<td>N unique values = N hardware instances</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="good-candidates-for-function_instantiate">Good Candidates for FUNCTION_INSTANTIATE</h2>
+<h3 id="shift-amounts">Shift Amounts</h3>
+<div class="highlight"><pre><span></span><code><span class="n">data_t</span><span class="w"> </span><span class="nf">shift_func</span><span class="p">(</span><span class="n">data_t</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">amount</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF</span>
+<span class="cp">#pragma HLS FUNCTION_INSTANTIATE variable=amount</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">amount</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="c1">// Compile-time shift → fixed wiring, no barrel shifter</span>
+</code></pre></div>
+
+<h3 id="array-sizes">Array Sizes</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF</span>
+<span class="cp">#pragma HLS FUNCTION_INSTANTIATE variable=size</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">size</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="cp">#pragma HLS UNROLL</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="c1">// Compile-time size → loop can be fully unrolled</span>
+</code></pre></div>
+
+<h3 id="mode-flags">Mode Flags</h3>
+<div class="highlight"><pre><span></span><code><span class="n">data_t</span><span class="w"> </span><span class="nf">compute</span><span class="p">(</span><span class="n">data_t</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">mode</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF</span>
+<span class="cp">#pragma HLS FUNCTION_INSTANTIATE variable=mode</span>
+<span class="w">    </span><span class="k">switch</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="mi">0</span><span class="p">:</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">x</span><span class="p">;</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="mi">1</span><span class="p">:</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="mi">2</span><span class="p">:</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+<span class="c1">// Compile-time mode → dead code elimination</span>
+</code></pre></div>
+
+<hr />
+<h2 id="test-bench-generation-guidelines">Test Bench Generation Guidelines</h2>
+<h3 id="test-bench-template">Test Bench Template</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;example.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">in1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="n">in2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="n">in3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">30</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">out1</span><span class="p">,</span><span class="w"> </span><span class="n">out2</span><span class="p">,</span><span class="w"> </span><span class="n">out3</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Call DUT</span>
+<span class="w">    </span><span class="n">top</span><span class="p">(</span><span class="n">in1</span><span class="p">,</span><span class="w"> </span><span class="n">in2</span><span class="p">,</span><span class="w"> </span><span class="n">in3</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">out1</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">out2</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">out3</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Verify</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">pass</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">out1</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">in1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;out1 mismatch&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"> </span><span class="n">pass</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">out2</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">in2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;out2 mismatch&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"> </span><span class="n">pass</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">out3</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">in3</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;out3 mismatch&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span><span class="w"> </span><span class="n">pass</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="p">(</span><span class="n">pass</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">&quot;Test PASSED&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;Test FAILED&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">pass</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="optimization-guidance-for-agents">Optimization Guidance for Agents</h2>
+<h3 id="when-to-apply-this-pattern">When to Apply This Pattern</h3>
+<div class="highlight"><pre><span></span><code>Decision tree:
+├── Function called multiple times?
+│   ├── Yes → With different constant parameters?
+│   │         ├── Yes → Would constant propagation help?
+│   │         │         ├── Yes → Can afford N instances?
+│   │         │         │         ├── Yes → Use FUNCTION_INSTANTIATE + INLINE OFF
+│   │         │         │         └── No → Share single instance
+│   │         │         └── No → Don&#39;t need FUNCTION_INSTANTIATE
+│   │         └── No (same params) → Share single instance
+│   └── No → Don&#39;t need FUNCTION_INSTANTIATE
+</code></pre></div>
+
+<h3 id="without-vs-with-comparison">Without vs With Comparison</h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Without</th>
+<th>With FUNCTION_INSTANTIATE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Instances</td>
+<td>1 shared</td>
+<td>N separate (per unique value)</td>
+</tr>
+<tr>
+<td>Parameter</td>
+<td>Runtime variable</td>
+<td>Compile-time constant</td>
+</tr>
+<tr>
+<td>Optimization</td>
+<td>Generic</td>
+<td>Specialized per value</td>
+</tr>
+<tr>
+<td>Resources</td>
+<td>1×</td>
+<td>N× (but each simpler)</td>
+</tr>
+<tr>
+<td>Execution</td>
+<td>Sequential</td>
+<td>Can be parallel</td>
+</tr>
+</tbody>
+</table>
+<h3 id="performance-trade-offs">Performance Trade-offs</h3>
+<table>
+<thead>
+<tr>
+<th>Choice</th>
+<th>Benefit</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Use FUNCTION_INSTANTIATE</td>
+<td>Constant propagation, parallelism</td>
+<td>More hardware instances</td>
+</tr>
+<tr>
+<td>Don't use</td>
+<td>Resource sharing</td>
+<td>Generic hardware, sequential</td>
+</tr>
+</tbody>
+</table>
+<h3 id="common-pitfalls">Common Pitfalls</h3>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Symptom</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Missing INLINE OFF</td>
+<td>Pragma has no effect</td>
+<td>Add <code>#pragma HLS INLINE OFF</code></td>
+</tr>
+<tr>
+<td>Too many unique values</td>
+<td>High resource usage</td>
+<td>Limit values or share some</td>
+</tr>
+<tr>
+<td>Runtime parameter</td>
+<td>No optimization benefit</td>
+<td>Ensure constants at call sites</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related-patterns">Related Patterns</h2>
+<ul>
+<li><a href="free-running-pipeline.md">free-running-pipeline</a> - Function-level pipelining</li>
+<li><a href="perfect-loop-restructuring.md">perfect-loop-restructuring</a> - Loop optimization</li>
+</ul>
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Pipelining/Functions/function_instantiate/example.cpp">function_instantiate/example.cpp</a></td>
+<td>FUNCTION_INSTANTIATE with incr=0,1,100</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Pipelining/Functions/hier_func/hier_func4.cpp">hier_func/hier_func4.cpp</a></td>
+<td>Basic hierarchical functions (baseline)</td>
+</tr>
+</tbody>
+</table>
+    </main>
+</body>
+</html>

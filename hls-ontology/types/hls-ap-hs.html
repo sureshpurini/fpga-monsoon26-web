@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hls::ap_hs - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="hlsap_hs">hls::ap_hs</h1>
+<p>Two-way handshake interface for direct I/O control signals with valid/acknowledge protocol.</p>
+<h2 id="header">Header</h2>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_directio.h&gt;</span>
+</code></pre></div>
+
+<h2 id="syntax">Syntax</h2>
+<div class="highlight"><pre><span></span><code><span class="n">hls</span><span class="o">::</span><span class="n">ap_hs</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">signal</span><span class="p">;</span><span class="w">  </span><span class="c1">// As function parameter</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>T</code></td>
+<td>Data type (typically <code>int</code>, <code>bool</code>, or small structs)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="handshake-signals">Handshake Signals</h2>
+<p>The <code>ap_hs</code> interface generates three hardware signals:</p>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────┐
+│           ap_hs Interface               │
+├─────────────────────────────────────────┤
+│  data  ◄──────────────────────────────► │  Payload
+│  valid ────────────────────────────────►│  Data is ready (from writer)
+│  ack   ◄────────────────────────────────│  Data consumed (from reader)
+└─────────────────────────────────────────┘
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Direction</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data</code></td>
+<td>Bidirectional</td>
+<td>The actual data value</td>
+</tr>
+<tr>
+<td><code>valid</code></td>
+<td>From writer</td>
+<td>Indicates data is valid</td>
+</tr>
+<tr>
+<td><code>ack</code></td>
+<td>From reader</td>
+<td>Acknowledges data was consumed</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="methods">Methods</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Return</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>write(T val)</code></td>
+<td><code>void</code></td>
+<td>Send value with valid signal asserted</td>
+</tr>
+<tr>
+<td><code>read()</code></td>
+<td><code>T</code></td>
+<td>Read value and send acknowledgment</td>
+</tr>
+<tr>
+<td><code>valid()</code></td>
+<td><code>bool</code></td>
+<td>Non-blocking check if data is available</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="direction-inference">Direction Inference</h2>
+<p>The interface direction (input/output) is <strong>inferred from usage</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Methods Used</th>
+<th>Inferred Direction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.write()</code> only</td>
+<td><strong>Output</strong></td>
+</tr>
+<tr>
+<td><code>.read()</code> / <code>.valid()</code> only</td>
+<td><strong>Input</strong></td>
+</tr>
+<tr>
+<td>Both</td>
+<td><strong>Inout</strong> (bidirectional)</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">kernel</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">ap_hs</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out_signal</span><span class="p">,</span><span class="w">   </span><span class="o">//</span><span class="w"> </span><span class="n">Output</span><span class="o">:</span><span class="w"> </span><span class="n">only</span><span class="w"> </span><span class="n">write</span><span class="p">()</span>
+<span class="w">            </span><span class="n">hls</span><span class="o">::</span><span class="n">ap_hs</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in_signal</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">  </span><span class="c1">// Input: only read()/valid()</span>
+
+<span class="w">    </span><span class="c1">// Output - only write</span>
+<span class="w">    </span><span class="n">out_signal</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">counter</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Input - only read/valid</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">in_signal</span><span class="p">.</span><span class="n">valid</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_signal</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="blocking-vs-non-blocking-operations">Blocking vs Non-Blocking Operations</h2>
+<p><code>ap_hs</code> supports both blocking and non-blocking patterns:</p>
+<h3 id="blocking-read">Blocking Read</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">signal</span><span class="p">.</span><span class="n">read</span><span class="p">();</span><span class="w">  </span><span class="c1">// Blocks until data is valid</span>
+</code></pre></div>
+
+<p>The <code>read()</code> method waits until the valid signal is asserted, then reads the data and sends acknowledgment.</p>
+<h3 id="non-blocking-check-with-valid">Non-Blocking Check with valid()</h3>
+<div class="highlight"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">signal</span><span class="p">.</span><span class="n">valid</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w">        </span><span class="c1">// Non-blocking check</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">signal</span><span class="p">.</span><span class="n">read</span><span class="p">();</span><span class="w"> </span><span class="c1">// Read only if data available</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Use <code>valid()</code> to poll for optional data without stalling the main processing loop.</p>
+<hr />
+<h2 id="example-usage">Example Usage</h2>
+<h3 id="control-driven-polling-with-valid">Control-Driven: Polling with valid()</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_directio.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_stream.h&quot;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">kernel</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">            </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span>
+<span class="w">            </span><span class="n">hls</span><span class="o">::</span><span class="n">ap_hs</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w">       </span><span class="c1">// Output: report counter</span>
+<span class="w">            </span><span class="n">hls</span><span class="o">::</span><span class="n">ap_hs</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">reset_cmd</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">  </span><span class="c1">// Input: reset command</span>
+<span class="cp">#pragma HLS interface mode=axis port=in</span>
+<span class="cp">#pragma HLS interface mode=axis port=out</span>
+
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">counter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1000</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+
+<span class="w">        </span><span class="c1">// Check for reset command (non-blocking)</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">reset_cmd</span><span class="p">.</span><span class="n">valid</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="kt">int</span><span class="w"> </span><span class="n">cmd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">reset_cmd</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">cmd</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">counter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">                </span><span class="n">status</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">counter</span><span class="p">);</span>
+<span class="w">                </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="n">counter</span><span class="o">++</span><span class="p">;</span>
+<span class="w">        </span><span class="n">status</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">counter</span><span class="p">);</span><span class="w">  </span><span class="c1">// Report current count</span>
+<span class="w">        </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="control-driven-test-bench">Control-Driven Test Bench</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;kernel.h&quot;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">ap_hs</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">status</span><span class="p">;</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">ap_hs</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">reset_cmd</span><span class="p">;</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Pre-load reset commands</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">99</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">reset_cmd</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span><span class="w">  </span><span class="c1">// No reset</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">reset_cmd</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span><span class="w">      </span><span class="c1">// Reset at iteration 100</span>
+
+<span class="w">    </span><span class="c1">// Load input data</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">in</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Execute kernel</span>
+<span class="w">    </span><span class="n">kernel</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">reset_cmd</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Read status values</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">status</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">out</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="usage-with-data-driven-tasks">Usage with Data-Driven Tasks</h2>
+<p><code>ap_hs</code> can be used with <code>hls::task</code> for synchronized scalar inputs in data-driven dataflow:</p>
+<h3 id="data-driven-task-with-ap_hs">Data-Driven Task with ap_hs</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_task.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_directio.h&quot;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">task2</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span>
+<span class="w">           </span><span class="n">hls</span><span class="o">::</span><span class="n">ap_hs</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">var</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">n</span><span class="p">.</span><span class="n">read</span><span class="p">();</span><span class="w">  </span><span class="c1">// Blocks until n has valid data</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">var</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">sub_task1</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">sub_task2</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">test</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span>
+<span class="w">          </span><span class="n">hls</span><span class="o">::</span><span class="n">ap_hs</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">s1</span><span class="p">;</span>
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">s2</span><span class="p">;</span>
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">task</span><span class="w"> </span><span class="n">t</span><span class="p">(</span><span class="n">task2</span><span class="p">,</span><span class="w"> </span><span class="n">s2</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">);</span>
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">task</span><span class="w"> </span><span class="n">t1</span><span class="p">(</span><span class="n">sub_task1</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">s1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">task</span><span class="w"> </span><span class="n">t2</span><span class="p">(</span><span class="n">sub_task2</span><span class="p">,</span><span class="w"> </span><span class="n">s1</span><span class="p">,</span><span class="w"> </span><span class="n">s2</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="data-flow">Data Flow</h3>
+<div class="highlight"><pre><span></span><code>in -&gt; [sub_task1: +2] -&gt; s1 -&gt; [sub_task2: -2] -&gt; s2 -&gt; [task2: +n] -&gt; out
+                                                            ^
+                                                            n (ap_hs)
+</code></pre></div>
+
+<h3 id="test-bench-for-data-driven">Test Bench for Data-Driven</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">ap_hs</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">golden</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">n</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">i</span><span class="p">);</span><span class="w">      </span><span class="c1">// Provide scalar for each element</span>
+<span class="w">        </span><span class="n">in</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+<span class="w">        </span><span class="n">golden</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="p">;</span><span class="w">   </span><span class="c1">// Expected: (i+2-2) + i = 2*i</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">test</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">        </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">out</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">sum</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">golden</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Key advantage</strong>: The task automatically synchronizes - it waits for both stream data AND the scalar value before proceeding.</p>
+<hr />
+<h2 id="when-to-use">When to Use</h2>
+<table>
+<thead>
+<tr>
+<th>Use Case</th>
+<th>Why ap_hs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Runtime control signals</td>
+<td>Reset, pause, mode changes</td>
+</tr>
+<tr>
+<td>Status reporting</td>
+<td>Counter values, error flags</td>
+</tr>
+<tr>
+<td>Fine-grained synchronization</td>
+<td>Per-iteration handshaking</td>
+</tr>
+<tr>
+<td>External controller interface</td>
+<td>FPGA-to-FPGA signaling</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="comparison-with-other-interfaces">Comparison with Other Interfaces</h2>
+<table>
+<thead>
+<tr>
+<th>Interface</th>
+<th>Handshaking</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ap_none</code></td>
+<td>None</td>
+<td>Static values, constants</td>
+</tr>
+<tr>
+<td><code>ap_vld</code></td>
+<td>1-way (valid only)</td>
+<td>Output status signals</td>
+</tr>
+<tr>
+<td><code>ap_ack</code></td>
+<td>1-way (ack only)</td>
+<td>Input consumption signals</td>
+</tr>
+<tr>
+<td><strong><code>ap_hs</code></strong></td>
+<td><strong>2-way (valid + ack)</strong></td>
+<td><strong>Bidirectional flow control</strong></td>
+</tr>
+<tr>
+<td><code>hls::stream</code></td>
+<td>FIFO-based</td>
+<td>Data streams with buffering</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="key-differences-from-hlsstream">Key Differences from hls::stream</h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th><code>hls::ap_hs</code></th>
+<th><code>hls::stream</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Buffering</td>
+<td>None (direct)</td>
+<td>FIFO buffer</td>
+</tr>
+<tr>
+<td>Handshake</td>
+<td>Valid + Ack signals</td>
+<td>FIFO full/empty</td>
+</tr>
+<tr>
+<td>Use case</td>
+<td>Control signals</td>
+<td>Data streams</td>
+</tr>
+<tr>
+<td>Blocking</td>
+<td>Depends on usage</td>
+<td>Yes (read/write)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related-types">Related Types</h2>
+<ul>
+<li><a href="hls-ap-none.md">hls::ap_none</a> - Wire-only interface (no handshaking)</li>
+<li><a href="hls-stream.md">hls::stream</a> - FIFO-based streaming (for data)</li>
+<li><a href="hls-task.md">hls::task</a> - Data-driven task-level parallelism</li>
+<li><a href="ap-axis.md">ap_axiu</a> - AXI-Stream packets</li>
+</ul>
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/directio/ap_hs/">directio/ap_hs/</a></td>
+<td>Control-driven with valid() polling</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Data_driven/using_directio_hs_in_tasks/">using_directio_hs_in_tasks/</a></td>
+<td>Data-driven tasks with ap_hs</td>
+</tr>
+</tbody>
+</table>
+<h2 id="yaml-source">YAML Source</h2>
+<p>See <code>schema/types.yaml</code> - <code>hls::ap_hs</code> entry for machine-readable definition.</p>
+    </main>
+</body>
+</html>

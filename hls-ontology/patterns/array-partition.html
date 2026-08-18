@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Array Partition - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="array-partition">Array Partition</h1>
+<p>Partition arrays into smaller arrays or individual elements to enable parallel access. Critical for achieving high throughput when loops access multiple array elements per iteration.</p>
+<h2 id="overview">Overview</h2>
+<p>Arrays in HLS default to BRAM (Block RAM) with limited ports (typically 2). When a loop is unrolled or pipelined with multiple accesses per cycle, memory bandwidth becomes the bottleneck. ARRAY_PARTITION splits arrays into multiple banks or registers, enabling parallel access.</p>
+<div class="highlight"><pre><span></span><code>WITHOUT PARTITION:                    WITH PARTITION:
+┌─────────────────────┐              ┌─────────────────────┐
+│  A[16] - Single BRAM │              │  A[16] → 4 banks    │
+│  ┌─────────────────┐│              │  ┌────┐ ┌────┐      │
+│  │ [0][1][2]...[15]││              │  │B0  │ │B1  │      │
+│  └─────────────────┘│              │  │0,4 │ │1,5 │      │
+│                     │              │  │8,12│ │9,13│      │
+│  1-2 accesses/cycle │              │  └────┘ └────┘      │
+└─────────────────────┘              │  ┌────┐ ┌────┐      │
+                                     │  │B2  │ │B3  │      │
+                                     │  │2,6 │ │3,7 │      │
+                                     │  │10, │ │11, │      │
+                                     │  │14  │ │15  │      │
+                                     │  └────┘ └────┘      │
+                                     │  4 accesses/cycle   │
+                                     └─────────────────────┘
+</code></pre></div>
+
+<h2 id="key-constructs">Key Constructs</h2>
+<table>
+<thead>
+<tr>
+<th>Construct</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#pragma HLS ARRAY_PARTITION variable=A complete</code></td>
+<td>Partition into individual registers</td>
+</tr>
+<tr>
+<td><code>#pragma HLS ARRAY_PARTITION variable=A cyclic factor=N</code></td>
+<td>Interleaved partitioning</td>
+</tr>
+<tr>
+<td><code>#pragma HLS ARRAY_PARTITION variable=A block factor=N</code></td>
+<td>Contiguous block partitioning</td>
+</tr>
+<tr>
+<td><code>dim=N</code></td>
+<td>Which dimension to partition (for multi-dimensional arrays)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="syntax">Syntax</h2>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS ARRAY_PARTITION variable=&lt;name&gt; [type] [factor=&lt;N&gt;] [dim=&lt;N&gt;]</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>variable</code></td>
+<td>Array to partition</td>
+</tr>
+<tr>
+<td><code>complete</code></td>
+<td>Fully partition into individual elements (registers)</td>
+</tr>
+<tr>
+<td><code>cyclic</code></td>
+<td>Interleaved distribution (card-dealing pattern)</td>
+</tr>
+<tr>
+<td><code>block</code></td>
+<td>Contiguous chunks</td>
+</tr>
+<tr>
+<td><code>factor</code></td>
+<td>Number of partitions (for cyclic/block)</td>
+</tr>
+<tr>
+<td><code>dim</code></td>
+<td>Dimension to partition (1, 2, ... or 0 for all)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="partition-types">Partition Types</h2>
+<h3 id="complete-partitioning">Complete Partitioning</h3>
+<p>Fully partition into individual elements. Each element becomes a separate register, enabling simultaneous access to ALL elements.</p>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="mi">16</span><span class="p">];</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=A complete</span>
+<span class="c1">// Creates 16 separate registers: A_0, A_1, ..., A_15</span>
+<span class="c1">// Can access all 16 in same cycle</span>
+</code></pre></div>
+
+<p><strong>When to Use:</strong>
+- Small arrays (&lt; ~64 elements)
+- Need access to any element at any time
+- Full inner loop unroll</p>
+<p><strong>Resource Impact:</strong> High - one register (flip-flops) per element</p>
+<hr />
+<h3 id="cyclic-partitioning">Cyclic Partitioning</h3>
+<p>Interleaved distribution - like <strong>dealing cards to players</strong>. Element <code>i</code> goes to partition <code>(i % factor)</code>. Consecutive elements go to different partitions.</p>
+<p><strong>Formula:</strong> <code>partition_index = element_index % factor</code></p>
+<div class="highlight"><pre><span></span><code>A[16] with factor=4 (4 partitions):
+
+Original: [0][1][2][3][4][5][6][7][8][9][10][11][12][13][14][15]
+           ↓  ↓  ↓  ↓  ↓  ↓  ↓  ↓  ↓  ↓   ↓   ↓   ↓   ↓   ↓   ↓
+
+Cyclic factor=4 &quot;deals&quot; like cards:
+Bank 0: [0]         [4]         [8]          [12]     (i%4 = 0)
+Bank 1:     [1]         [5]         [9]          [13] (i%4 = 1)
+Bank 2:         [2]         [6]         [10]          [14] (i%4 = 2)
+Bank 3:             [3]         [7]         [11]          [15] (i%4 = 3)
+</code></pre></div>
+
+<p><strong>When to Use:</strong>
+- Access pattern is <strong>consecutive elements</strong>: <code>A[i], A[i+1], A[i+2], A[i+3]</code>
+- Loop accessing adjacent elements in parallel
+- Partial UNROLL with consecutive access</p>
+<p><strong>Example Use Case:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS UNROLL factor=4</span>
+<span class="w">    </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">3</span><span class="p">];</span><span class="w">  </span><span class="c1">// Consecutive access</span>
+<span class="p">}</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=A cyclic factor=4</span>
+<span class="c1">// A[i], A[i+1], A[i+2], A[i+3] go to banks 0,1,2,3 → no conflict!</span>
+</code></pre></div>
+
+<hr />
+<h3 id="block-partitioning">Block Partitioning</h3>
+<p>Contiguous chunks - array divided into equal-sized blocks. Element <code>i</code> goes to partition <code>(i / chunk_size)</code>. Each partition holds consecutive elements.</p>
+<p><strong>Formula:</strong> <code>partition_index = element_index / chunk_size</code>, where <code>chunk_size = N/factor</code></p>
+<div class="highlight"><pre><span></span><code>A[16] with factor=4 (4 partitions, chunk_size=4):
+
+Original: [0][1][2][3][4][5][6][7][8][9][10][11][12][13][14][15]
+           └──────┬─────┘└──────┬─────┘└───────┬─────┘└───────┬──────┘
+
+Block factor=4:
+Bank 0: [0][1][2][3]        (indices 0-3)
+Bank 1: [4][5][6][7]        (indices 4-7)
+Bank 2: [8][9][10][11]      (indices 8-11)
+Bank 3: [12][13][14][15]    (indices 12-15)
+</code></pre></div>
+
+<p><strong>When to Use:</strong>
+- Access pattern is <strong>strided</strong>: <code>A[0], A[4], A[8], A[12]</code>
+- Processing different regions of array in parallel
+- UNROLL with strided access</p>
+<p><strong>Example Use Case:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS UNROLL</span>
+<span class="w">    </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="mi">4</span><span class="p">];</span><span class="w">  </span><span class="c1">// Strided access: A[0], A[4], A[8], A[12]</span>
+<span class="p">}</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=A block factor=4</span>
+<span class="c1">// A[0], A[4], A[8], A[12] go to banks 0,1,2,3 → no conflict!</span>
+</code></pre></div>
+
+<hr />
+<h2 id="cyclic-vs-block-decision">Cyclic vs Block Decision</h2>
+<p>The key difference is <strong>HOW elements are distributed</strong> to partitions:
+- <strong>CYCLIC:</strong> interleaved (<code>i % F</code>) - consecutive elements in <strong>different</strong> banks
+- <strong>BLOCK:</strong> contiguous (<code>i / chunk</code>) - consecutive elements in <strong>same</strong> bank</p>
+<h3 id="decision-guide">Decision Guide</h3>
+<p>Ask: <strong>"What indices will I access simultaneously in one iteration?"</strong></p>
+<div class="highlight"><pre><span></span><code>If accessing A[i], A[i+1], A[i+2], A[i+3] (consecutive):
+  → Use CYCLIC - these go to 4 different banks
+
+If accessing A[0], A[4], A[8], A[12] (strided by chunk_size):
+  → Use BLOCK - these go to 4 different banks
+</code></pre></div>
+
+<h3 id="visual-comparison">Visual Comparison</h3>
+<div class="highlight"><pre><span></span><code>Array A[16], factor=4:
+
+CYCLIC (i % 4):                    BLOCK (i / 4):
+Bank 0: [0] [4] [8] [12]           Bank 0: [0] [1] [2] [3]
+Bank 1: [1] [5] [9] [13]           Bank 1: [4] [5] [6] [7]
+Bank 2: [2] [6] [10] [14]          Bank 2: [8] [9] [10] [11]
+Bank 3: [3] [7] [11] [15]          Bank 3: [12] [13] [14] [15]
+
+A[0..3] access:                    A[0..3] access:
+  → 4 different banks (good!)        → ALL in Bank 0 (conflict!)
+
+A[0,4,8,12] access:               A[0,4,8,12] access:
+  → ALL in Bank 0 (conflict!)        → 4 different banks (good!)
+</code></pre></div>
+
+<hr />
+<h2 id="dimension-explanation-dim1-vs-dim2">Dimension Explanation (dim=1 vs dim=2)</h2>
+<p>For 2D arrays, <code>dim</code> specifies <strong>which dimension to slice</strong>.</p>
+<p>Think of it as: "partition along dimension N" = "slice perpendicular to dimension N"</p>
+<h3 id="dim-meanings">dim Meanings</h3>
+<table>
+<thead>
+<tr>
+<th>dim</th>
+<th>Meaning</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dim=0</code></td>
+<td>Partition ALL dimensions</td>
+<td>Complete equivalent for multi-dimensional</td>
+</tr>
+<tr>
+<td><code>dim=1</code></td>
+<td>Partition FIRST dimension (rows)</td>
+<td>Creates multiple row-banks</td>
+</tr>
+<tr>
+<td><code>dim=2</code></td>
+<td>Partition SECOND dimension (columns)</td>
+<td>Creates multiple column-banks</td>
+</tr>
+</tbody>
+</table>
+<h3 id="visual-explanation">Visual Explanation</h3>
+<p>For a 4x4 matrix <code>M[4][4]</code> (M[row][col]):</p>
+<div class="highlight"><pre><span></span><code>Original: M[4][4]
+
+    Col 0  Col 1  Col 2  Col 3
+Row 0: [0,0] [0,1] [0,2] [0,3]
+Row 1: [1,0] [1,1] [1,2] [1,3]
+Row 2: [2,0] [2,1] [2,2] [2,3]
+Row 3: [3,0] [3,1] [3,2] [3,3]
+</code></pre></div>
+
+<h4 id="dim1-partition-rows">dim=1 (Partition Rows)</h4>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS ARRAY_PARTITION variable=M complete dim=1</span>
+</code></pre></div>
+
+<p>Slices horizontally - each row becomes a separate bank:</p>
+<div class="highlight"><pre><span></span><code>Bank 0: [0,0] [0,1] [0,2] [0,3]  ← Row 0
+Bank 1: [1,0] [1,1] [1,2] [1,3]  ← Row 1
+Bank 2: [2,0] [2,1] [2,2] [2,3]  ← Row 2
+Bank 3: [3,0] [3,1] [3,2] [3,3]  ← Row 3
+
+Result: 4 separate ROW arrays
+Can access M[0][j], M[1][j], M[2][j], M[3][j] in parallel
+(different rows, same column)
+</code></pre></div>
+
+<p><strong>Use when:</strong> Accessing <strong>column-wise</strong> - same column, different rows</p>
+<h4 id="dim2-partition-columns">dim=2 (Partition Columns)</h4>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS ARRAY_PARTITION variable=M complete dim=2</span>
+</code></pre></div>
+
+<p>Slices vertically - each column becomes a separate bank:</p>
+<div class="highlight"><pre><span></span><code>Bank 0  Bank 1  Bank 2  Bank 3
+ [0,0]   [0,1]   [0,2]   [0,3]
+ [1,0]   [1,1]   [1,2]   [1,3]
+ [2,0]   [2,1]   [2,2]   [2,3]
+ [3,0]   [3,1]   [3,2]   [3,3]
+   ↓       ↓       ↓       ↓
+ Col 0   Col 1   Col 2   Col 3
+
+Result: 4 separate COLUMN arrays
+Can access M[i][0], M[i][1], M[i][2], M[i][3] in parallel
+(same row, different columns)
+</code></pre></div>
+
+<p><strong>Use when:</strong> Accessing <strong>row-wise</strong> - same row, different columns</p>
+<h3 id="access-pattern-to-dim-mapping">Access Pattern to dim Mapping</h3>
+<table>
+<thead>
+<tr>
+<th>Access Pattern</th>
+<th>Use dim</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Same row, different columns</td>
+<td><code>dim=2</code></td>
+<td><code>M[i][0], M[i][1], M[i][2], M[i][3]</code></td>
+</tr>
+<tr>
+<td>Different rows, same column</td>
+<td><code>dim=1</code></td>
+<td><code>M[0][j], M[1][j], M[2][j], M[3][j]</code></td>
+</tr>
+<tr>
+<td>Both directions</td>
+<td><code>dim=0</code> or both</td>
+<td>Full partition</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="matrix-multiplication-example">Matrix Multiplication Example</h2>
+<div class="highlight"><pre><span></span><code><span class="c1">// C[i][j] += A[i][k] * B[k][j]</span>
+<span class="c1">// Inner loop over k unrolled</span>
+
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">MAT_B_COLS</span><span class="p">;</span><span class="w"> </span><span class="n">k</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS UNROLL</span>
+<span class="w">    </span><span class="n">result</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">B</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">col</span><span class="p">];</span><span class="w">  </span><span class="c1">// k varies</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Analysis:</strong>
+- <code>A[row][k]</code>: same row, different columns (k varies) → Access along row
+- <code>B[k][col]</code>: different rows, same column (k varies) → Access along column</p>
+<p><strong>Partitioning:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS ARRAY_PARTITION variable=A complete dim=2  </span><span class="c1">// Columns for row access</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=B complete dim=1  </span><span class="c1">// Rows for column access</span>
+</code></pre></div>
+
+<p>From <a href="../../Vitis-HLS-Introductory-Examples/Array/array_partition_complete/matmul_partition.cpp">Array/array_partition_complete/matmul_partition.cpp</a>:</p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">matmul_partition</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">MAT_A_ROWS</span><span class="p">][</span><span class="n">MAT_A_COLS</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">B</span><span class="p">[</span><span class="n">MAT_B_ROWS</span><span class="p">][</span><span class="n">MAT_B_COLS</span><span class="p">],</span>
+<span class="w">                      </span><span class="kt">int</span><span class="w"> </span><span class="n">AB</span><span class="p">[</span><span class="n">MAT_A_ROWS</span><span class="p">][</span><span class="n">MAT_B_COLS</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=A complete dim=2  </span><span class="c1">// Partition columns of A</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=B complete dim=1  </span><span class="c1">// Partition rows of B</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">MAT_A_ROWS</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">MAT_B_COLS</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="w">            </span><span class="kt">int</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">MAT_B_COLS</span><span class="p">;</span><span class="w"> </span><span class="n">k</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">result</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">B</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">];</span><span class="w">  </span><span class="c1">// k varies: row access on A, column access on B</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="n">AB</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">result</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="code-generation-guidelines">Code Generation Guidelines</h2>
+<h3 id="complete-partition-template">Complete Partition Template</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">func</span><span class="p">(</span><span class="n">data_t</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">data_t</span><span class="w"> </span><span class="n">B</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">data_t</span><span class="w"> </span><span class="n">C</span><span class="p">[</span><span class="n">N</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=A complete</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=B complete</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=C complete</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS UNROLL  </span><span class="c1">// Full unroll matches complete partition</span>
+<span class="w">        </span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">B</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="factor-partition-template">Factor Partition Template</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">func</span><span class="p">(</span><span class="n">data_t</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">data_t</span><span class="w"> </span><span class="n">B</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">data_t</span><span class="w"> </span><span class="n">C</span><span class="p">[</span><span class="n">N</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=A cyclic factor=FACTOR  </span><span class="c1">// Or block</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=B cyclic factor=FACTOR</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=C cyclic factor=FACTOR</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">FACTOR</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">FACTOR</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS UNROLL  </span><span class="c1">// Unroll factor matches partition factor</span>
+<span class="w">            </span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">B</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">j</span><span class="p">];</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="2d-array-template">2D Array Template</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">func</span><span class="p">(</span><span class="n">data_t</span><span class="w"> </span><span class="n">M</span><span class="p">[</span><span class="n">ROWS</span><span class="p">][</span><span class="n">COLS</span><span class="p">],</span><span class="w"> </span><span class="n">data_t</span><span class="w"> </span><span class="n">out</span><span class="p">[</span><span class="n">ROWS</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=M complete dim=2  </span><span class="c1">// Partition columns</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">ROWS</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">data_t</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">COLS</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS UNROLL  </span><span class="c1">// Access M[i][0..COLS-1] in parallel</span>
+<span class="w">            </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">];</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sum</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="key-constraints">Key Constraints</h3>
+<table>
+<thead>
+<tr>
+<th>Constraint</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Match factor to unroll</td>
+<td><code>UNROLL factor=N</code> → <code>ARRAY_PARTITION factor=N</code></td>
+</tr>
+<tr>
+<td>Access pattern</td>
+<td>Cyclic for consecutive, Block for strided</td>
+</tr>
+<tr>
+<td>Complete partition</td>
+<td>Only for small arrays (resources scale with size)</td>
+</tr>
+<tr>
+<td>Multi-dimensional</td>
+<td>Choose dim based on which index varies in parallel access</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="test-bench-generation-guidelines">Test Bench Generation Guidelines</h2>
+<h3 id="test-bench-template">Test Bench Template</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;dut.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">data_t</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">B</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">C</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+<span class="w">    </span><span class="n">data_t</span><span class="w"> </span><span class="n">expected</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+
+<span class="w">    </span><span class="c1">// Initialize</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="p">;</span>
+<span class="w">        </span><span class="n">B</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">i</span><span class="p">;</span>
+<span class="w">        </span><span class="n">expected</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">B</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w">  </span><span class="c1">// Golden reference</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Execute DUT</span>
+<span class="w">    </span><span class="n">func</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">B</span><span class="p">,</span><span class="w"> </span><span class="n">C</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Verify</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">pass</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">expected</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Mismatch at &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; != &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">expected</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">            </span><span class="n">pass</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="p">(</span><span class="n">pass</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">&quot;Test PASSED&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;Test FAILED&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">pass</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="optimization-guidance-for-agents">Optimization Guidance for Agents</h2>
+<h3 id="when-to-apply-this-pattern">When to Apply This Pattern</h3>
+<div class="highlight"><pre><span></span><code>Decision tree:
+├── Loop unrolled or pipelined with multiple array accesses per cycle?
+│   ├── Yes → Are accesses to same array in same cycle?
+│   │         ├── Yes → Getting II violation due to memory?
+│   │         │         ├── Yes → Need to partition
+│   │         │         │         ├── Small array (&lt;64) → complete
+│   │         │         │         └── Large array → cyclic or block based on access
+│   │         │         └── No → Check if partition would help
+│   │         └── No (different arrays) → Partition each as needed
+│   └── No → Partition likely not needed
+</code></pre></div>
+
+<h3 id="partition-type-selection">Partition Type Selection</h3>
+<table>
+<thead>
+<tr>
+<th>Access Pattern</th>
+<th>Partition Type</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Consecutive: <code>A[i], A[i+1], A[i+2]...</code></td>
+<td><code>cyclic</code></td>
+<td>Sliding window, sequential processing</td>
+</tr>
+<tr>
+<td>Strided: <code>A[0], A[N/4], A[N/2]...</code></td>
+<td><code>block</code></td>
+<td>Parallel region processing</td>
+</tr>
+<tr>
+<td>Random/all: any element any time</td>
+<td><code>complete</code></td>
+<td>Small lookup tables</td>
+</tr>
+</tbody>
+</table>
+<h3 id="performance-trade-offs">Performance Trade-offs</h3>
+<table>
+<thead>
+<tr>
+<th>Choice</th>
+<th>Benefit</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>complete</code></td>
+<td>Maximum parallelism</td>
+<td>High register usage</td>
+</tr>
+<tr>
+<td><code>cyclic factor=N</code></td>
+<td>N parallel accesses</td>
+<td>N memory banks</td>
+</tr>
+<tr>
+<td><code>block factor=N</code></td>
+<td>N parallel accesses</td>
+<td>N memory banks</td>
+</tr>
+<tr>
+<td>No partition</td>
+<td>Minimum resources</td>
+<td>Limited to 1-2 accesses/cycle</td>
+</tr>
+</tbody>
+</table>
+<h3 id="common-pitfalls">Common Pitfalls</h3>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Symptom</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wrong partition type</td>
+<td>II violation persists</td>
+<td>Match type to access pattern (cyclic vs block)</td>
+</tr>
+<tr>
+<td>Factor too small</td>
+<td>Still getting memory conflicts</td>
+<td>Increase factor to match unroll factor</td>
+</tr>
+<tr>
+<td>Wrong dim for 2D array</td>
+<td>II violation on specific access</td>
+<td>Check which index varies; partition that dimension</td>
+</tr>
+<tr>
+<td>Partitioning M-AXI array</td>
+<td>No effect</td>
+<td>External memory can't be partitioned; use local buffer</td>
+</tr>
+<tr>
+<td>Complete on large array</td>
+<td>Resource explosion</td>
+<td>Use factor partition instead</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related-patterns">Related Patterns</h2>
+<ul>
+<li><a href="perfect-loop-restructuring.md">perfect-loop-restructuring</a> - Loop optimization for pipelining</li>
+<li><a href="free-running-pipeline.md">free-running-pipeline</a> - Function-level pipeline needs ARRAY_PARTITION</li>
+</ul>
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Array/array_partition_complete/matmul_partition.cpp">array_partition_complete/matmul_partition.cpp</a></td>
+<td>Complete partition for matrix multiply</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Array/array_partition_block_cyclic/matmul_partition.cpp">array_partition_block_cyclic/matmul_partition.cpp</a></td>
+<td>Block and cyclic partitioning comparison</td>
+</tr>
+</tbody>
+</table>
+    </main>
+</body>
+</html>

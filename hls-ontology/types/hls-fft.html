@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hls::fft - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="hlsfft">hls::fft</h1>
+<p>Vitis HLS FFT IP wrapper for Fast Fourier Transform operations. Provides a highly optimized, pre-built FFT implementation with configurable architecture, scaling, and interface options.</p>
+<h2 id="overview">Overview</h2>
+<p>The <code>hls::fft</code> function wraps the Xilinx FFT IP core for use in Vitis HLS designs. It supports forward and inverse transforms, multiple architectures, and both array and stream interfaces.</p>
+<div class="highlight"><pre><span></span><code>Time Domain                    Frequency Domain
+   xn[N]     ─────► FFT ─────►    xk[N]
+(complex)                       (complex)
+</code></pre></div>
+
+<p><strong>Two variants available:</strong>
+- <strong>Basic FFT</strong>: Single sample per cycle, fixed-point or float, full runtime control (direction, scaling, nfft)
+- <strong>SSR FFT</strong>: Super Sample Rate (2x or 4x throughput), native float only, simplified API</p>
+<h2 id="header">Header</h2>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_fft.h&quot;</span>
+</code></pre></div>
+
+<hr />
+<h2 id="basic-fft-ssr1">Basic FFT (SSR=1)</h2>
+<h3 id="syntax">Syntax</h3>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">CONFIG</span><span class="o">&gt;</span>
+<span class="kt">void</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">fft</span><span class="p">(</span>
+<span class="w">    </span><span class="n">TI</span><span class="w"> </span><span class="n">xn</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w">           </span><span class="c1">// Input: time-domain samples (or hls::stream&lt;TI&gt;&amp;)</span>
+<span class="w">    </span><span class="n">TO</span><span class="w"> </span><span class="n">xk</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w">           </span><span class="c1">// Output: frequency-domain bins (or hls::stream&lt;TO&gt;&amp;)</span>
+<span class="w">    </span><span class="n">TDir</span><span class="w"> </span><span class="n">direction</span><span class="p">,</span><span class="w">     </span><span class="c1">// 1=FFT (forward), 0=IFFT (inverse)</span>
+<span class="w">    </span><span class="n">TScale</span><span class="w"> </span><span class="n">scaling</span><span class="p">,</span><span class="w">     </span><span class="c1">// Scaling schedule</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">nfft</span><span class="p">,</span><span class="w">           </span><span class="c1">// Runtime FFT size (-1 for fixed)</span>
+<span class="w">    </span><span class="kt">bool</span><span class="o">*</span><span class="w"> </span><span class="n">status</span><span class="w">        </span><span class="c1">// Output: overflow flag</span>
+<span class="p">);</span>
+</code></pre></div>
+
+<h3 id="configuration">Configuration</h3>
+<p>Basic FFT is configured via a struct that inherits from <code>hls::ip_fft::params_t</code>. Use the <code>OVERRIDE()</code> macro to customize parameters.</p>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">my_fft_config</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">ip_fft</span><span class="o">::</span><span class="n">params_t</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">OVERRIDE</span><span class="p">(</span><span class="n">input_width</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">16</span><span class="p">;</span>
+<span class="w">    </span><span class="n">OVERRIDE</span><span class="p">(</span><span class="n">output_width</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">16</span><span class="p">;</span>
+<span class="w">    </span><span class="n">OVERRIDE</span><span class="p">(</span><span class="n">max_nfft</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">                          </span><span class="c1">// log2(1024) = 10</span>
+<span class="w">    </span><span class="n">OVERRIDE</span><span class="p">(</span><span class="n">arch</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">ip_fft</span><span class="o">::</span><span class="n">pipelined_streaming_io</span><span class="p">;</span>
+<span class="w">    </span><span class="n">OVERRIDE</span><span class="p">(</span><span class="n">scaling</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">ip_fft</span><span class="o">::</span><span class="n">scaled</span><span class="p">;</span>
+<span class="w">    </span><span class="n">OVERRIDE</span><span class="p">(</span><span class="n">output_ordering</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">ip_fft</span><span class="o">::</span><span class="n">natural_order</span><span class="p">;</span>
+<span class="w">    </span><span class="n">OVERRIDE</span><span class="p">(</span><span class="n">config_width</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">16</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<h3 id="configuration-parameters">Configuration Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Range</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>input_width</code></td>
+<td>int</td>
+<td>8-34 (32 for float)</td>
+<td>Input data width</td>
+</tr>
+<tr>
+<td><code>output_width</code></td>
+<td>int</td>
+<td>8-34</td>
+<td>Output data width</td>
+</tr>
+<tr>
+<td><code>max_nfft</code></td>
+<td>int</td>
+<td>3-16</td>
+<td>log2(max FFT length)</td>
+</tr>
+<tr>
+<td><code>has_nfft</code></td>
+<td>bool</td>
+<td>true/false</td>
+<td>Enable runtime FFT size</td>
+</tr>
+<tr>
+<td><code>arch</code></td>
+<td>enum</td>
+<td>See below</td>
+<td>FFT architecture</td>
+</tr>
+<tr>
+<td><code>scaling</code></td>
+<td>enum</td>
+<td>See below</td>
+<td>Scaling mode</td>
+</tr>
+<tr>
+<td><code>output_ordering</code></td>
+<td>enum</td>
+<td>See below</td>
+<td>Output sample order</td>
+</tr>
+<tr>
+<td><code>rounding</code></td>
+<td>enum</td>
+<td>See below</td>
+<td>Rounding mode</td>
+</tr>
+</tbody>
+</table>
+<h3 id="architecture-options">Architecture Options</h3>
+<table>
+<thead>
+<tr>
+<th>Architecture</th>
+<th>Description</th>
+<th>Throughput</th>
+<th>Resources</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pipelined_streaming_io</code></td>
+<td>Continuous streaming (recommended)</td>
+<td>1 sample/cycle</td>
+<td>Higher</td>
+</tr>
+<tr>
+<td><code>radix_4_burst_io</code></td>
+<td>Burst I/O, radix-4</td>
+<td>Frame-based</td>
+<td>Lower</td>
+</tr>
+<tr>
+<td><code>radix_2_burst_io</code></td>
+<td>Burst I/O, radix-2</td>
+<td>Frame-based</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td><code>radix_2_lite_burst_io</code></td>
+<td>Smallest implementation</td>
+<td>Slowest</td>
+<td>Lowest</td>
+</tr>
+</tbody>
+</table>
+<h3 id="scaling-options">Scaling Options</h3>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scaled</code></td>
+<td>Divide by 2 at each stage (prevents overflow)</td>
+</tr>
+<tr>
+<td><code>unscaled</code></td>
+<td>No scaling (output grows)</td>
+</tr>
+<tr>
+<td><code>block_floating_point</code></td>
+<td>Dynamic scaling based on data</td>
+</tr>
+</tbody>
+</table>
+<h3 id="output-ordering">Output Ordering</h3>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>natural_order</code></td>
+<td>Output in natural frequency order (0, 1, 2, ...)</td>
+</tr>
+<tr>
+<td><code>bit_reversed_order</code></td>
+<td>Output in bit-reversed order (saves reordering logic)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="data-types">Data Types</h3>
+<p>Basic FFT supports both fixed-point and floating-point:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Fixed-Point (Recommended for Basic FFT)</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">16</span><span class="p">,</span><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">data_in_t</span><span class="p">;</span><span class="w">              </span><span class="c1">// Q1.15 format</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">16</span><span class="p">,</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">data_out_t</span><span class="p">;</span><span class="w">             </span><span class="c1">// Extra bit for growth</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">complex</span><span class="o">&lt;</span><span class="n">data_in_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">cmpxDataIn</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">complex</span><span class="o">&lt;</span><span class="n">data_out_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">cmpxDataOut</span><span class="p">;</span>
+
+<span class="c1">// Floating-Point</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">complex</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">cmpxDataIn</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">complex</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">cmpxDataOut</span><span class="p">;</span>
+</code></pre></div>
+
+<h3 id="interface-options">Interface Options</h3>
+<h4 id="array-interface">Array Interface</h4>
+<p>Use arrays with <code>#pragma HLS stream</code> for internal conversion to streaming:</p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">fft_top</span><span class="p">(</span><span class="n">cmpxDataIn</span><span class="w"> </span><span class="n">xn</span><span class="p">[</span><span class="n">FFT_LENGTH</span><span class="p">],</span><span class="w"> </span><span class="n">cmpxDataOut</span><span class="w"> </span><span class="n">xk</span><span class="p">[</span><span class="n">FFT_LENGTH</span><span class="p">],</span><span class="w"> </span><span class="p">...)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS interface ap_fifo depth=1024 port=xn,xk</span>
+<span class="cp">#pragma HLS stream variable=xn</span>
+<span class="cp">#pragma HLS stream variable=xk</span>
+<span class="cp">#pragma HLS dataflow</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">fft</span><span class="o">&lt;</span><span class="n">config1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">xn</span><span class="p">,</span><span class="w"> </span><span class="n">xk</span><span class="p">,</span><span class="w"> </span><span class="n">dir</span><span class="p">,</span><span class="w"> </span><span class="n">scaling</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">status</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="stream-interface">Stream Interface</h4>
+<p>Use native <code>hls::stream</code> for direct streaming:</p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">fft_top</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">cmpxDataIn</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">xn</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">cmpxDataOut</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">xk</span><span class="p">,</span><span class="w"> </span><span class="p">...)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS interface ap_fifo depth=1024 port=xn,xk</span>
+<span class="cp">#pragma HLS dataflow</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">fft</span><span class="o">&lt;</span><span class="n">config1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">xn</span><span class="p">,</span><span class="w"> </span><span class="n">xk</span><span class="p">,</span><span class="w"> </span><span class="n">dir</span><span class="p">,</span><span class="w"> </span><span class="n">scaling</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">status</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="runtime-parameters">Runtime Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>direction</code></td>
+<td>ap_uint&lt;1&gt;</td>
+<td>1=FFT (forward), 0=IFFT (inverse)</td>
+</tr>
+<tr>
+<td><code>scaling</code></td>
+<td>ap_uint&lt;15&gt;</td>
+<td>Scaling schedule (e.g., 0x5555 for ÷2 per stage)</td>
+</tr>
+<tr>
+<td><code>nfft</code></td>
+<td>int</td>
+<td>-1 for fixed size, or log2(size) for runtime config</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="ssr-fft-super-sample-rate">SSR FFT (Super Sample Rate)</h2>
+<p>SSR FFT processes 2 or 4 samples per clock cycle for higher throughput. It uses a different base class and simplified API.</p>
+<h3 id="syntax_1">Syntax</h3>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">CONFIG</span><span class="o">&gt;</span>
+<span class="kt">void</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">fft</span><span class="p">(</span>
+<span class="w">    </span><span class="n">TI</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w">           </span><span class="c1">// Input array (or hls::stream&lt;hls::vector&lt;TI, SSR&gt;&gt;&amp;)</span>
+<span class="w">    </span><span class="n">TO</span><span class="w"> </span><span class="n">out</span><span class="p">[</span><span class="n">N</span><span class="p">]</span><span class="w">           </span><span class="c1">// Output array (or hls::stream&lt;hls::vector&lt;TO, SSR&gt;&gt;&amp;)</span>
+<span class="p">);</span>
+<span class="c1">// Note: No direction, scaling, nfft, status parameters for SSR</span>
+</code></pre></div>
+
+<h3 id="configuration_1">Configuration</h3>
+<p>SSR FFT uses <code>hls::ip_fft::ssr_params_t</code> as the base class:</p>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">my_ssr_config</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">ip_fft</span><span class="o">::</span><span class="n">ssr_params_t</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">super_sample_rate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">  </span><span class="c1">// 2 or 4 samples/cycle</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">use_native_float</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w">    </span><span class="c1">// Required for SSR</span>
+<span class="w">    </span><span class="n">OVERRIDE</span><span class="p">(</span><span class="n">systolicfft_inv</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span><span class="w">            </span><span class="c1">// false=FFT, true=IFFT</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">config_width</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">16</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">max_nfft</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">          </span><span class="c1">// log2(1024)</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<h3 id="ssr-configuration-parameters">SSR Configuration Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Values</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>super_sample_rate</code></td>
+<td>unsigned</td>
+<td>2 or 4</td>
+<td>Samples processed per clock cycle</td>
+</tr>
+<tr>
+<td><code>use_native_float</code></td>
+<td>bool</td>
+<td>true</td>
+<td><strong>Required</strong> - must be true for SSR</td>
+</tr>
+<tr>
+<td><code>systolicfft_inv</code></td>
+<td>bool</td>
+<td>true/false</td>
+<td>Control FFT/IFFT mode (false=FFT, true=IFFT)</td>
+</tr>
+<tr>
+<td><code>config_width</code></td>
+<td>unsigned</td>
+<td>16</td>
+<td>Configuration width</td>
+</tr>
+<tr>
+<td><code>max_nfft</code></td>
+<td>unsigned</td>
+<td>3-16</td>
+<td>log2(max FFT length)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="data-types_1">Data Types</h3>
+<p>SSR requires native 32-bit float:</p>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">complex</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">cmpxDataIn</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">complex</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">cmpxDataOut</span><span class="p">;</span>
+
+<span class="c1">// For stream interface: use hls::vector</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">FFT_SSR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">cmpxDataIn</span><span class="p">,</span><span class="w"> </span><span class="n">FFT_SSR</span><span class="o">&gt;</span><span class="w"> </span><span class="n">vec_in_t</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">cmpxDataOut</span><span class="p">,</span><span class="w"> </span><span class="n">FFT_SSR</span><span class="o">&gt;</span><span class="w"> </span><span class="n">vec_out_t</span><span class="p">;</span>
+</code></pre></div>
+
+<h3 id="interface-options_1">Interface Options</h3>
+<h4 id="ssr-array-interface">SSR Array Interface</h4>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">fft_top</span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">direction</span><span class="p">,</span><span class="w"> </span><span class="n">cmpxDataIn</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">FFT_LENGTH</span><span class="p">],</span>
+<span class="w">             </span><span class="n">cmpxDataOut</span><span class="w"> </span><span class="n">out</span><span class="p">[</span><span class="n">FFT_LENGTH</span><span class="p">],</span><span class="w"> </span><span class="kt">bool</span><span class="o">*</span><span class="w"> </span><span class="n">ovflo</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS interface ap_hs port=direction</span>
+<span class="cp">#pragma HLS dataflow</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">fft</span><span class="o">&lt;</span><span class="n">ssr_config</span><span class="o">&gt;</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">);</span><span class="w">  </span><span class="c1">// Simplified call</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="ssr-stream-interface">SSR Stream Interface</h4>
+<p>Uses <code>hls::stream&lt;hls::vector&lt;complex, SSR&gt;&gt;</code> for SSR samples per transfer:</p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">fft_top</span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">direction</span><span class="p">,</span>
+<span class="w">             </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vec_in_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">             </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vec_out_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span>
+<span class="w">             </span><span class="kt">bool</span><span class="o">*</span><span class="w"> </span><span class="n">ovflo</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS interface ap_hs port=direction</span>
+<span class="cp">#pragma HLS interface ap_fifo depth=1024 port=in,out</span>
+<span class="cp">#pragma HLS dataflow</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">fft</span><span class="o">&lt;</span><span class="n">ssr_config</span><span class="o">&gt;</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">);</span><span class="w">  </span><span class="c1">// 2 or 4 samples per cycle</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="ssr-complete-example">SSR Complete Example</h3>
+<h4 id="header-fft_toph">Header (fft_top.h)</h4>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_fft.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_vector.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;complex&gt;</span>
+
+<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">  </span><span class="n">FFT_LENGTH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1024</span><span class="p">;</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">FFT_NFFT_MAX</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">FFT_CONFIG_WIDTH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">16</span><span class="p">;</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">  </span><span class="n">FFT_SSR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">complex</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">cmpxDataIn</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">complex</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">cmpxDataOut</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">cmpxDataIn</span><span class="p">,</span><span class="w"> </span><span class="n">FFT_SSR</span><span class="o">&gt;</span><span class="w"> </span><span class="n">vec_in_t</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">cmpxDataOut</span><span class="p">,</span><span class="w"> </span><span class="n">FFT_SSR</span><span class="o">&gt;</span><span class="w"> </span><span class="n">vec_out_t</span><span class="p">;</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">ssr_fft_config</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">ip_fft</span><span class="o">::</span><span class="n">ssr_params_t</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">super_sample_rate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FFT_SSR</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">use_native_float</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="n">OVERRIDE</span><span class="p">(</span><span class="n">systolicfft_inv</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">config_width</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FFT_CONFIG_WIDTH</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">max_nfft</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FFT_NFFT_MAX</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">fft_top</span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">direction</span><span class="p">,</span>
+<span class="w">             </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vec_in_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">             </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vec_out_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span>
+<span class="w">             </span><span class="kt">bool</span><span class="o">*</span><span class="w"> </span><span class="n">ovflo</span><span class="p">);</span>
+</code></pre></div>
+
+<h4 id="implementation-fft_topcpp">Implementation (fft_top.cpp)</h4>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;fft_top.h&quot;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">fft_top</span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">direction</span><span class="p">,</span>
+<span class="w">             </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vec_in_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">             </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">vec_out_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span>
+<span class="w">             </span><span class="kt">bool</span><span class="o">*</span><span class="w"> </span><span class="n">ovflo</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS interface ap_hs port=direction</span>
+<span class="cp">#pragma HLS interface ap_fifo depth=1 port=ovflo</span>
+<span class="cp">#pragma HLS interface ap_fifo depth=1024 port=in,out</span>
+<span class="cp">#pragma HLS dataflow</span>
+
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">fft</span><span class="o">&lt;</span><span class="n">ssr_fft_config</span><span class="o">&gt;</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="choosing-between-basic-and-ssr-fft">Choosing Between Basic and SSR FFT</h2>
+<table>
+<thead>
+<tr>
+<th>Criterion</th>
+<th>Basic FFT</th>
+<th>SSR FFT</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Throughput</strong></td>
+<td>1 sample/cycle</td>
+<td>2 or 4 samples/cycle</td>
+</tr>
+<tr>
+<td><strong>Data type</strong></td>
+<td>Fixed-point or float</td>
+<td>Float only (native)</td>
+</tr>
+<tr>
+<td><strong>Runtime control</strong></td>
+<td>Direction, scaling, size</td>
+<td>Direction only (via port)</td>
+</tr>
+<tr>
+<td><strong>Base class</strong></td>
+<td><code>hls::ip_fft::params_t</code></td>
+<td><code>hls::ip_fft::ssr_params_t</code></td>
+</tr>
+<tr>
+<td><strong>Stream type</strong></td>
+<td><code>hls::stream&lt;complex&gt;</code></td>
+<td><code>hls::stream&lt;hls::vector&lt;complex, SSR&gt;&gt;</code></td>
+</tr>
+<tr>
+<td><strong>Use when</strong></td>
+<td>Standard throughput, flexibility needed</td>
+<td>Need 2x-4x throughput</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="when-to-use">When to Use</h2>
+<ul>
+<li>Need optimized FFT/IFFT for signal processing</li>
+<li>OFDM modulation/demodulation</li>
+<li>Spectrum analysis</li>
+<li>Convolution via frequency domain</li>
+<li>Filter design and implementation</li>
+<li><strong>SSR specifically</strong>: High-throughput requirements (e.g., wideband systems)</li>
+</ul>
+<h2 id="when-not-to-use">When Not to Use</h2>
+<ul>
+<li>Very small transforms (&lt; 16 points) - use direct implementation</li>
+<li>Non-power-of-2 sizes - FFT IP requires power-of-2</li>
+<li>Need custom FFT algorithm (e.g., split-radix, prime-factor)</li>
+<li><strong>SSR</strong>: When fixed-point precision is required (SSR needs float)</li>
+</ul>
+<hr />
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="basic-fft">Basic FFT</h3>
+<ol>
+<li><strong>Use <code>pipelined_streaming_io</code></strong> for continuous throughput</li>
+<li><strong>Match input/output width</strong> to your precision requirements</li>
+<li><strong>Use <code>scaled</code> mode</strong> to prevent overflow in fixed-point</li>
+<li><strong>Apply <code>#pragma HLS DATAFLOW</code></strong> for streaming operation</li>
+<li><strong>Set FIFO depth to FFT_LENGTH</strong> for interface ports</li>
+</ol>
+<h3 id="ssr-fft">SSR FFT</h3>
+<ol>
+<li><strong>Always set <code>use_native_float = true</code></strong> - required for SSR</li>
+<li><strong>Use <code>hls::stream&lt;hls::vector&lt;T, SSR&gt;&gt;</code></strong> for stream interface</li>
+<li><strong>Control direction via a port</strong>, not function parameter</li>
+<li><strong>Remember the simplified API</strong> - no scaling/nfft parameters</li>
+</ol>
+<hr />
+<h2 id="common-pitfalls">Common Pitfalls</h2>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Symptom</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Missing DATAFLOW</td>
+<td>Poor throughput</td>
+<td>Add <code>#pragma HLS DATAFLOW</code></td>
+</tr>
+<tr>
+<td>FIFO depth too small</td>
+<td>Deadlock in simulation</td>
+<td>Set <code>depth=FFT_LENGTH</code></td>
+</tr>
+<tr>
+<td>Unscaled with fixed-point</td>
+<td>Overflow, wrong results</td>
+<td>Use <code>scaled</code> mode</td>
+</tr>
+<tr>
+<td>Missing STREAM pragma</td>
+<td>Not streaming</td>
+<td>Add <code>#pragma HLS stream</code> for arrays</td>
+</tr>
+<tr>
+<td><strong>SSR: Wrong base class</strong></td>
+<td>Compilation error</td>
+<td>Use <code>ssr_params_t</code> not <code>params_t</code></td>
+</tr>
+<tr>
+<td><strong>SSR: Missing use_native_float</strong></td>
+<td>Synthesis error</td>
+<td>Add <code>use_native_float = true</code></td>
+</tr>
+<tr>
+<td><strong>SSR: Wrong stream type</strong></td>
+<td>Data rate mismatch</td>
+<td>Use <code>hls::stream&lt;hls::vector&lt;T, SSR&gt;&gt;</code></td>
+</tr>
+<tr>
+<td><strong>SSR: Passing runtime params</strong></td>
+<td>Function signature error</td>
+<td>SSR uses simplified call</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>Example</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/DSP/fft/interface_array/">interface_array</a></td>
+<td>Basic FFT with array-based I/O</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/DSP/fft/interface_stream/">interface_stream</a></td>
+<td>Basic FFT with hls::stream interface</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/DSP/fft/interface_array_float_ssr2/">interface_array_float_ssr2</a></td>
+<td>SSR FFT with array interface (2 samples/cycle)</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/DSP/fft/interface_stream_float_ssr2/">interface_stream_float_ssr2</a></td>
+<td>SSR FFT with hls::stream<hls::vector> interface</td>
+</tr>
+</tbody>
+</table>
+<h2 id="related">Related</h2>
+<ul>
+<li><a href="hls-stream.md">hls::stream</a> - Streaming channels</li>
+<li><a href="hls-vector.md">hls::vector</a> - SIMD vectors (used for SSR streaming)</li>
+<li><a href="ap-fixed.md">ap_fixed</a> - Fixed-point types</li>
+<li><a href="../patterns/fft-usage.md">fft-usage pattern</a> - FFT usage pattern</li>
+</ul>
+    </main>
+</body>
+</html>

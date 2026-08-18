@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Struct Aggregation & Disaggregation - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="struct-aggregation-disaggregation">Struct Aggregation &amp; Disaggregation</h1>
+<p>How to handle C++ structs in HLS interfaces.</p>
+<h2 id="overview">Overview</h2>
+<p>When structs are used in HLS interfaces, you control how they map to hardware:</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Pragma</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Aggregate</strong></td>
+<td><code>#pragma HLS aggregate</code></td>
+<td>Pack all fields into single wide word</td>
+</tr>
+<tr>
+<td><strong>Disaggregate</strong></td>
+<td><code>#pragma HLS disaggregate</code></td>
+<td>Split into separate ports per field</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="aggregate">AGGREGATE</h2>
+<p>Pack struct fields into a single wide word for efficient transfer.</p>
+<h3 id="syntax">Syntax</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS aggregate variable=&lt;name&gt; [compact=&lt;mode&gt;]</span>
+</code></pre></div>
+
+<h3 id="compact-modes">compact Modes</h3>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Description</th>
+<th>Resulting Size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bit</code></td>
+<td>Pack to exact bit boundaries</td>
+<td>Minimum bits</td>
+</tr>
+<tr>
+<td><code>byte</code></td>
+<td>Align fields to byte boundaries</td>
+<td>Matches C layout</td>
+</tr>
+<tr>
+<td><code>auto</code></td>
+<td>HLS decides based on interface</td>
+<td>Varies</td>
+</tr>
+<tr>
+<td><code>none</code></td>
+<td>Pad to power-of-2</td>
+<td>Larger (M-AXI requirement)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="example-basic-aggregation">Example: Basic Aggregation</h3>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">A</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">foo</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span><span class="w">      </span><span class="c1">// 96 bits</span>
+<span class="w">    </span><span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">23</span><span class="o">&gt;</span><span class="w"> </span><span class="n">bar</span><span class="p">;</span><span class="w">  </span><span class="c1">// 23 bits</span>
+<span class="p">};</span><span class="w">                   </span><span class="c1">// Total: 119 bits</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">dut</span><span class="p">(</span><span class="n">A</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="n">N</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS interface ap_fifo port=arr</span>
+<span class="cp">#pragma HLS aggregate variable=arr</span>
+<span class="w">    </span><span class="c1">// Single 119-bit read per struct element</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">tmp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">        </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">tmp</span><span class="p">.</span><span class="n">foo</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">tmp</span><span class="p">.</span><span class="n">foo</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">tmp</span><span class="p">.</span><span class="n">foo</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">tmp</span><span class="p">.</span><span class="n">bar</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">sum</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="example-nested-structs-with-compact-modes">Example: Nested Structs with compact Modes</h3>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">m</span><span class="p">;</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">o</span><span class="p">;</span><span class="w"> </span><span class="p">};</span><span class="w">  </span><span class="c1">// 65 bits</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">S</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">p</span><span class="p">;</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">q</span><span class="p">;</span><span class="w"> </span><span class="p">};</span><span class="w">            </span><span class="c1">// 97 bits total</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">top</span><span class="p">(</span><span class="n">S</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">S</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">S</span><span class="w"> </span><span class="n">c</span><span class="p">[</span><span class="n">N</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS interface bram port=c</span>
+<span class="cp">#pragma HLS interface ap_memory port=a</span>
+<span class="cp">#pragma HLS aggregate variable=a compact=byte  </span><span class="c1">// 104 bits (bool→8 bits)</span>
+<span class="cp">#pragma HLS aggregate variable=c compact=byte  </span><span class="c1">// 104 bits</span>
+<span class="w">    </span><span class="c1">// b uses default compact=bit: 97 bits</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="hls-log-messages">HLS Log Messages</h3>
+<div class="highlight"><pre><span></span><code>INFO: [HLS 214-241] Aggregating fifo variable &#39;arr&#39; with compact=bit mode in 119-bits
+INFO: [HLS 214-241] Aggregating bram variable &#39;a&#39; with compact=byte mode in 104-bits
+</code></pre></div>
+
+<hr />
+<h2 id="disaggregate">DISAGGREGATE</h2>
+<p>Split struct into separate ports, one per field.</p>
+<h3 id="syntax_1">Syntax</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS disaggregate variable=&lt;name&gt;</span>
+</code></pre></div>
+
+<h3 id="example-split-axis-ports">Example: Split AXIS Ports</h3>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">A</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">c</span><span class="p">;</span><span class="w">  </span><span class="c1">// 8 bits</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w">   </span><span class="c1">// 32 bits</span>
+<span class="p">};</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">dut</span><span class="p">(</span><span class="n">A</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="n">out</span><span class="p">[</span><span class="n">N</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS interface axis port=in</span>
+<span class="cp">#pragma HLS interface axis port=out</span>
+<span class="cp">#pragma HLS disaggregate variable=in</span>
+<span class="cp">#pragma HLS disaggregate variable=out</span>
+<span class="w">    </span><span class="c1">// Creates 4 AXIS ports: in_c, in_i, out_c, out_i</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">c</span><span class="p">;</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">i</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="port-naming">Port Naming</h3>
+<p>Disaggregated ports are named: <code>&lt;variable&gt;_&lt;field&gt;_*</code></p>
+<div class="highlight"><pre><span></span><code>Original: dut(A in[N], A out[N])
+After:    in_c, in_i, out_c, out_i
+</code></pre></div>
+
+<hr />
+<h2 id="automatic-behaviors">Automatic Behaviors</h2>
+<h3 id="m-axi-auto-aggregation">M-AXI Auto-Aggregation</h3>
+<p>M-AXI interfaces <strong>automatically aggregate</strong> structs and pad to power-of-2 bytes:</p>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">A</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">foo</span><span class="p">;</span><span class="w"> </span><span class="kt">short</span><span class="w"> </span><span class="n">bar</span><span class="p">;</span><span class="w"> </span><span class="p">};</span><span class="w">  </span><span class="c1">// 24 bits (3 bytes)</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">dut</span><span class="p">(</span><span class="n">A</span><span class="o">*</span><span class="w"> </span><span class="n">arr</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS interface m_axi port=arr</span>
+<span class="w">    </span><span class="c1">// Automatically padded to 32 bits (4 bytes)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>No pragma needed</strong> - but watch for alignment issues!</p>
+<h3 id="stream-auto-disaggregation">Stream Auto-Disaggregation</h3>
+<p>Structs containing <code>hls::stream</code> are <strong>automatically disaggregated</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">A</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">s_in</span><span class="p">;</span><span class="w">  </span><span class="c1">// Needs stream interface</span>
+<span class="w">    </span><span class="kt">long</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="n">N</span><span class="p">];</span><span class="w">            </span><span class="c1">// Needs memory interface</span>
+<span class="p">};</span>
+
+<span class="kt">long</span><span class="w"> </span><span class="nf">dut</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">A</span><span class="o">&amp;</span><span class="w"> </span><span class="n">d</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// No pragma needed - auto-disaggregated</span>
+<span class="w">    </span><span class="c1">// Creates: d_s_in_* and d_arr_* ports</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="the-alignment-pitfall">The Alignment Pitfall</h2>
+<h3 id="problem">Problem</h3>
+<p>Non-power-of-2 struct sizes with M-AXI cause <strong>II violations</strong>.</p>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">A</span><span class="w"> </span><span class="p">{</span><span class="w">  </span><span class="c1">// 192 bits = 24 bytes (NOT power of 2!)</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">s_1</span><span class="p">,</span><span class="w"> </span><span class="n">s_2</span><span class="p">,</span><span class="w"> </span><span class="n">s_3</span><span class="p">,</span><span class="w"> </span><span class="n">s_4</span><span class="p">,</span><span class="w"> </span><span class="n">s_5</span><span class="p">,</span><span class="w"> </span><span class="n">s_6</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">dut</span><span class="p">(</span><span class="n">A</span><span class="w"> </span><span class="n">a_in</span><span class="p">[</span><span class="n">NUM</span><span class="p">],</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="n">a_out</span><span class="p">[</span><span class="n">NUM</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=a_in</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=a_out</span>
+<span class="w">    </span><span class="c1">// M-AXI pads to 256 bits (32 bytes)</span>
+<span class="w">    </span><span class="c1">// Software: 24 bytes, Hardware: 32 bytes</span>
+<span class="w">    </span><span class="c1">// Result: Address mismatch → II violations!</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="solution-1-alignas">Solution 1: alignas()</h3>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">alignas</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="p">{</span><span class="w">  </span><span class="c1">// Force 32-byte alignment</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">s_1</span><span class="p">,</span><span class="w"> </span><span class="n">s_2</span><span class="p">,</span><span class="w"> </span><span class="n">s_3</span><span class="p">,</span><span class="w"> </span><span class="n">s_4</span><span class="p">,</span><span class="w"> </span><span class="n">s_5</span><span class="p">,</span><span class="w"> </span><span class="n">s_6</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// Compiler pads to 256 bits (32 bytes)</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<h3 id="solution-2-explicit-padding">Solution 2: Explicit Padding</h3>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">A</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">s_1</span><span class="p">,</span><span class="w"> </span><span class="n">s_2</span><span class="p">,</span><span class="w"> </span><span class="n">s_3</span><span class="p">,</span><span class="w"> </span><span class="n">s_4</span><span class="p">,</span><span class="w"> </span><span class="n">s_5</span><span class="p">,</span><span class="w"> </span><span class="n">s_6</span><span class="p">;</span><span class="w">  </span><span class="c1">// 192 bits</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">_pad</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span><span class="w">  </span><span class="c1">// +64 bits = 256 bits (32 bytes)</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<h3 id="power-of-2-reference">Power-of-2 Reference</h3>
+<table>
+<thead>
+<tr>
+<th>Original</th>
+<th>Padded To</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>12 bytes (96 bits)</td>
+<td>16 bytes</td>
+<td><code>alignas(16)</code></td>
+</tr>
+<tr>
+<td>24 bytes (192 bits)</td>
+<td>32 bytes</td>
+<td><code>alignas(32)</code></td>
+</tr>
+<tr>
+<td>48 bytes (384 bits)</td>
+<td>64 bytes</td>
+<td><code>alignas(64)</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="decision-guide">Decision Guide</h2>
+<div class="highlight"><pre><span></span><code>Using struct in interface?
+├── M-AXI interface?
+│   └── AUTO-AGGREGATED (power-of-2 padded)
+│       └── Ensure struct size is power of 2!
+├── Want single-transaction transfer?
+│   └── Use AGGREGATE
+│       ├── compact=bit   (min bits)
+│       ├── compact=byte  (matches C layout)
+│       └── compact=auto  (let HLS decide)
+├── Need separate ports per field?
+│   └── Use DISAGGREGATE
+└── Struct contains hls::stream?
+    └── AUTO-DISAGGREGATED
+</code></pre></div>
+
+<hr />
+<h2 id="when-to-use-each">When to Use Each</h2>
+<h3 id="use-aggregate-when">Use AGGREGATE When:</h3>
+<ul>
+<li>Want efficient single-transaction transfer</li>
+<li>All fields are accessed together</li>
+<li>Reducing interface signal count</li>
+<li>Struct passed through streaming interface</li>
+</ul>
+<h3 id="use-disaggregate-when">Use DISAGGREGATE When:</h3>
+<ul>
+<li>Fields connect to different external modules</li>
+<li>Fields have different timing requirements</li>
+<li>Want separate AXI-Stream channels per field</li>
+<li>Fields are accessed independently</li>
+</ul>
+<hr />
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>Example</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Interface/Aggregation_Disaggregation/aggregation_of_struct/">aggregation_of_struct</a></td>
+<td>Basic struct packing</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Interface/Aggregation_Disaggregation/aggregation_of_m_axi_ports/">aggregation_of_m_axi_ports</a></td>
+<td>M-AXI with auto-padding</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Interface/Aggregation_Disaggregation/aggregation_of_nested_structs/">aggregation_of_nested_structs</a></td>
+<td>Nested structs, compact modes</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Interface/Aggregation_Disaggregation/disaggregation_of_axis_port/">disaggregation_of_axis_port</a></td>
+<td>Split into separate AXIS</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Interface/Aggregation_Disaggregation/auto_disaggregation_of_struct/">auto_disaggregation_of_struct</a></td>
+<td>Auto-disaggregate with stream</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Interface/Aggregation_Disaggregation/struct_ii_issue/">struct_ii_issue</a></td>
+<td>Alignment pitfall demo</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related-documentation">Related Documentation</h2>
+<ul>
+<li><a href="../pragmas/index.md#aggregate">AGGREGATE pragma</a></li>
+<li><a href="../pragmas/index.md#disaggregate">DISAGGREGATE pragma</a></li>
+<li><a href="../patterns/struct-alignment.md">struct-alignment pattern</a></li>
+<li><a href="../decision-guides/aggregate-vs-disaggregate.md">aggregate-vs-disaggregate decision guide</a></li>
+</ul>
+<h2 id="yaml-sources">YAML Sources</h2>
+<ul>
+<li><code>schema/pragmas.yaml</code> - AGGREGATE, DISAGGREGATE entries</li>
+<li><code>schema/patterns.yaml</code> - struct-alignment pattern</li>
+<li><code>schema/decision-guides.yaml</code> - aggregate-vs-disaggregate guide</li>
+</ul>
+    </main>
+</body>
+</html>

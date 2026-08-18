@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DATAFLOW Bypass Patterns - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="dataflow-bypass-patterns">DATAFLOW Bypass Patterns</h1>
+<p>This document covers common DATAFLOW feed-forward violations and their solutions. These patterns help agents detect and fix issues that degrade pipeline performance.</p>
+<h2 id="the-feed-forward-constraint">The Feed-Forward Constraint</h2>
+<p>HLS DATAFLOW requires data to flow <strong>forward</strong> through stages in a linear chain:</p>
+<div class="highlight"><pre><span></span><code>CORRECT (Feed-Forward):
+input ──► Stage1 ──► Stage2 ──► Stage3 ──► output
+              │          │          │
+              └──────────┴──────────┘
+              Each stage reads only from previous stage
+
+INCORRECT (Bypass):
+input ──► Stage1 ──► Stage2 ──► Stage3 ──► output
+   │                    ▲
+   └────────────────────┘
+   Input bypasses Stage1 - breaks feed-forward!
+</code></pre></div>
+
+<p><strong>Why bypasses cause problems:</strong>
+- DATAFLOW can't pipeline stages efficiently when data arrives from multiple sources
+- The bypassed stage must wait for both its predecessor AND the bypassing data
+- Results in sequential execution instead of parallel pipelining</p>
+<hr />
+<h2 id="key-constructs">Key Constructs</h2>
+<table>
+<thead>
+<tr>
+<th>Pragma</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#pragma HLS DATAFLOW</code></td>
+<td>Enable concurrent function execution</td>
+</tr>
+<tr>
+<td><code>#pragma HLS INLINE OFF</code></td>
+<td>Keep functions as separate hardware modules</td>
+</tr>
+<tr>
+<td><code>#pragma HLS PIPELINE</code></td>
+<td>Pipeline loops within stages</td>
+</tr>
+</tbody>
+</table>
+<h3 id="required-pragmas">Required Pragmas</h3>
+<table>
+<thead>
+<tr>
+<th>Pragma</th>
+<th>Required?</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#pragma HLS DATAFLOW</code></td>
+<td>Yes</td>
+<td>Enable concurrent function execution</td>
+</tr>
+<tr>
+<td><code>#pragma HLS INLINE OFF</code></td>
+<td>Yes</td>
+<td>Keep functions as separate hardware modules</td>
+</tr>
+<tr>
+<td><code>#pragma HLS PIPELINE</code></td>
+<td>Recommended</td>
+<td>Pipeline loops for throughput</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="pattern-1-input-bypass">Pattern 1: Input Bypass</h2>
+<h3 id="problem">Problem</h3>
+<p>An input argument bypasses the first function, going directly to a later stage.</p>
+<div class="highlight"><pre><span></span><code>PROBLEM:
+   a ──► pass ──► tmp1 ──► double_pass ──► tmp4 ──► add_kernel ──► output
+   b ─────────────────────────┘                          │
+       BYPASSES pass!        └──► tmp2 ──────────────────┘
+</code></pre></div>
+
+<h3 id="problem-code">Problem Code</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">pass</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">tmp1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">double_pass</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp4</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">tmp2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w">      </span><span class="c1">// b comes directly from top-level input!</span>
+<span class="w">        </span><span class="n">tmp4</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">add_kernel</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp3</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">tmp3</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">dut</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp3</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="n">tmp4</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span>
+
+<span class="w">    </span><span class="n">pass</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">tmp1</span><span class="p">);</span><span class="w">                      </span><span class="c1">// Stage 1: only processes &#39;a&#39;</span>
+<span class="w">    </span><span class="n">double_pass</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">tmp2</span><span class="p">,</span><span class="w"> </span><span class="n">tmp1</span><span class="p">,</span><span class="w"> </span><span class="n">tmp4</span><span class="p">);</span><span class="w">   </span><span class="c1">// Stage 2: &#39;b&#39; BYPASSES Stage 1!</span>
+<span class="w">    </span><span class="n">add_kernel</span><span class="p">(</span><span class="n">tmp4</span><span class="p">,</span><span class="w"> </span><span class="n">tmp2</span><span class="p">,</span><span class="w"> </span><span class="n">tmp3</span><span class="p">);</span><span class="w">       </span><span class="c1">// Stage 3</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="solution">Solution</h3>
+<p>Route ALL inputs through the first stage.</p>
+<div class="highlight"><pre><span></span><code>SOLUTION:
+   a ──► pass ──► tmp1 ──► Double_pass ──► tmp4 ──► add_kernel ──► output
+   b ──►      ──► tmp2 ──►             ──► tmp5 ──►
+        Stage 1          Stage 2            Stage 3
+        (both inputs)    (reads from S1)    (reads from S2)
+</code></pre></div>
+
+<h3 id="solution-code">Solution Code</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">pass</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">tmp1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">        </span><span class="n">tmp2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w">   </span><span class="c1">// Now b goes through pass too!</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">Double_pass</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp4</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp5</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">tmp4</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">        </span><span class="n">tmp5</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w">   </span><span class="c1">// Reads from pass output, not top-level input</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">add_kernel</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp3</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">tmp3</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">dut</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp3</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="n">tmp4</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="n">tmp5</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span>
+
+<span class="w">    </span><span class="n">pass</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">tmp1</span><span class="p">,</span><span class="w"> </span><span class="n">tmp2</span><span class="p">);</span><span class="w">              </span><span class="c1">// Stage 1: BOTH inputs enter here</span>
+<span class="w">    </span><span class="n">Double_pass</span><span class="p">(</span><span class="n">tmp2</span><span class="p">,</span><span class="w"> </span><span class="n">tmp1</span><span class="p">,</span><span class="w"> </span><span class="n">tmp4</span><span class="p">,</span><span class="w"> </span><span class="n">tmp5</span><span class="p">);</span><span class="w"> </span><span class="c1">// Stage 2: only reads from Stage 1</span>
+<span class="w">    </span><span class="n">add_kernel</span><span class="p">(</span><span class="n">tmp4</span><span class="p">,</span><span class="w"> </span><span class="n">tmp5</span><span class="p">,</span><span class="w"> </span><span class="n">tmp3</span><span class="p">);</span><span class="w">        </span><span class="c1">// Stage 3: only reads from Stage 2</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Source:</strong> <code>Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Patterns/input_bypass/</code></p>
+<h3 id="how-to-fix-input-bypass">How to Fix Input Bypass</h3>
+<ol>
+<li>Add bypassing input as parameter to first stage function</li>
+<li>Add corresponding output channel from first stage</li>
+<li>Update second stage to read from channel instead of top-level input</li>
+</ol>
+<hr />
+<h2 id="pattern-2-middle-bypass">Pattern 2: Middle Bypass</h2>
+<h3 id="problem_1">Problem</h3>
+<p>A channel skips an intermediate task, breaking the feed-forward chain.</p>
+<div class="highlight"><pre><span></span><code>PROBLEM:
+   double_pass ──► tmp1 ─────────────────────────► bypass ──► output
+               ──► tmp2 ──► pass ──► tmp4 ────────►
+                            tmp1 SKIPS pass!
+</code></pre></div>
+
+<h3 id="problem-code_1">Problem Code</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">double_pass</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">tmp1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">        </span><span class="n">tmp2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">pass</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp4</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">tmp4</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">bypass</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp3</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">tmp3</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">dut</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp3</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="n">tmp4</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span>
+
+<span class="w">    </span><span class="n">double_pass</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">tmp1</span><span class="p">,</span><span class="w"> </span><span class="n">tmp2</span><span class="p">);</span><span class="w">  </span><span class="c1">// Stage 1</span>
+<span class="w">    </span><span class="n">pass</span><span class="p">(</span><span class="n">tmp2</span><span class="p">,</span><span class="w"> </span><span class="n">tmp4</span><span class="p">);</span><span class="w">               </span><span class="c1">// Stage 2: only processes tmp2</span>
+<span class="w">    </span><span class="n">bypass</span><span class="p">(</span><span class="n">tmp1</span><span class="p">,</span><span class="w"> </span><span class="n">tmp4</span><span class="p">,</span><span class="w"> </span><span class="n">tmp3</span><span class="p">);</span><span class="w">       </span><span class="c1">// Stage 3: tmp1 BYPASSES Stage 2!</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="solution_1">Solution</h3>
+<p>Route all data through the intermediate stage.</p>
+<div class="highlight"><pre><span></span><code>SOLUTION:
+   double_pass ──► tmp1 ──► pass ──► tmp5 ──► bypass ──► output
+               ──► tmp2 ──►      ──► tmp4 ──►
+                   Stage 1      Stage 2      Stage 3
+</code></pre></div>
+
+<h3 id="solution-code_1">Solution Code</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">double_pass</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">tmp1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">        </span><span class="n">tmp2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">pass</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp4</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp5</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">tmp4</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">        </span><span class="n">tmp5</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w">   </span><span class="c1">// Now tmp1 passes through this stage</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">bypass</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp3</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">tmp3</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">dut</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp3</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="n">tmp4</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="n">tmp5</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span>
+
+<span class="w">    </span><span class="n">double_pass</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">tmp1</span><span class="p">,</span><span class="w"> </span><span class="n">tmp2</span><span class="p">);</span><span class="w">       </span><span class="c1">// Stage 1</span>
+<span class="w">    </span><span class="n">pass</span><span class="p">(</span><span class="n">tmp2</span><span class="p">,</span><span class="w"> </span><span class="n">tmp4</span><span class="p">,</span><span class="w"> </span><span class="n">tmp1</span><span class="p">,</span><span class="w"> </span><span class="n">tmp5</span><span class="p">);</span><span class="w">        </span><span class="c1">// Stage 2: processes BOTH channels</span>
+<span class="w">    </span><span class="n">bypass</span><span class="p">(</span><span class="n">tmp5</span><span class="p">,</span><span class="w"> </span><span class="n">tmp4</span><span class="p">,</span><span class="w"> </span><span class="n">tmp3</span><span class="p">);</span><span class="w">            </span><span class="c1">// Stage 3: reads only from Stage 2</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Source:</strong> <code>Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Patterns/middle_bypass/</code></p>
+<h3 id="how-to-fix-middle-bypass">How to Fix Middle Bypass</h3>
+<ol>
+<li>Add bypassing channel as input to skipped stage</li>
+<li>Add corresponding output channel from skipped stage</li>
+<li>Update consumer stage to read from new output</li>
+</ol>
+<hr />
+<h2 id="pattern-3-output-bypass">Pattern 3: Output Bypass</h2>
+<h3 id="problem_2">Problem</h3>
+<p>An output goes directly from an early stage, bypassing later stages.</p>
+<div class="highlight"><pre><span></span><code>PROBLEM:
+   split ──► tmp1 ──► pass ──► b (output)
+         ──► tmp2 ────────────► output
+             tmp2 BYPASSES pass directly to output!
+</code></pre></div>
+
+<h3 id="problem-code_2">Problem Code</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">split</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">tmp1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">        </span><span class="n">tmp2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">pass</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">dut</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="n">tmp3</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span>
+
+<span class="w">    </span><span class="n">split</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">tmp1</span><span class="p">,</span><span class="w"> </span><span class="n">tmp2</span><span class="p">);</span><span class="w">   </span><span class="c1">// Stage 1: tmp2 goes directly to output!</span>
+<span class="w">    </span><span class="n">pass</span><span class="p">(</span><span class="n">tmp1</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">);</span><span class="w">          </span><span class="c1">// Stage 2: only processes tmp1</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="solution_2">Solution</h3>
+<p>Route all outputs through the final stage.</p>
+<div class="highlight"><pre><span></span><code>SOLUTION:
+   split ──► tmp1 ──► pass ──► b (output)
+         ──► tmp3 ──►      ──► tmp2 (output)
+        Stage 1      Stage 2
+                     (produces BOTH outputs)
+</code></pre></div>
+
+<h3 id="solution-code_2">Solution Code</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">split</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">tmp1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">        </span><span class="n">tmp2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">pass</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">tmp3</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">        </span><span class="n">tmp2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp3</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w">   </span><span class="c1">// Output now comes from pass, not split</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">dut</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp2</span><span class="p">[</span><span class="mi">128</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">tmp1</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="n">tmp3</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span>
+
+<span class="w">    </span><span class="n">split</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">tmp1</span><span class="p">,</span><span class="w"> </span><span class="n">tmp3</span><span class="p">);</span><span class="w">          </span><span class="c1">// Stage 1: internal channel tmp3</span>
+<span class="w">    </span><span class="n">pass</span><span class="p">(</span><span class="n">tmp3</span><span class="p">,</span><span class="w"> </span><span class="n">tmp2</span><span class="p">,</span><span class="w"> </span><span class="n">tmp1</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">);</span><span class="w">     </span><span class="c1">// Stage 2: produces BOTH outputs</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Source:</strong> <code>Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Patterns/output_bypass/</code></p>
+<h3 id="how-to-fix-output-bypass">How to Fix Output Bypass</h3>
+<ol>
+<li>Replace top-level output with internal channel in early stage</li>
+<li>Add channel as input to final stage</li>
+<li>Add top-level output as parameter to final stage</li>
+</ol>
+<hr />
+<h2 id="pattern-4-stream-as-synchronization">Pattern 4: Stream as Synchronization</h2>
+<h3 id="problem_3">Problem</h3>
+<p>Two stages share external memory (DDR) but have no direct channel - the reader may start before the writer finishes.</p>
+<div class="highlight"><pre><span></span><code>PROBLEM:
+   write ──► A[N][N] (DDR) ──► read
+                 │
+        Race condition! Reader may read garbage
+        because there&#39;s no channel to synchronize.
+</code></pre></div>
+
+<h3 id="problem-description">Problem Description</h3>
+<p>When a writer and reader process exchange data through external memory:
+- Both processes start as soon as possible (no channel dependency)
+- Reader may read rows before writer has written them
+- Results in reading garbage data</p>
+<h3 id="solution_3">Solution</h3>
+<p>Use an <code>hls::stream</code> as a <strong>synchronization barrier</strong> between writer and reader.</p>
+<div class="highlight"><pre><span></span><code>SOLUTION:
+   write ──► A[N][N] (DDR) ──► read
+        │                       ▲
+        └──► line (stream) ─────┘
+             Sync signal: &quot;row i is ready&quot;
+</code></pre></div>
+
+<h3 id="solution-code_3">Solution Code</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_stream.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;etc/ap_utils.h&quot;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">inputStream</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">N</span><span class="p">][</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">line</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=3</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">j</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="kt">int</span><span class="w"> </span><span class="n">temp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">inputStream</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">            </span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">temp</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="n">ap_wait</span><span class="p">();</span><span class="w">          </span><span class="c1">// Ensure write completes</span>
+<span class="w">        </span><span class="n">line</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">i</span><span class="p">);</span><span class="w">      </span><span class="c1">// Signal: &quot;row i is ready to read&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">N</span><span class="p">][</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">outputStream</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">line</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">row</span><span class="p">;</span>
+<span class="w">    </span><span class="k">do</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=3</span>
+<span class="w">        </span><span class="n">row</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">line</span><span class="p">.</span><span class="n">read</span><span class="p">();</span><span class="w">  </span><span class="c1">// Block until writer signals row is ready</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">j</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">outputStream</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">j</span><span class="p">];</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">row</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="mi">-1</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">dut</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">inputStream</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">N</span><span class="p">][</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">outputStream</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE axis  port=inputStream</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=A</span>
+<span class="cp">#pragma HLS INTERFACE axis  port=outputStream</span>
+<span class="cp">#pragma HLS DATAFLOW</span>
+
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">line</span><span class="p">;</span><span class="w">  </span><span class="c1">// Synchronization stream</span>
+
+<span class="w">    </span><span class="n">write</span><span class="p">(</span><span class="n">inputStream</span><span class="p">,</span><span class="w"> </span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">line</span><span class="p">);</span>
+<span class="w">    </span><span class="n">read</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">outputStream</span><span class="p">,</span><span class="w"> </span><span class="n">line</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="key-points">Key Points</h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>line.write(i)</code></td>
+<td>Writer signals "row i is complete"</td>
+</tr>
+<tr>
+<td><code>line.read()</code></td>
+<td>Reader blocks until signal received</td>
+</tr>
+<tr>
+<td><code>ap_wait()</code></td>
+<td>Ensures memory write completes before signaling</td>
+</tr>
+<tr>
+<td>Row-by-row sync</td>
+<td>Allows overlap - reader processes row i while writer writes row i+1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Source:</strong> <code>Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Patterns/using_stream_as_sync/</code></p>
+<h3 id="how-to-fix-missing-sync">How to Fix Missing Sync</h3>
+<ol>
+<li>Declare <code>hls::stream&lt;int&gt;</code> for synchronization</li>
+<li>Writer signals after completing each unit (e.g., row)</li>
+<li>Reader blocks on <code>stream.read()</code> before accessing memory</li>
+</ol>
+<hr />
+<h2 id="code-generation-guidelines">Code Generation Guidelines</h2>
+<h3 id="proper-feed-forward-kernel-template">Proper Feed-Forward Kernel Template</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">kernel</span><span class="p">(</span><span class="n">input_t</span><span class="o">*</span><span class="w"> </span><span class="n">in1</span><span class="p">,</span><span class="w"> </span><span class="n">input_t</span><span class="o">*</span><span class="w"> </span><span class="n">in2</span><span class="p">,</span><span class="w"> </span><span class="n">output_t</span><span class="o">*</span><span class="w"> </span><span class="n">out1</span><span class="p">,</span><span class="w"> </span><span class="n">output_t</span><span class="o">*</span><span class="w"> </span><span class="n">out2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS DATAFLOW</span>
+
+<span class="w">    </span><span class="c1">// Internal channels</span>
+<span class="w">    </span><span class="n">channel_t</span><span class="w"> </span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">c3</span><span class="p">,</span><span class="w"> </span><span class="n">c4</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Stage 1: ALL inputs enter here</span>
+<span class="w">    </span><span class="n">first_stage</span><span class="p">(</span><span class="n">in1</span><span class="p">,</span><span class="w"> </span><span class="n">in2</span><span class="p">,</span><span class="w"> </span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Middle stages: read from previous, write to next</span>
+<span class="w">    </span><span class="n">middle_stage</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">c3</span><span class="p">,</span><span class="w"> </span><span class="n">c4</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Last stage: ALL outputs exit here</span>
+<span class="w">    </span><span class="n">last_stage</span><span class="p">(</span><span class="n">c3</span><span class="p">,</span><span class="w"> </span><span class="n">c4</span><span class="p">,</span><span class="w"> </span><span class="n">out1</span><span class="p">,</span><span class="w"> </span><span class="n">out2</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="stage-function-template">Stage Function Template</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">stage_func</span><span class="p">(</span><span class="n">input_t</span><span class="o">*</span><span class="w"> </span><span class="n">in1</span><span class="p">,</span><span class="w"> </span><span class="n">input_t</span><span class="o">*</span><span class="w"> </span><span class="n">in2</span><span class="p">,</span><span class="w"> </span><span class="n">output_t</span><span class="o">*</span><span class="w"> </span><span class="n">out1</span><span class="p">,</span><span class="w"> </span><span class="n">output_t</span><span class="o">*</span><span class="w"> </span><span class="n">out2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF          </span><span class="c1">// Required for DATAFLOW</span>
+<span class="nl">Loop</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE</span>
+<span class="w">        </span><span class="n">out1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">process1</span><span class="p">(</span><span class="n">in1</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">        </span><span class="n">out2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">process2</span><span class="p">(</span><span class="n">in2</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="sync-stream-template-for-shared-memory">Sync Stream Template (for shared memory)</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">writer</span><span class="p">(</span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="n">mem_t</span><span class="w"> </span><span class="n">mem</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">sync</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">mem</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">input</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">        </span><span class="n">sync</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">i</span><span class="p">);</span><span class="w">      </span><span class="c1">// Signal completion</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">reader</span><span class="p">(</span><span class="n">mem_t</span><span class="w"> </span><span class="n">mem</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">output</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">sync</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sync</span><span class="p">.</span><span class="n">read</span><span class="p">();</span><span class="w">  </span><span class="c1">// Wait for signal</span>
+<span class="w">        </span><span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mem</span><span class="p">[</span><span class="n">idx</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="key-constraints">Key Constraints</h3>
+<table>
+<thead>
+<tr>
+<th>Constraint</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Feed-forward</td>
+<td>Each stage reads only from previous stage outputs</td>
+</tr>
+<tr>
+<td>Single producer/consumer</td>
+<td>Each channel has exactly 1 writer and 1 reader</td>
+</tr>
+<tr>
+<td>No input bypass</td>
+<td>Top-level inputs only go to first stage</td>
+</tr>
+<tr>
+<td>No output bypass</td>
+<td>Top-level outputs only come from last stage</td>
+</tr>
+<tr>
+<td>Shared memory sync</td>
+<td>Use stream as barrier when stages share external memory</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="test-bench-generation-guidelines">Test Bench Generation Guidelines</h2>
+<h3 id="basic-dataflow-test-bench-template">Basic Dataflow Test Bench Template</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;dut.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="mi">128</span><span class="p">],</span><span class="w"> </span><span class="n">result</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">expected</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">errors</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Initialize inputs</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="p">;</span>
+<span class="w">        </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">        </span><span class="n">expected</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">compute_expected</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Run multiple iterations to expose timing issues</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">iter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">iter</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"> </span><span class="n">iter</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">dut</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">result</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// Verify results</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">expected</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Mismatch at [&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;]: &quot;</span>
+<span class="w">                          </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; != &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">expected</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">                </span><span class="n">errors</span><span class="o">++</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">errors</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Test PASSED&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Test FAILED with &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">errors</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; errors&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="test-bench-requirements">Test Bench Requirements</h3>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Multiple iterations</td>
+<td>Run 3+ times to expose synchronization issues</td>
+</tr>
+<tr>
+<td>Golden reference</td>
+<td>Pre-compute expected outputs for verification</td>
+</tr>
+<tr>
+<td>Return code</td>
+<td>Return 0 for PASS, non-zero for FAIL</td>
+</tr>
+<tr>
+<td>Error reporting</td>
+<td>Print specific mismatches for debugging</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="optimization-guidance-for-agents">Optimization Guidance for Agents</h2>
+<h3 id="detection-decision-tree">Detection Decision Tree</h3>
+<div class="highlight"><pre><span></span><code>Is data flowing directly from input to a non-first stage?
+├── Yes → INPUT BYPASS - route input through first stage
+└── No → Continue
+
+Is data skipping an intermediate stage?
+├── Yes → MIDDLE BYPASS - add pass-through in skipped stage
+└── No → Continue
+
+Is data going directly to output from a non-last stage?
+├── Yes → OUTPUT BYPASS - route output through last stage
+└── No → Feed-forward OK
+
+Do two stages share external memory with no channel?
+├── Yes → SYNC NEEDED - add synchronization stream
+└── No → No sync needed
+</code></pre></div>
+
+<h3 id="common-pitfalls">Common Pitfalls</h3>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Symptom</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Input bypass</td>
+<td>Input argument goes to stage 2+</td>
+<td>Route all inputs through stage 1</td>
+</tr>
+<tr>
+<td>Middle bypass</td>
+<td>Channel skips a stage</td>
+<td>Add pass-through in skipped stage</td>
+</tr>
+<tr>
+<td>Output bypass</td>
+<td>Output comes from early stage</td>
+<td>Route all outputs through last stage</td>
+</tr>
+<tr>
+<td>Missing sync</td>
+<td>Race condition with shared memory</td>
+<td>Add sync stream between writer/reader</td>
+</tr>
+<tr>
+<td>Missing INLINE OFF</td>
+<td>Functions merged, no parallelism</td>
+<td>Add <code>#pragma HLS INLINE OFF</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="performance-impact">Performance Impact</h3>
+<table>
+<thead>
+<tr>
+<th>Issue</th>
+<th>Without Fix</th>
+<th>With Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bypass violations</td>
+<td>Sequential execution, no pipelining</td>
+<td>Full pipeline overlap</td>
+</tr>
+<tr>
+<td>Missing sync</td>
+<td>Data corruption, non-deterministic</td>
+<td>Correct results, row-level overlap</td>
+</tr>
+</tbody>
+</table>
+<h3 id="resource-vs-performance-trade-offs">Resource vs Performance Trade-offs</h3>
+<table>
+<thead>
+<tr>
+<th>Choice</th>
+<th>Performance Impact</th>
+<th>Resource Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fix bypass violations</td>
+<td>Enables parallel pipelining (Nx speedup)</td>
+<td>Adds pass-through logic</td>
+</tr>
+<tr>
+<td>Leave bypass</td>
+<td>Sequential execution</td>
+<td>No additional logic</td>
+</tr>
+<tr>
+<td>Add sync stream</td>
+<td>Enables overlap with correct data</td>
+<td>Small FIFO overhead</td>
+</tr>
+<tr>
+<td>Higher sync granularity</td>
+<td>More overlap (row vs block)</td>
+<td>More sync overhead</td>
+</tr>
+</tbody>
+</table>
+<h3 id="parameter-tuning">Parameter Tuning</h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Low Value</th>
+<th>High Value</th>
+<th>Guidance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sync stream depth</td>
+<td>1-2</td>
+<td>N rows</td>
+<td>Match writer-reader latency difference</td>
+</tr>
+<tr>
+<td>PIPELINE II</td>
+<td>1</td>
+<td>Higher</td>
+<td>Trade throughput for resources</td>
+</tr>
+<tr>
+<td>Pass-through unroll</td>
+<td>1</td>
+<td>Full</td>
+<td>Balance throughput vs area</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related-patterns">Related Patterns</h2>
+<ul>
+<li><a href="dataflow-diamond.md">Dataflow Diamond</a> - Proper fork-join topology</li>
+<li><a href="merge-split.md">Merge-Split</a> - Fan-out/fan-in with hls::split and hls::merge</li>
+<li><a href="autorestart.md">Autorestart</a> - Continuous execution</li>
+</ul>
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Input Bypass</td>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Patterns/input_bypass/">Vitis-HLS-Introductory-Examples/.../input_bypass/</a></td>
+</tr>
+<tr>
+<td>Middle Bypass</td>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Patterns/middle_bypass/">Vitis-HLS-Introductory-Examples/.../middle_bypass/</a></td>
+</tr>
+<tr>
+<td>Output Bypass</td>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Patterns/output_bypass/">Vitis-HLS-Introductory-Examples/.../output_bypass/</a></td>
+</tr>
+<tr>
+<td>Stream as Sync</td>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Patterns/using_stream_as_sync/">Vitis-HLS-Introductory-Examples/.../using_stream_as_sync/</a></td>
+</tr>
+</tbody>
+</table>
+    </main>
+</body>
+</html>

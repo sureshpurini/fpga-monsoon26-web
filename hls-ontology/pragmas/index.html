@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLS Pragmas Reference - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="hls-pragmas-reference">HLS Pragmas Reference</h1>
+<p>Comprehensive reference for Vitis HLS pragmas organized by category.</p>
+<hr />
+<h2 id="quick-reference">Quick Reference</h2>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Pragmas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#loop-optimization">Loop Optimization</a></td>
+<td>PIPELINE, UNROLL, LOOP_TRIPCOUNT, LOOP_FLATTEN, LOOP_MERGE</td>
+</tr>
+<tr>
+<td><a href="#task-parallelism">Task Parallelism</a></td>
+<td>DATAFLOW, STREAM</td>
+</tr>
+<tr>
+<td><a href="#interface">Interface</a></td>
+<td>INTERFACE (m_axi, s_axilite, axis, ap_fifo, etc.)</td>
+</tr>
+<tr>
+<td><a href="#memory-optimization">Memory Optimization</a></td>
+<td>ARRAY_PARTITION, ARRAY_RESHAPE, BIND_STORAGE, DEPENDENCE, CACHE</td>
+</tr>
+<tr>
+<td><a href="#function-optimization">Function Optimization</a></td>
+<td>INLINE, FUNCTION_INSTANTIATE, TOP</td>
+</tr>
+<tr>
+<td><a href="#resource-allocation">Resource Allocation</a></td>
+<td>ALLOCATION, BIND_OP</td>
+</tr>
+<tr>
+<td><a href="#data-packing">Data Packing</a></td>
+<td>AGGREGATE, DISAGGREGATE</td>
+</tr>
+<tr>
+<td><a href="#performance">Performance</a></td>
+<td>PERFORMANCE, LATENCY, EXPRESSION_BALANCE</td>
+</tr>
+<tr>
+<td><a href="#miscellaneous">Miscellaneous</a></td>
+<td>RESET, PROTOCOL, STABLE, ALIAS, ARRAY_STENCIL</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="loop-optimization">Loop Optimization</h2>
+<h3 id="pipeline">PIPELINE</h3>
+<p>Pipeline a loop or function to improve throughput.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS PIPELINE [II=&lt;N&gt;] [rewind] [off]</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>II=&lt;N&gt;</code></td>
+<td>Initiation Interval - cycles between loop iterations (default: 1)</td>
+</tr>
+<tr>
+<td><code>rewind</code></td>
+<td>Enable continuous execution without pipeline flush</td>
+</tr>
+<tr>
+<td><code>off</code></td>
+<td>Disable pipelining</td>
+</tr>
+</tbody>
+</table>
+<p><strong>When to use:</strong>
+- Loop body has no/minimal loop-carried dependencies
+- Want to maximize throughput
+- Processing streaming data element-by-element</p>
+<p><strong>When NOT to use:</strong>
+- Loop has complex dependencies that prevent II=1
+- Memory bandwidth is the bottleneck, not compute</p>
+<blockquote>
+<p><strong>Note:</strong> The <code>rewind</code> option is best used with autorestart kernels for continuous streaming.</p>
+</blockquote>
+<hr />
+<h3 id="unroll">UNROLL</h3>
+<p>Unroll loop iterations to increase parallelism.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS UNROLL [factor=&lt;N&gt;] [skip_exit_check]</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>factor=&lt;N&gt;</code></td>
+<td>Number of iterations to unroll (complete if omitted)</td>
+</tr>
+<tr>
+<td><code>skip_exit_check</code></td>
+<td>Skip loop exit condition check for partial unroll</td>
+</tr>
+</tbody>
+</table>
+<p><strong>When to use:</strong>
+- Loop body is small and independent
+- Want to parallelize loop iterations</p>
+<p><strong>When NOT to use:</strong>
+- Loop has many iterations (resource explosion)
+- Loop body has dependencies between iterations</p>
+<blockquote>
+<p><strong>Caution:</strong> Unrolling multiplies resources by unroll factor! N iterations fully unrolled = N× logic.</p>
+</blockquote>
+<hr />
+<h3 id="loop_tripcount">LOOP_TRIPCOUNT</h3>
+<p>Specify expected loop iteration count for analysis/reporting.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS LOOP_TRIPCOUNT min=&lt;N&gt; max=&lt;N&gt; [avg=&lt;N&gt;]</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>min=&lt;N&gt;</code></td>
+<td>Minimum expected iterations</td>
+</tr>
+<tr>
+<td><code>max=&lt;N&gt;</code></td>
+<td>Maximum expected iterations</td>
+</tr>
+<tr>
+<td><code>avg=&lt;N&gt;</code></td>
+<td>Average expected iterations</td>
+</tr>
+</tbody>
+</table>
+<p><strong>When to use:</strong>
+- Variable loop bounds (data-dependent)
+- Want accurate latency/throughput reports</p>
+<blockquote>
+<p><strong>Note:</strong> This pragma does NOT affect synthesis, only reporting.</p>
+</blockquote>
+<hr />
+<h3 id="loop_flatten">LOOP_FLATTEN</h3>
+<p>Flatten nested loops into single loop.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS LOOP_FLATTEN [off]</span>
+</code></pre></div>
+
+<p><strong>When to use:</strong>
+- Perfect nested loops (bounds are constant)
+- Want to reduce loop overhead</p>
+<p><strong>When NOT to use:</strong>
+- Imperfect loops (code between loop levels)
+- Variable inner loop bounds</p>
+<hr />
+<h3 id="loop_merge">LOOP_MERGE</h3>
+<p>Merge consecutive loops into single loop.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS LOOP_MERGE [force]</span>
+</code></pre></div>
+
+<p><strong>When to use:</strong>
+- Consecutive loops with same bounds
+- Want to reduce loop overhead</p>
+<blockquote>
+<p><strong>Caution:</strong> Using <code>force</code> can cause incorrect results if loops have hidden dependencies.</p>
+</blockquote>
+<hr />
+<h2 id="task-parallelism">Task Parallelism</h2>
+<h3 id="dataflow">DATAFLOW</h3>
+<p>Enable task-level pipelining for functions/loops.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS DATAFLOW</span>
+</code></pre></div>
+
+<p><strong>When to use:</strong>
+- Multiple sequential functions that can run concurrently
+- Producer-consumer relationships between functions
+- Want to overlap execution of different stages</p>
+<p><strong>When NOT to use:</strong>
+- Functions have feedback loops
+- Multiple consumers per channel (use split instead)</p>
+<p><strong>Requirements:</strong>
+- Single-producer single-consumer for each channel
+- No feedback loops (unidirectional data flow)
+- Functions should have <code>#pragma HLS INLINE OFF</code></p>
+<hr />
+<h3 id="stream">STREAM</h3>
+<p>Specify stream implementation for arrays in dataflow.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS STREAM variable=&lt;name&gt; [depth=&lt;N&gt;] [type=&lt;fifo|pipo&gt;]</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>variable=&lt;name&gt;</code></td>
+<td>Array variable to stream</td>
+</tr>
+<tr>
+<td><code>depth=&lt;N&gt;</code></td>
+<td>FIFO depth (default: 2)</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>Channel type: <code>fifo</code> or <code>pipo</code> (default: fifo)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>When to use:</strong>
+- Override default PIPO channel type in dataflow
+- Need specific FIFO depth for buffering</p>
+<blockquote>
+<p><strong>Note:</strong> Without this pragma, arrays in dataflow default to PIPO (ping-pong), NOT FIFO.</p>
+</blockquote>
+<hr />
+<h2 id="interface">Interface</h2>
+<h3 id="interface_1">INTERFACE</h3>
+<p>Specify hardware interface protocol for function arguments.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS INTERFACE &lt;mode&gt; port=&lt;name&gt; [options...]</span>
+</code></pre></div>
+
+<h4 id="m_axi-axi4-master">m_axi (AXI4 Master)</h4>
+<p>Memory-mapped interface, kernel initiates transfers.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS INTERFACE m_axi port=&lt;name&gt; [depth=&lt;N&gt;] [bundle=&lt;id&gt;] [offset=slave]</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>depth=&lt;N&gt;</code></td>
+<td>Expected array depth for co-simulation</td>
+</tr>
+<tr>
+<td><code>bundle=&lt;id&gt;</code></td>
+<td>Bundle name for port grouping</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>Address offset mode: <code>slave</code>, <code>direct</code>, <code>off</code></td>
+</tr>
+<tr>
+<td><code>max_read_burst_length</code></td>
+<td>Maximum burst length for reads (default: 16)</td>
+</tr>
+<tr>
+<td><code>max_write_burst_length</code></td>
+<td>Maximum burst length for writes (default: 16)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Use for:</strong> Accessing external memory (DDR, HBM), large data transfers</p>
+<h4 id="s_axilite-axi4-lite-slave">s_axilite (AXI4-Lite Slave)</h4>
+<p>Register-based interface, host controls.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS INTERFACE s_axilite port=&lt;name&gt; [bundle=&lt;id&gt;] [autorestart]</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bundle=&lt;id&gt;</code></td>
+<td>Bundle name for register grouping</td>
+</tr>
+<tr>
+<td><code>autorestart</code></td>
+<td>Enable automatic kernel restart after completion</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Use for:</strong> Scalar arguments, control/status registers, kernel start/done (port=return)</p>
+<h4 id="axis-axi4-stream">axis (AXI4-Stream)</h4>
+<p>Streaming interface, no addressing.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS INTERFACE axis port=&lt;name&gt; [register_mode=&lt;mode&gt;]</span>
+</code></pre></div>
+
+<p><strong>Use for:</strong> Streaming data (video, network), kernel-to-kernel connections</p>
+<h4 id="other-modes">Other Modes</h4>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Description</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ap_fifo</code></td>
+<td>FIFO with handshake</td>
+<td>Simple internal streaming</td>
+</tr>
+<tr>
+<td><code>ap_memory</code></td>
+<td>BRAM-like interface</td>
+<td>Local memory access</td>
+</tr>
+<tr>
+<td><code>ap_none</code></td>
+<td>Direct wire</td>
+<td>Combinational inputs</td>
+</tr>
+<tr>
+<td><code>ap_ctrl_chain</code></td>
+<td>Block control with chaining</td>
+<td>Dataflow designs</td>
+</tr>
+<tr>
+<td><code>ap_ctrl_hs</code></td>
+<td>Block control with handshake</td>
+<td>Standard kernels (default)</td>
+</tr>
+<tr>
+<td><code>ap_ctrl_none</code></td>
+<td>No block control</td>
+<td>Free-running kernels</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="memory-optimization">Memory Optimization</h2>
+<h3 id="array_partition">ARRAY_PARTITION</h3>
+<p>Partition array into smaller arrays or individual elements.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS ARRAY_PARTITION variable=&lt;name&gt; [complete|cyclic|block] [factor=&lt;N&gt;] [dim=&lt;N&gt;]</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>complete</code></td>
+<td>Fully partition into individual elements (registers)</td>
+</tr>
+<tr>
+<td><code>cyclic</code></td>
+<td>Cyclic partitioning (interleaved)</td>
+</tr>
+<tr>
+<td><code>block</code></td>
+<td>Block partitioning (contiguous chunks)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>When to use:</strong>
+- Need parallel access to array elements
+- Loop unrolling requires multiple simultaneous accesses</p>
+<blockquote>
+<p><strong>Tip:</strong> Match partition factor to loop unroll factor.</p>
+</blockquote>
+<hr />
+<h3 id="array_reshape">ARRAY_RESHAPE</h3>
+<p>Reshape array to change word width (partition + merge into wider word).</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS ARRAY_RESHAPE variable=&lt;name&gt; [complete|cyclic|block] [factor=&lt;N&gt;] [dim=&lt;N&gt;]</span>
+</code></pre></div>
+
+<p><strong>When to use:</strong>
+- Want wider memory access without full partition
+- Optimize memory bandwidth utilization</p>
+<hr />
+<h3 id="bind_storage">BIND_STORAGE</h3>
+<p>Specify storage implementation for arrays.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS BIND_STORAGE variable=&lt;name&gt; type=&lt;type&gt; impl=&lt;impl&gt;</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RAM_1P</code>, <code>RAM_2P</code>, <code>RAM_S2P</code>, <code>RAM_T2P</code></td>
+<td>RAM configurations</td>
+</tr>
+<tr>
+<td><code>ROM_1P</code>, <code>ROM_2P</code></td>
+<td>ROM configurations</td>
+</tr>
+<tr>
+<td><code>FIFO</code></td>
+<td>FIFO storage</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Implementation</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>BRAM</code></td>
+<td>Block RAM (18Kb/36Kb blocks)</td>
+</tr>
+<tr>
+<td><code>LUTRAM</code></td>
+<td>Distributed RAM (small arrays)</td>
+</tr>
+<tr>
+<td><code>URAM</code></td>
+<td>Ultra RAM (288Kb blocks, Versal/UltraScale+)</td>
+</tr>
+<tr>
+<td><code>AUTO</code></td>
+<td>Let HLS decide</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="dependence">DEPENDENCE</h3>
+<p>Override memory dependency analysis.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS DEPENDENCE variable=&lt;name&gt; &lt;class&gt; &lt;type&gt; &lt;direction&gt; &lt;dependent&gt;</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>class</code></td>
+<td><code>array</code>, <code>pointer</code></td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td><code>inter</code> (between iterations), <code>intra</code> (within iteration)</td>
+</tr>
+<tr>
+<td><code>direction</code></td>
+<td><code>RAW</code>, <code>WAR</code>, <code>WAW</code></td>
+</tr>
+<tr>
+<td><code>dependent</code></td>
+<td><code>true</code>, <code>false</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Caution:</strong> Incorrect use can cause functional errors! Only use when you have verified the access pattern is safe.</p>
+</blockquote>
+<hr />
+<h3 id="cache">CACHE</h3>
+<p>Add local cache for m_axi port.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS CACHE port=&lt;name&gt; lines=&lt;N&gt; depth=&lt;N&gt;</span>
+</code></pre></div>
+
+<p><strong>When to use:</strong>
+- Repeated access to same memory locations
+- Data has temporal locality</p>
+<hr />
+<h2 id="function-optimization">Function Optimization</h2>
+<h3 id="inline">INLINE</h3>
+<p>Control function inlining.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS INLINE [off|recursive]</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(default)</td>
+<td>Let HLS decide</td>
+</tr>
+<tr>
+<td><code>off</code></td>
+<td>Prevent inlining (keep as separate module)</td>
+</tr>
+<tr>
+<td><code>recursive</code></td>
+<td>Inline all functions in hierarchy</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Important:</strong> DATAFLOW requires functions to NOT be inlined. Add <code>#pragma HLS INLINE OFF</code> to all dataflow stage functions.</p>
+</blockquote>
+<hr />
+<h3 id="function_instantiate">FUNCTION_INSTANTIATE</h3>
+<p>Create separate hardware instance for each unique parameter value.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS FUNCTION_INSTANTIATE variable=&lt;name&gt;</span>
+</code></pre></div>
+
+<p><strong>When to use:</strong>
+- Function called with different constant parameters
+- Want specialized hardware for each case</p>
+<hr />
+<h3 id="top">TOP</h3>
+<p>Specify the top-level function for synthesis.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS TOP name=&lt;function_name&gt;</span>
+</code></pre></div>
+
+<hr />
+<h2 id="resource-allocation">Resource Allocation</h2>
+<h3 id="allocation">ALLOCATION</h3>
+<p>Limit or control resource allocation.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS ALLOCATION &lt;type&gt;=&lt;name&gt; limit=&lt;N&gt; [instances=&lt;list&gt;]</span>
+</code></pre></div>
+
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS ALLOCATION operation instances=mul limit=1</span>
+</code></pre></div>
+
+<p><strong>When to use:</strong>
+- Need to reduce resource usage
+- Want resource sharing between operations</p>
+<hr />
+<h3 id="bind_op">BIND_OP</h3>
+<p>Bind operation to specific implementation.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS BIND_OP variable=&lt;name&gt; op=&lt;operation&gt; impl=&lt;impl&gt;</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Implementation</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dsp</code></td>
+<td>Use DSP blocks</td>
+</tr>
+<tr>
+<td><code>fabric</code></td>
+<td>Use LUTs</td>
+</tr>
+<tr>
+<td><code>auto</code></td>
+<td>Let HLS decide</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="data-packing">Data Packing</h2>
+<h3 id="aggregate">AGGREGATE</h3>
+<p>Pack struct fields into single wide word.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS AGGREGATE variable=&lt;name&gt; [compact=&lt;mode&gt;]</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>auto</code></td>
+<td>Default packing</td>
+</tr>
+<tr>
+<td><code>byte</code></td>
+<td>Byte-aligned</td>
+</tr>
+<tr>
+<td><code>bit</code></td>
+<td>Bit-packed</td>
+</tr>
+<tr>
+<td><code>none</code></td>
+<td>No packing</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="disaggregate">DISAGGREGATE</h3>
+<p>Split struct into separate signals.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS DISAGGREGATE variable=&lt;name&gt;</span>
+</code></pre></div>
+
+<hr />
+<h2 id="performance">Performance</h2>
+<h3 id="performance_1">PERFORMANCE</h3>
+<p>Specify performance target for HLS optimizer.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS PERFORMANCE target_ti=&lt;N&gt;</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>Note:</strong> This is a hint, not a guarantee.</p>
+</blockquote>
+<hr />
+<h3 id="latency">LATENCY</h3>
+<p>Constrain function/loop latency.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS LATENCY min=&lt;N&gt; max=&lt;N&gt;</span>
+</code></pre></div>
+
+<hr />
+<h3 id="expression_balance">EXPRESSION_BALANCE</h3>
+<p>Control expression tree balancing for latency optimization.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS EXPRESSION_BALANCE [off]</span>
+</code></pre></div>
+
+<hr />
+<h2 id="miscellaneous">Miscellaneous</h2>
+<h3 id="reset">RESET</h3>
+<p>Control reset behavior for static/global variables.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS RESET variable=&lt;name&gt; [off]</span>
+</code></pre></div>
+
+<h3 id="protocol">PROTOCOL</h3>
+<p>Control protocol region constraints.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS PROTOCOL [mode=&lt;floating|fixed&gt;]</span>
+</code></pre></div>
+
+<h3 id="stable">STABLE</h3>
+<p>Mark variable as stable (doesn't change during kernel execution).</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS STABLE variable=&lt;name&gt;</span>
+</code></pre></div>
+
+<h3 id="alias">ALIAS</h3>
+<p>Indicate ports may alias same memory.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS ALIAS ports=&lt;p1&gt;,&lt;p2&gt; distance=&lt;N&gt;</span>
+</code></pre></div>
+
+<h3 id="array_stencil">ARRAY_STENCIL</h3>
+<p>Enable stencil optimization for array access.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS ARRAY_STENCIL variable=&lt;name&gt;</span>
+</code></pre></div>
+
+<p><strong>When to use:</strong>
+- Image/signal processing with sliding window
+- Regular stencil access patterns</p>
+<hr />
+<h2 id="see-also">See Also</h2>
+<ul>
+<li><a href="../../schema/pragmas.yaml">Schema: pragmas.yaml</a> - Machine-readable pragma definitions</li>
+<li><a href="../../schema/PRAGMA-TEMPLATE.md">Schema: PRAGMA-TEMPLATE.md</a> - Template for adding new pragmas</li>
+</ul>
+    </main>
+</body>
+</html>

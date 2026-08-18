@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ap_axis and ap_axiu - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="ap_axis-and-ap_axiu">ap_axis and ap_axiu</h1>
+<p>AXI-Stream packet types with sideband signals for streaming interfaces.</p>
+<h2 id="header">Header</h2>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;ap_axi_sdata.h&gt;</span>
+</code></pre></div>
+
+<h2 id="syntax">Syntax</h2>
+<div class="highlight"><pre><span></span><code><span class="n">ap_axis</span><span class="o">&lt;</span><span class="n">D</span><span class="p">,</span><span class="w"> </span><span class="n">U</span><span class="p">,</span><span class="w"> </span><span class="n">TI</span><span class="p">,</span><span class="w"> </span><span class="n">TD</span><span class="o">&gt;</span><span class="w">  </span><span class="n">signed_packet</span><span class="p">;</span><span class="w">    </span><span class="c1">// Signed data</span>
+<span class="n">ap_axiu</span><span class="o">&lt;</span><span class="n">D</span><span class="p">,</span><span class="w"> </span><span class="n">U</span><span class="p">,</span><span class="w"> </span><span class="n">TI</span><span class="p">,</span><span class="w"> </span><span class="n">TD</span><span class="o">&gt;</span><span class="w"> </span><span class="n">unsigned_packet</span><span class="p">;</span><span class="w">   </span><span class="c1">// Unsigned data (most common)</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>D</code></td>
+<td>Data width in bits (TDATA)</td>
+</tr>
+<tr>
+<td><code>U</code></td>
+<td>User signal width (TUSER)</td>
+</tr>
+<tr>
+<td><code>TI</code></td>
+<td>ID signal width (TID)</td>
+</tr>
+<tr>
+<td><code>TD</code></td>
+<td>Destination signal width (TDEST)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="packet-structure">Packet Structure</h2>
+<div class="highlight"><pre><span></span><code><span class="n">ap_axiu</span><span class="o">&lt;</span><span class="mi">32</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="o">&gt;</span><span class="w"> </span><span class="n">packet</span><span class="p">;</span>
+<span class="c1">// Creates a struct with:</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span><span class="w"> </span><span class="n">data</span><span class="p">;</span><span class="w">   </span><span class="c1">// TDATA - payload</span>
+<span class="w">    </span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">4</span><span class="o">&gt;</span><span class="w">  </span><span class="n">keep</span><span class="p">;</span><span class="w">   </span><span class="c1">// TKEEP - byte enables (D/8 bits)</span>
+<span class="w">    </span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">4</span><span class="o">&gt;</span><span class="w">  </span><span class="n">strb</span><span class="p">;</span><span class="w">   </span><span class="c1">// TSTRB - byte strobes (D/8 bits)</span>
+<span class="w">    </span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w">  </span><span class="n">user</span><span class="p">;</span><span class="w">   </span><span class="c1">// TUSER - user sideband</span>
+<span class="w">    </span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="w">  </span><span class="n">last</span><span class="p">;</span><span class="w">   </span><span class="c1">// TLAST - end of packet</span>
+<span class="w">    </span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">5</span><span class="o">&gt;</span><span class="w">  </span><span class="n">id</span><span class="p">;</span><span class="w">     </span><span class="c1">// TID - stream ID</span>
+<span class="w">    </span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">6</span><span class="o">&gt;</span><span class="w">  </span><span class="n">dest</span><span class="p">;</span><span class="w">   </span><span class="c1">// TDEST - routing</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<h3 id="axi-stream-signal-mapping">AXI-Stream Signal Mapping</h3>
+<div class="highlight"><pre><span></span><code>              ┌─────────────────────────────────────┐
+              │       AXI-Stream Packet             │
+              ├─────────────────────────────────────┤
+  TDATA[31:0] │  data   (32 bits payload)          │
+  TKEEP[3:0]  │  keep   (which bytes are valid)    │
+  TSTRB[3:0]  │  strb   (which bytes are data)     │
+  TUSER[1:0]  │  user   (user-defined sideband)    │
+  TLAST       │  last   (1 = end of packet)        │
+  TID[4:0]    │  id     (stream identifier)        │
+  TDEST[5:0]  │  dest   (routing info)             │
+              └─────────────────────────────────────┘
+</code></pre></div>
+
+<hr />
+<h2 id="common-configurations">Common Configurations</h2>
+<table>
+<thead>
+<tr>
+<th>Configuration</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ap_axiu&lt;32, 0, 0, 0&gt;</code></td>
+<td>Simple 32-bit stream, no sideband</td>
+</tr>
+<tr>
+<td><code>ap_axiu&lt;64, 0, 0, 0&gt;</code></td>
+<td>64-bit data stream</td>
+</tr>
+<tr>
+<td><code>ap_axiu&lt;32, 2, 5, 6&gt;</code></td>
+<td>Full AXI4-Stream with routing</td>
+</tr>
+<tr>
+<td><code>ap_axiu&lt;512, 0, 0, 0&gt;</code></td>
+<td>Wide bus for high bandwidth</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="basic-usage">Basic Usage</h2>
+<h3 id="creating-and-sending-packets">Creating and Sending Packets</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;ap_axi_sdata.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_stream.h&gt;</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_axiu</span><span class="o">&lt;</span><span class="mi">32</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="o">&gt;</span><span class="w"> </span><span class="n">pkt</span><span class="p">;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">send_packet</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">pkt</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">is_last</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pkt</span><span class="w"> </span><span class="n">p</span><span class="p">;</span>
+<span class="w">    </span><span class="n">p</span><span class="p">.</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">value</span><span class="p">;</span>
+<span class="w">    </span><span class="n">p</span><span class="p">.</span><span class="n">keep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xF</span><span class="p">;</span><span class="w">     </span><span class="c1">// All 4 bytes valid</span>
+<span class="w">    </span><span class="n">p</span><span class="p">.</span><span class="n">strb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xF</span><span class="p">;</span><span class="w">     </span><span class="c1">// All 4 bytes are data</span>
+<span class="w">    </span><span class="n">p</span><span class="p">.</span><span class="n">last</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">is_last</span><span class="p">;</span><span class="w"> </span><span class="c1">// End of packet marker</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="receiving-and-processing-packets">Receiving and Processing Packets</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">receive_packet</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">pkt</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">result</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pkt</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Extract data</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">data</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Check end of packet</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">last</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Handle end of packet</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="o">*</span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">value</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="complete-example">Complete Example</h2>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;ap_axi_sdata.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_stream.h&gt;</span>
+
+<span class="cp">#define DWIDTH 32</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_axiu</span><span class="o">&lt;</span><span class="n">DWIDTH</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="o">&gt;</span><span class="w"> </span><span class="n">pkt</span><span class="p">;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">stream_processor</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">pkt</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">                      </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">pkt</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span>
+<span class="w">                      </span><span class="kt">int</span><span class="w"> </span><span class="n">add_value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE mode=axis port=in</span>
+<span class="cp">#pragma HLS INTERFACE mode=axis port=out</span>
+<span class="cp">#pragma HLS INTERFACE mode=s_axilite port=add_value</span>
+<span class="cp">#pragma HLS INTERFACE mode=s_axilite port=return</span>
+
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">eos</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">eos</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="w">        </span><span class="c1">// Read input packet</span>
+<span class="w">        </span><span class="n">pkt</span><span class="w"> </span><span class="n">t_in</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+
+<span class="w">        </span><span class="c1">// Process data</span>
+<span class="w">        </span><span class="n">pkt</span><span class="w"> </span><span class="n">t_out</span><span class="p">;</span>
+<span class="w">        </span><span class="n">t_out</span><span class="p">.</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t_in</span><span class="p">.</span><span class="n">data</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">add_value</span><span class="p">;</span>
+<span class="w">        </span><span class="n">t_out</span><span class="p">.</span><span class="n">keep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t_in</span><span class="p">.</span><span class="n">keep</span><span class="p">;</span><span class="w">       </span><span class="c1">// Preserve byte enables</span>
+<span class="w">        </span><span class="n">t_out</span><span class="p">.</span><span class="n">strb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t_in</span><span class="p">.</span><span class="n">strb</span><span class="p">;</span>
+<span class="w">        </span><span class="n">t_out</span><span class="p">.</span><span class="n">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t_in</span><span class="p">.</span><span class="n">user</span><span class="p">;</span><span class="w">       </span><span class="c1">// Pass through user signal</span>
+<span class="w">        </span><span class="n">t_out</span><span class="p">.</span><span class="n">last</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t_in</span><span class="p">.</span><span class="n">last</span><span class="p">;</span><span class="w">       </span><span class="c1">// Preserve last flag</span>
+<span class="w">        </span><span class="n">t_out</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t_in</span><span class="p">.</span><span class="n">id</span><span class="p">;</span>
+<span class="w">        </span><span class="n">t_out</span><span class="p">.</span><span class="n">dest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t_in</span><span class="p">.</span><span class="n">dest</span><span class="p">;</span>
+
+<span class="w">        </span><span class="c1">// Write output packet</span>
+<span class="w">        </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">t_out</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// Check for end of stream</span>
+<span class="w">        </span><span class="n">eos</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t_in</span><span class="p">.</span><span class="n">last</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="field-details">Field Details</h2>
+<h3 id="tkeep-keep">TKEEP (keep)</h3>
+<p>Indicates which bytes in TDATA are valid:</p>
+<div class="highlight"><pre><span></span><code><span class="n">pkt</span><span class="w"> </span><span class="n">p</span><span class="p">;</span>
+<span class="n">p</span><span class="p">.</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xAABBCCDD</span><span class="p">;</span>
+<span class="n">p</span><span class="p">.</span><span class="n">keep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xF</span><span class="p">;</span><span class="w">   </span><span class="c1">// 0b1111 - all 4 bytes valid</span>
+<span class="n">p</span><span class="p">.</span><span class="n">keep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x3</span><span class="p">;</span><span class="w">   </span><span class="c1">// 0b0011 - only bytes 0,1 valid (0xCCDD)</span>
+<span class="n">p</span><span class="p">.</span><span class="n">keep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xC</span><span class="p">;</span><span class="w">   </span><span class="c1">// 0b1100 - only bytes 2,3 valid (0xAABB)</span>
+</code></pre></div>
+
+<h3 id="tlast-last">TLAST (last)</h3>
+<p>Marks end of a packet/transaction:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Sending a 3-word packet</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pkt</span><span class="w"> </span><span class="n">p</span><span class="p">;</span>
+<span class="w">    </span><span class="n">p</span><span class="p">.</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="n">p</span><span class="p">.</span><span class="n">keep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xF</span><span class="p">;</span>
+<span class="w">    </span><span class="n">p</span><span class="p">.</span><span class="n">last</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w">  </span><span class="c1">// Set last on final word</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="tuser-user">TUSER (user)</h3>
+<p>User-defined sideband data:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Example: Use TUSER for packet type</span>
+<span class="cp">#define PKT_TYPE_DATA   0</span>
+<span class="cp">#define PKT_TYPE_CMD    1</span>
+<span class="cp">#define PKT_TYPE_STATUS 2</span>
+
+<span class="n">pkt</span><span class="w"> </span><span class="n">p</span><span class="p">;</span>
+<span class="n">p</span><span class="p">.</span><span class="n">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PKT_TYPE_CMD</span><span class="p">;</span>
+</code></pre></div>
+
+<hr />
+<h2 id="ap_axis-vs-ap_axiu">ap_axis vs ap_axiu</h2>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Data Field Type</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ap_axis</code></td>
+<td><code>ap_int&lt;D&gt;</code> (signed)</td>
+<td>Signed data streams</td>
+</tr>
+<tr>
+<td><code>ap_axiu</code></td>
+<td><code>ap_uint&lt;D&gt;</code> (unsigned)</td>
+<td>Most common, raw bytes</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="interface-pragma">Interface Pragma</h2>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">kernel</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">pkt</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">pkt</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE mode=axis port=in</span>
+<span class="cp">#pragma HLS INTERFACE mode=axis port=out</span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>The <code>mode=axis</code> pragma creates full AXI4-Stream interface with all signals.</p>
+<hr />
+<h2 id="test-bench">Test Bench</h2>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;kernel.h&quot;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">pkt</span><span class="o">&gt;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Create test packets</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">pkt</span><span class="w"> </span><span class="n">p</span><span class="p">;</span>
+<span class="w">        </span><span class="n">p</span><span class="p">.</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span>
+<span class="w">        </span><span class="n">p</span><span class="p">.</span><span class="n">keep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xF</span><span class="p">;</span>
+<span class="w">        </span><span class="n">p</span><span class="p">.</span><span class="n">strb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xF</span><span class="p">;</span>
+<span class="w">        </span><span class="n">p</span><span class="p">.</span><span class="n">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">p</span><span class="p">.</span><span class="n">last</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">9</span><span class="p">);</span><span class="w">  </span><span class="c1">// Last packet</span>
+<span class="w">        </span><span class="n">p</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">p</span><span class="p">.</span><span class="n">dest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">in</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Run kernel</span>
+<span class="w">    </span><span class="n">stream_processor</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Verify output</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">pkt</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">out</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">data</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">// Error</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">  </span><span class="c1">// Pass</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="related-types">Related Types</h2>
+<ul>
+<li><a href="hls-stream.md">hls::stream</a> - Streaming channel (without AXI signals)</li>
+<li><a href="hls-ap-hs.md">hls::ap_hs</a> - Handshake interface</li>
+</ul>
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/directio/ap_hs/">Vitis-HLS-Introductory-Examples/.../directio/ap_hs/</a></td>
+<td>AXI-Stream with handshake</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Interface/Streaming/using_axi_stream_with_side_channel_data/">Vitis-HLS-Introductory-Examples/.../using_axi_stream_with_side_channel_data/</a></td>
+<td>Full AXI-Stream example</td>
+</tr>
+</tbody>
+</table>
+    </main>
+</body>
+</html>

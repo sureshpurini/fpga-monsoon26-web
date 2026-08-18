@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pointer Streaming Interfaces - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="pointer-streaming-interfaces">Pointer Streaming Interfaces</h1>
+<p>Map C pointers to streaming hardware interfaces using <code>volatile</code> and INTERFACE pragma modes (<code>ap_fifo</code> or <code>ap_hs</code>).</p>
+<h2 id="overview">Overview</h2>
+<p>In HLS, pointer parameters can be mapped to streaming interfaces where each dereference becomes a hardware read/write operation. The <code>volatile</code> keyword is critical to prevent HLS from optimizing away multiple accesses.</p>
+<div class="highlight"><pre><span></span><code>C Code:                          Hardware:
+
+volatile din_t *d_i  ────────►  ┌─────────┐
+    *d_i (read)                 │ ap_fifo │◄── Input FIFO
+    *d_i (read)                 │   or    │
+                                │  ap_hs  │
+volatile dout_t *d_o ────────►  └─────────┘──► Output FIFO/HS
+    *d_o (write)
+</code></pre></div>
+
+<hr />
+<h2 id="key-constructs">Key Constructs</h2>
+<table>
+<thead>
+<tr>
+<th>Construct</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>volatile</code> keyword</td>
+<td>Prevents optimization of multiple pointer accesses</td>
+</tr>
+<tr>
+<td><code>#pragma HLS INTERFACE ap_fifo</code></td>
+<td>Buffered FIFO with configurable depth</td>
+</tr>
+<tr>
+<td><code>#pragma HLS INTERFACE ap_hs</code></td>
+<td>Per-element handshake (valid/ack)</td>
+</tr>
+<tr>
+<td><code>depth=N</code></td>
+<td>FIFO buffer depth (ap_fifo only)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="interface-mode-comparison">Interface Mode Comparison</h2>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Buffering</th>
+<th>Protocol</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ap_fifo</code></td>
+<td>Yes (configurable depth)</td>
+<td>Ready/valid with FIFO</td>
+<td>Burst transfers, buffered streaming</td>
+</tr>
+<tr>
+<td><code>ap_hs</code></td>
+<td>No</td>
+<td>Valid/ack per element</td>
+<td>Fine-grained control, each access is one transaction</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="complete-example">Complete Example</h2>
+<h3 id="ap_fifo-mode-buffered">ap_fifo Mode (Buffered)</h3>
+<p>From <a href="../../Vitis-HLS-Introductory-Examples/Modeling/Pointers/stream_good/">Vitis-HLS-Introductory-Examples/Modeling/Pointers/stream_good/</a>:</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;pointer_stream_good.h&quot;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">pointer_stream_good</span><span class="p">(</span><span class="k">volatile</span><span class="w"> </span><span class="n">dout_t</span><span class="w"> </span><span class="o">*</span><span class="n">d_o</span><span class="p">,</span><span class="w"> </span><span class="k">volatile</span><span class="w"> </span><span class="n">din_t</span><span class="w"> </span><span class="o">*</span><span class="n">d_i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE ap_fifo port=d_i depth=4</span>
+<span class="cp">#pragma HLS INTERFACE ap_fifo port=d_o depth=2</span>
+
+<span class="w">    </span><span class="n">din_t</span><span class="w"> </span><span class="n">acc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">acc</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="o">*</span><span class="n">d_i</span><span class="p">;</span><span class="w">        </span><span class="c1">// Read 1 from FIFO</span>
+<span class="w">    </span><span class="n">acc</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="o">*</span><span class="p">(</span><span class="n">d_i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w">  </span><span class="c1">// Read 2 (pointer arithmetic ignored for FIFO)</span>
+<span class="w">    </span><span class="o">*</span><span class="n">d_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acc</span><span class="p">;</span><span class="w">         </span><span class="c1">// Write 1 to FIFO</span>
+
+<span class="w">    </span><span class="n">acc</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="o">*</span><span class="p">(</span><span class="n">d_i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w">  </span><span class="c1">// Read 3</span>
+<span class="w">    </span><span class="n">acc</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="o">*</span><span class="p">(</span><span class="n">d_i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span><span class="w">  </span><span class="c1">// Read 4</span>
+<span class="w">    </span><span class="o">*</span><span class="p">(</span><span class="n">d_o</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acc</span><span class="p">;</span><span class="w">   </span><span class="c1">// Write 2</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Note:</strong> With <code>ap_fifo</code>, pointer arithmetic offsets are ignored - each dereference reads the next element from the FIFO sequentially.</p>
+<h3 id="ap_hs-mode-per-element-handshake">ap_hs Mode (Per-Element Handshake)</h3>
+<p>From <a href="../../Vitis-HLS-Introductory-Examples/Modeling/Pointers/stream_better/">Vitis-HLS-Introductory-Examples/Modeling/Pointers/stream_better/</a>:</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;pointer_stream_better.h&quot;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">pointer_stream_better</span><span class="p">(</span><span class="k">volatile</span><span class="w"> </span><span class="n">dout_t</span><span class="w"> </span><span class="o">*</span><span class="n">d_o</span><span class="p">,</span><span class="w"> </span><span class="k">volatile</span><span class="w"> </span><span class="n">din_t</span><span class="w"> </span><span class="o">*</span><span class="n">d_i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE ap_hs port=d_i</span>
+<span class="cp">#pragma HLS INTERFACE ap_hs port=d_o</span>
+
+<span class="w">    </span><span class="n">din_t</span><span class="w"> </span><span class="n">acc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">acc</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="o">*</span><span class="n">d_i</span><span class="p">;</span><span class="w">    </span><span class="c1">// Handshake transaction 1</span>
+<span class="w">    </span><span class="n">acc</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="o">*</span><span class="n">d_i</span><span class="p">;</span><span class="w">    </span><span class="c1">// Handshake transaction 2</span>
+<span class="w">    </span><span class="o">*</span><span class="n">d_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acc</span><span class="p">;</span><span class="w">     </span><span class="c1">// Handshake write</span>
+
+<span class="w">    </span><span class="n">acc</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="o">*</span><span class="n">d_i</span><span class="p">;</span><span class="w">    </span><span class="c1">// Handshake transaction 3</span>
+<span class="w">    </span><span class="n">acc</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="o">*</span><span class="n">d_i</span><span class="p">;</span><span class="w">    </span><span class="c1">// Handshake transaction 4</span>
+<span class="w">    </span><span class="o">*</span><span class="p">(</span><span class="n">d_o</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acc</span><span class="p">;</span><span class="w">   </span><span class="c1">// Handshake write</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Note:</strong> With <code>ap_hs</code>, each dereference is a separate valid/ack transaction. No buffering occurs.</p>
+<hr />
+<h2 id="code-generation-guidelines">Code Generation Guidelines</h2>
+<h3 id="kernel-template">Kernel Template</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdint.h&gt;</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="kt">int32_t</span><span class="w"> </span><span class="n">din_t</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">int32_t</span><span class="w"> </span><span class="n">dout_t</span><span class="p">;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">streaming_kernel</span><span class="p">(</span><span class="k">volatile</span><span class="w"> </span><span class="n">dout_t</span><span class="w"> </span><span class="o">*</span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="k">volatile</span><span class="w"> </span><span class="n">din_t</span><span class="w"> </span><span class="o">*</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Choose ONE interface mode:</span>
+<span class="w">    </span><span class="c1">// Option A: Buffered FIFO</span>
+<span class="cp">#pragma HLS INTERFACE ap_fifo port=in depth=8</span>
+<span class="cp">#pragma HLS INTERFACE ap_fifo port=out depth=4</span>
+
+<span class="w">    </span><span class="c1">// Option B: Per-element handshake</span>
+<span class="w">    </span><span class="c1">// #pragma HLS INTERFACE ap_hs port=in</span>
+<span class="w">    </span><span class="c1">// #pragma HLS INTERFACE ap_hs port=out</span>
+
+<span class="w">    </span><span class="n">din_t</span><span class="w"> </span><span class="n">acc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Each dereference = one stream operation</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">acc</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="o">*</span><span class="n">in</span><span class="p">;</span><span class="w">   </span><span class="c1">// Read from stream</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="o">*</span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acc</span><span class="p">;</span><span class="w">       </span><span class="c1">// Write to stream</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="key-constraints">Key Constraints</h3>
+<table>
+<thead>
+<tr>
+<th>Constraint</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>volatile</code> keyword</td>
+<td><strong>Mandatory</strong> - prevents HLS from caching/optimizing accesses</td>
+</tr>
+<tr>
+<td>Pointer arithmetic</td>
+<td>Ignored for <code>ap_fifo</code> - reads are sequential</td>
+</tr>
+<tr>
+<td>FIFO depth</td>
+<td>Must accommodate producer-consumer rate mismatch</td>
+</tr>
+<tr>
+<td>No random access</td>
+<td>Streaming interfaces are sequential only</td>
+</tr>
+</tbody>
+</table>
+<h3 id="required-pragmas">Required Pragmas</h3>
+<table>
+<thead>
+<tr>
+<th>Pragma</th>
+<th>Required?</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#pragma HLS INTERFACE ap_fifo</code></td>
+<td>Yes (if FIFO)</td>
+<td>Map pointer to buffered FIFO</td>
+</tr>
+<tr>
+<td><code>#pragma HLS INTERFACE ap_hs</code></td>
+<td>Yes (if handshake)</td>
+<td>Map pointer to valid/ack protocol</td>
+</tr>
+<tr>
+<td><code>depth=N</code></td>
+<td>For ap_fifo</td>
+<td>Set FIFO buffer size</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="test-bench-generation-guidelines">Test Bench Generation Guidelines</h2>
+<h3 id="test-bench-template">Test Bench Template</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;streaming_kernel.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 1. Declare test data</span>
+<span class="w">    </span><span class="n">din_t</span><span class="w"> </span><span class="n">input</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">};</span>
+<span class="w">    </span><span class="n">dout_t</span><span class="w"> </span><span class="n">output</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+
+<span class="w">    </span><span class="c1">// 2. For FIFO: use arrays that match depth</span>
+<span class="w">    </span><span class="c1">// For ap_hs: single elements work too</span>
+
+<span class="w">    </span><span class="c1">// 3. Execute DUT</span>
+<span class="w">    </span><span class="n">streaming_kernel</span><span class="p">(</span><span class="n">output</span><span class="p">,</span><span class="w"> </span><span class="n">input</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// 4. Verify results</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Output[0] = %d (expected 10)</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Output[1] = %d (expected 26)</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">output</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+
+<span class="w">    </span><span class="c1">// 5. Return 0 on success</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">errors</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="w"> </span><span class="n">errors</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">26</span><span class="p">)</span><span class="w"> </span><span class="n">errors</span><span class="o">++</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">errors</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Test FAILED with %d errors</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">errors</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Test PASSED</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="interface-specific-notes">Interface-Specific Notes</h3>
+<table>
+<thead>
+<tr>
+<th>Interface</th>
+<th>Test Bench Consideration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ap_fifo</code></td>
+<td>Use arrays sized to FIFO depth; simulation reads sequentially</td>
+</tr>
+<tr>
+<td><code>ap_hs</code></td>
+<td>Each call to kernel performs one set of transactions</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="optimization-guidance-for-agents">Optimization Guidance for Agents</h2>
+<h3 id="when-to-apply-this-pattern">When to Apply This Pattern</h3>
+<div class="highlight"><pre><span></span><code>Need streaming interface for pointer parameter?
+├── Need buffering between producer/consumer?
+│   ├── Yes → Use ap_fifo with appropriate depth
+│   └── No → Use ap_hs for tighter control
+├── Multiple accesses to same pointer?
+│   └── Must use volatile to prevent optimization
+└── Need random access?
+    └── No → Streaming pointers don&#39;t support random access
+            Use arrays with M-AXI instead
+</code></pre></div>
+
+<h3 id="decision-ap_fifo-vs-ap_hs">Decision: ap_fifo vs ap_hs</h3>
+<table>
+<thead>
+<tr>
+<th>Factor</th>
+<th>Choose ap_fifo</th>
+<th>Choose ap_hs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Buffering needed</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Producer/consumer rate mismatch</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Per-element flow control</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Simpler protocol</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Burst-like behavior</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h3 id="parameter-tuning">Parameter Tuning</h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Low Value</th>
+<th>High Value</th>
+<th>Guidance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>depth</code> (ap_fifo)</td>
+<td>2</td>
+<td>256+</td>
+<td>Match producer-consumer rate mismatch</td>
+</tr>
+</tbody>
+</table>
+<h3 id="common-pitfalls">Common Pitfalls</h3>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Symptom</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Missing <code>volatile</code></td>
+<td>HLS optimizes away multiple reads</td>
+<td>Add <code>volatile</code> to pointer declaration</td>
+</tr>
+<tr>
+<td>Using pointer arithmetic with ap_fifo</td>
+<td>Unexpected data ordering</td>
+<td>Pointer offsets ignored - reads are sequential</td>
+</tr>
+<tr>
+<td>FIFO depth too small</td>
+<td>Deadlock or stalls</td>
+<td>Increase depth to match data rate</td>
+</tr>
+<tr>
+<td>Expecting random access</td>
+<td>Wrong data read</td>
+<td>Use arrays with M-AXI for random access</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related-patterns">Related Patterns</h2>
+<ul>
+<li><a href="../types/hls-stream.md">hls::stream</a> - Preferred modern approach for streaming</li>
+<li><a href="directio-with-tasks.md">directio-with-tasks</a> - DirectIO scalars with data-driven tasks</li>
+</ul>
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Modeling/Pointers/stream_good/">Pointers/stream_good/</a></td>
+<td>ap_fifo mode with depth configuration</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Modeling/Pointers/stream_better/">Pointers/stream_better/</a></td>
+<td>ap_hs mode per-element handshake</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Modeling/Pointers/basic_pointers/">Pointers/basic_pointers/</a></td>
+<td>Basic pointer dereferencing</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Modeling/Pointers/basic_arithmetic/">Pointers/basic_arithmetic/</a></td>
+<td>Pointer arithmetic in loops</td>
+</tr>
+</tbody>
+</table>
+    </main>
+</body>
+</html>

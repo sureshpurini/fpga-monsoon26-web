@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hls::stream_of_blocks - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="hlsstream_of_blocks">hls::stream_of_blocks</h1>
+<p>Block-level streaming with random access within blocks. Combines the pipelining benefits of streaming with the flexibility of random access.</p>
+<h2 id="header">Header</h2>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_streamofblocks.h&gt;</span>
+</code></pre></div>
+
+<h2 id="syntax">Syntax</h2>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="n">data_t</span><span class="w"> </span><span class="n">block_t</span><span class="p">[</span><span class="n">BLOCK_SIZE</span><span class="p">];</span>
+<span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">channel</span><span class="p">;</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>block_t</code></td>
+<td>Block type (typically array typedef)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="lock-types">Lock Types</h2>
+<p>Access to blocks requires RAII locks:</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hls::write_lock&lt;block_t&gt;</code></td>
+<td>Acquire block for writing</td>
+</tr>
+<tr>
+<td><code>hls::read_lock&lt;block_t&gt;</code></td>
+<td>Acquire block for reading</td>
+</tr>
+</tbody>
+</table>
+<p>Locks are released automatically when they go out of scope.</p>
+<hr />
+<h2 id="basic-example">Basic Example</h2>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_streamofblocks.h&gt;</span>
+
+<span class="cp">#define BLOCK_SIZE 64</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">block_t</span><span class="p">[</span><span class="n">BLOCK_SIZE</span><span class="p">];</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">producer</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">input</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Acquire write lock on a block</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">write_lock</span><span class="o">&lt;</span><span class="n">block_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">lock</span><span class="p">(</span><span class="n">out</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">BLOCK_SIZE</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">lock</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">input</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w">  </span><span class="c1">// Random access write</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// Block sent automatically when lock goes out of scope</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">consumer</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">output</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Acquire read lock on a block</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">read_lock</span><span class="o">&lt;</span><span class="n">block_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">lock</span><span class="p">(</span><span class="n">in</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">BLOCK_SIZE</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lock</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w">  </span><span class="c1">// Random access read</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// Block released automatically</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">top</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">output</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">channel</span><span class="p">;</span>
+
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="w">    </span><span class="n">producer</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span><span class="w"> </span><span class="n">input</span><span class="p">);</span>
+<span class="w">    </span><span class="n">consumer</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span><span class="w"> </span><span class="n">output</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="random-access-within-blocks">Random Access Within Blocks</h2>
+<p>Unlike <code>hls::stream</code>, you can access elements in any order within a block:</p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">             </span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">read_lock</span><span class="o">&lt;</span><span class="n">block_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">in_lock</span><span class="p">(</span><span class="n">in</span><span class="p">);</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">write_lock</span><span class="o">&lt;</span><span class="n">block_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">out_lock</span><span class="p">(</span><span class="n">out</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Access in any order - not sequential!</span>
+<span class="w">    </span><span class="n">out_lock</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_lock</span><span class="p">[</span><span class="n">BLOCK_SIZE</span><span class="mi">-1</span><span class="p">];</span><span class="w">  </span><span class="c1">// Last to first</span>
+<span class="w">    </span><span class="n">out_lock</span><span class="p">[</span><span class="n">BLOCK_SIZE</span><span class="mi">-1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_lock</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span><span class="w">  </span><span class="c1">// First to last</span>
+
+<span class="w">    </span><span class="c1">// Middle elements</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">BLOCK_SIZE</span><span class="mi">-1</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">out_lock</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in_lock</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="diamond-pattern-with-blocks">Diamond Pattern with Blocks</h2>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">block_t</span><span class="p">[</span><span class="n">NUM_ELEMENTS</span><span class="p">];</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">funcA</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">           </span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out1</span><span class="p">,</span>
+<span class="w">           </span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">read_lock</span><span class="o">&lt;</span><span class="n">block_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">inL</span><span class="p">(</span><span class="n">in</span><span class="p">);</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">write_lock</span><span class="o">&lt;</span><span class="n">block_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">outL1</span><span class="p">(</span><span class="n">out1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">write_lock</span><span class="o">&lt;</span><span class="n">block_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">outL2</span><span class="p">(</span><span class="n">out2</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NUM_ELEMENTS</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">outL1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">inL</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">        </span><span class="n">outL2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">inL</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">top</span><span class="p">(...)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">c3</span><span class="p">;</span>
+
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="w">    </span><span class="n">funcA</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">);</span>
+<span class="w">    </span><span class="n">funcB</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c3</span><span class="p">);</span>
+<span class="w">    </span><span class="n">funcC</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">c3</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="when-to-use">When to Use</h2>
+<table>
+<thead>
+<tr>
+<th>Use Case</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Need random access within data unit</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Block-level synchronization</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Image tile processing</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Matrix operations on blocks</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Pure element-by-element streaming</td>
+<td>No - use <code>hls::stream</code></td>
+</tr>
+<tr>
+<td>No random access needed</td>
+<td>No - use <code>hls::stream</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="comparison-with-hlsstream">Comparison with hls::stream</h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>hls::stream</th>
+<th>hls::stream_of_blocks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Access</td>
+<td>Sequential (FIFO)</td>
+<td>Random within block</td>
+</tr>
+<tr>
+<td>Granularity</td>
+<td>Element</td>
+<td>Block</td>
+</tr>
+<tr>
+<td>Lock required</td>
+<td>No</td>
+<td>Yes (read_lock/write_lock)</td>
+</tr>
+<tr>
+<td>Use case</td>
+<td>Streaming</td>
+<td>Block processing</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related-types">Related Types</h2>
+<ul>
+<li><a href="hls-stream.md">hls::stream</a> - Element-by-element streaming</li>
+<li><a href="hls-read-write-lock.md">hls::read_lock / hls::write_lock</a> - Lock types for block access</li>
+</ul>
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Channels/using_stream_of_blocks/">Vitis-HLS-Introductory-Examples/.../using_stream_of_blocks/</a></td>
+<td>Diamond pattern with block streaming</td>
+</tr>
+</tbody>
+</table>
+    </main>
+</body>
+</html>

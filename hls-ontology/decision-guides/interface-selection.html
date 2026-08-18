@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interface Selection - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="interface-selection">Interface Selection</h1>
+<p><strong>Question:</strong> Which interface should I use for this port?</p>
+<p><strong>Category:</strong> Interface</p>
+<hr />
+<h2 id="decision-tree">Decision Tree</h2>
+<div class="highlight"><pre><span></span><code>What type of data?
+├── Large array/buffer
+│   ├── Accessed once, sequentially → axis (streaming)
+│   └── Random access or reuse → m_axi (memory-mapped)
+├── Scalar value
+│   └── Use s_axilite (register)
+└── Control signals
+    └── Use s_axilite port=return
+</code></pre></div>
+
+<hr />
+<h2 id="interface-comparison">Interface Comparison</h2>
+<table>
+<thead>
+<tr>
+<th>Interface</th>
+<th>Bandwidth</th>
+<th>Latency</th>
+<th>Access Pattern</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>m_axi</strong></td>
+<td>High (DDR ~19GB/s, HBM ~460GB/s)</td>
+<td>Higher</td>
+<td>Random or sequential</td>
+<td>External memory</td>
+</tr>
+<tr>
+<td><strong>axis</strong></td>
+<td>High (sustained)</td>
+<td>Lower</td>
+<td>Sequential only</td>
+<td>Streaming data</td>
+</tr>
+<tr>
+<td><strong>s_axilite</strong></td>
+<td>Low</td>
+<td>Low</td>
+<td>Register R/W</td>
+<td>Scalars, control</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="m_axi-axi4-master">m_axi (AXI4 Master)</h2>
+<p>Memory-mapped interface for accessing external memory (DDR, HBM).</p>
+<h3 id="when-to-use">When to Use</h3>
+<ul>
+<li>Accessing external memory (DDR, HBM)</li>
+<li>Large data transfers</li>
+<li>Random access patterns</li>
+<li>Data reuse (read multiple times)</li>
+</ul>
+<h3 id="when-not-to-use">When NOT to Use</h3>
+<ul>
+<li>Small scalar values</li>
+<li>Streaming data accessed once</li>
+<li>Low-latency requirements</li>
+</ul>
+<h3 id="example">Example</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">kernel</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=data depth=1024 offset=slave bundle=gmem</span>
+<span class="cp">#pragma HLS INTERFACE s_axilite port=size</span>
+<span class="cp">#pragma HLS INTERFACE s_axilite port=return</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">size</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">  </span><span class="c1">// Random access OK</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="key-parameters">Key Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>depth=N</code></td>
+<td>Expected array size (for co-sim)</td>
+</tr>
+<tr>
+<td><code>offset=slave</code></td>
+<td>Address from s_axilite register</td>
+</tr>
+<tr>
+<td><code>bundle=name</code></td>
+<td>Group ports on same AXI interface</td>
+</tr>
+<tr>
+<td><code>max_read_burst_length</code></td>
+<td>Max burst for reads (default: 16)</td>
+</tr>
+<tr>
+<td><code>max_write_burst_length</code></td>
+<td>Max burst for writes (default: 16)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="axis-axi4-stream">axis (AXI4-Stream)</h2>
+<p>Streaming interface for sequential data without addressing.</p>
+<h3 id="when-to-use_1">When to Use</h3>
+<ul>
+<li>Streaming data (video, audio, network)</li>
+<li>Kernel-to-kernel connections</li>
+<li>Data processed once, sequentially</li>
+<li>Low-latency streaming</li>
+</ul>
+<h3 id="when-not-to-use_1">When NOT to Use</h3>
+<ul>
+<li>Random access needed</li>
+<li>Data needs to be reused</li>
+<li>Need to seek/skip elements</li>
+</ul>
+<h3 id="example_1">Example</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">kernel</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">ap_axis</span><span class="o">&lt;</span><span class="mi">32</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="o">&gt;&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">            </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">ap_axis</span><span class="o">&lt;</span><span class="mi">32</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="o">&gt;&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE axis port=in</span>
+<span class="cp">#pragma HLS INTERFACE axis port=out</span>
+<span class="cp">#pragma HLS INTERFACE s_axilite port=return</span>
+
+<span class="w">    </span><span class="n">ap_axis</span><span class="o">&lt;</span><span class="mi">32</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">pkt</span><span class="p">;</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">in</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">pkt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">        </span><span class="n">pkt</span><span class="p">.</span><span class="n">data</span><span class="w"> </span><span class="o">*=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">        </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">pkt</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="key-parameters_1">Key Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>register_mode=both</code></td>
+<td>Add registers for timing</td>
+</tr>
+<tr>
+<td><code>register_mode=off</code></td>
+<td>No register insertion</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="s_axilite-axi4-lite-slave">s_axilite (AXI4-Lite Slave)</h2>
+<p>Register-based interface for control and scalar values.</p>
+<h3 id="when-to-use_2">When to Use</h3>
+<ul>
+<li>Scalar arguments (size, config values)</li>
+<li>Control/status registers</li>
+<li>Kernel start/done signaling (<code>port=return</code>)</li>
+</ul>
+<h3 id="when-not-to-use_2">When NOT to Use</h3>
+<ul>
+<li>Large data transfers</li>
+<li>High bandwidth requirements</li>
+<li>Array data</li>
+</ul>
+<h3 id="example_2">Example</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">kernel</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">threshold</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=data</span>
+<span class="cp">#pragma HLS INTERFACE s_axilite port=size bundle=control</span>
+<span class="cp">#pragma HLS INTERFACE s_axilite port=threshold bundle=control</span>
+<span class="cp">#pragma HLS INTERFACE s_axilite port=return bundle=control</span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="special-portreturn">Special: port=return</h3>
+<p>Controls kernel execution:
+- <code>ap_start</code> - Host writes to start kernel
+- <code>ap_done</code> - Kernel sets when complete
+- <code>ap_idle</code> - Kernel sets when idle
+- <code>ap_ready</code> - Kernel ready for input</p>
+<p>Add <code>autorestart</code> for continuous execution:</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS INTERFACE s_axilite port=return autorestart</span>
+</code></pre></div>
+
+<hr />
+<h2 id="other-interfaces">Other Interfaces</h2>
+<table>
+<thead>
+<tr>
+<th>Interface</th>
+<th>Description</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ap_fifo</code></td>
+<td>FIFO with handshake</td>
+<td>Simple internal streaming</td>
+</tr>
+<tr>
+<td><code>ap_memory</code></td>
+<td>BRAM-like interface</td>
+<td>Local memory connections</td>
+</tr>
+<tr>
+<td><code>ap_none</code></td>
+<td>Direct wire</td>
+<td>Combinational inputs</td>
+</tr>
+<tr>
+<td><code>ap_ctrl_none</code></td>
+<td>No block control</td>
+<td>Free-running kernels</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="quick-reference">Quick Reference</h2>
+<table>
+<thead>
+<tr>
+<th>Data Type</th>
+<th>Recommended Interface</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Large array (DDR/HBM)</td>
+<td><code>m_axi</code></td>
+</tr>
+<tr>
+<td>Streaming data</td>
+<td><code>axis</code></td>
+</tr>
+<tr>
+<td>Scalar parameter</td>
+<td><code>s_axilite</code></td>
+</tr>
+<tr>
+<td>Kernel control</td>
+<td><code>s_axilite port=return</code></td>
+</tr>
+<tr>
+<td>Local BRAM</td>
+<td><code>ap_memory</code></td>
+</tr>
+<tr>
+<td>Internal FIFO</td>
+<td><code>ap_fifo</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related">Related</h2>
+<ul>
+<li><a href="memory-bank-selection.html">Memory Bank Selection</a> - DDR/HBM bank assignment</li>
+<li><a href="../pragmas/index.html#interface">INTERFACE Pragma</a> - Full pragma reference</li>
+</ul>
+    </main>
+</body>
+</html>

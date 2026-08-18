@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfect Loop Restructuring - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="perfect-loop-restructuring">Perfect Loop Restructuring</h1>
+<p>Restructure imperfect loop nests into perfect loop nests to enable LOOP_FLATTEN and eliminate pipeline bubbles between outer loop iterations.</p>
+<h2 id="overview">Overview</h2>
+<p><strong>Perfect loop</strong>: All code is inside the innermost loop body.
+<strong>Imperfect loop</strong>: Code exists between loop levels (before/after inner loop).</p>
+<div class="highlight"><pre><span></span><code>IMPERFECT (pipeline bubbles):          PERFECT (continuous flow):
+┌─────────────────────────────┐        ┌─────────────────────────────┐
+│ for (i) {                   │        │ for (i) {                   │
+│   acc = 0;       ◄── GAP    │        │   for (j) {                 │
+│   for (j) {                 │   ──►  │     if (j == 0) acc = 0;    │
+│     acc += A[j];            │        │     acc += A[j];            │
+│   }                         │        │     if (j == N-1) B[i]=acc; │
+│   B[i] = acc;    ◄── GAP    │        │   }                         │
+│ }                           │        │ }                           │
+└─────────────────────────────┘        └─────────────────────────────┘
+</code></pre></div>
+
+<h2 id="key-constructs">Key Constructs</h2>
+<table>
+<thead>
+<tr>
+<th>Construct</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>if (j == 0)</code></td>
+<td>Replace pre-loop initialization</td>
+</tr>
+<tr>
+<td><code>if (j == N-1)</code></td>
+<td>Replace post-loop processing</td>
+</tr>
+<tr>
+<td><code>#pragma HLS LOOP_FLATTEN</code></td>
+<td>Merge perfect nested loops into single loop</td>
+</tr>
+<tr>
+<td><code>#pragma HLS PIPELINE</code></td>
+<td>Pipeline the innermost (or flattened) loop</td>
+</tr>
+</tbody>
+</table>
+<h2 id="syntax">Syntax</h2>
+<div class="highlight"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">M</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS LOOP_FLATTEN  </span><span class="c1">// Only works with perfect loops</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">j</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w">              </span><span class="c1">// First iteration of inner loop</span>
+<span class="w">            </span><span class="n">acc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">        </span><span class="n">acc</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">i</span><span class="p">;</span><span class="w">         </span><span class="c1">// Core computation</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">j</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">N</span><span class="mi">-1</span><span class="p">)</span><span class="w">            </span><span class="c1">// Last iteration of inner loop</span>
+<span class="w">            </span><span class="n">B</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acc</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">N</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Boundary Check</th>
+<th>Replaces</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>if (j == 0)</code></td>
+<td>Code before inner loop</td>
+</tr>
+<tr>
+<td><code>if (j == N-1)</code></td>
+<td>Code after inner loop</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="complete-example">Complete Example</h2>
+<p>From <a href="../../Vitis-HLS-Introductory-Examples/Pipelining/Loops/perfect_loop/loop_perfect.cpp">Pipelining/Loops/perfect_loop/loop_perfect.cpp</a>:</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;loop_perfect.h&quot;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">loop_perfect</span><span class="p">(</span><span class="n">din_t</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">dout_t</span><span class="w"> </span><span class="n">B</span><span class="p">[</span><span class="n">N</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">;</span>
+<span class="w">    </span><span class="n">dint_t</span><span class="w"> </span><span class="n">acc</span><span class="p">;</span>
+
+<span class="nl">LOOP_I</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nl">LOOP_J</span><span class="p">:</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">j</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w">              </span><span class="c1">// Replaces: acc = 0; before LOOP_J</span>
+<span class="w">                </span><span class="n">acc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">            </span><span class="n">acc</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">j</span><span class="p">;</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">j</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">19</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">           </span><span class="c1">// Replaces: code after LOOP_J</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">                    </span><span class="n">B</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acc</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span>
+<span class="w">                </span><span class="k">else</span>
+<span class="w">                    </span><span class="n">B</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>hls_config.cfg:</strong></p>
+<div class="highlight"><pre><span></span><code>syn.directive.pipeline=loop_perfect/LOOP_J
+</code></pre></div>
+
+<hr />
+<h2 id="variants">Variants</h2>
+<h3 id="variant-1-pipeline-inner-loop-default">Variant 1: Pipeline Inner Loop (Default)</h3>
+<p>Inner loop iterations overlap; outer loop is sequential.</p>
+<div class="highlight"><pre><span></span><code><span class="nl">LOOP_I</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">M</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nl">LOOP_J</span><span class="p">:</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1  </span><span class="c1">// Pipeline inner</span>
+<span class="w">            </span><span class="c1">// ... perfect loop body ...</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Cycles</strong>: M x N + pipeline_depth
+<strong>Resources</strong>: 1x loop body
+<strong>Array access</strong>: Sequential</p>
+<h3 id="variant-2-pipeline-outer-loop-unrolls-inner">Variant 2: Pipeline Outer Loop (Unrolls Inner)</h3>
+<p>All inner iterations execute in parallel.</p>
+<div class="highlight"><pre><span></span><code><span class="nl">LOOP_I</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">M</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1  </span><span class="c1">// Pipeline outer - unrolls inner!</span>
+<span class="w">    </span><span class="nl">LOOP_J</span><span class="p">:</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// ... perfect loop body ...</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=A complete dim=1  </span><span class="c1">// Required!</span>
+</code></pre></div>
+
+<p><strong>Cycles</strong>: M + pipeline_depth
+<strong>Resources</strong>: Nx loop body
+<strong>Array access</strong>: N parallel accesses (requires partitioning)</p>
+<h3 id="variant-3-flattened-loop">Variant 3: Flattened Loop</h3>
+<p>Merge into single loop of M*N iterations.</p>
+<div class="highlight"><pre><span></span><code><span class="nl">LOOP_I</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">M</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS LOOP_FLATTEN</span>
+<span class="w">    </span><span class="nl">LOOP_J</span><span class="p">:</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="w">            </span><span class="c1">// ... perfect loop body ...</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Benefit</strong>: Eliminates all loop overhead, continuous pipeline flow.</p>
+<hr />
+<h2 id="code-generation-guidelines">Code Generation Guidelines</h2>
+<h3 id="kernel-template">Kernel Template</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">kernel</span><span class="p">(</span><span class="n">din_t</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">dout_t</span><span class="w"> </span><span class="n">B</span><span class="p">[</span><span class="n">M</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE         </span><span class="c1">// Or on specific loop</span>
+<span class="c1">// #pragma HLS LOOP_FLATTEN  // If perfect loop</span>
+
+<span class="w">    </span><span class="n">dint_t</span><span class="w"> </span><span class="n">acc</span><span class="p">;</span>
+
+<span class="nl">OUTER</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">M</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nl">INNER</span><span class="p">:</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// BOUNDARY: First iteration setup</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">j</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">                </span><span class="n">acc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">initial_value</span><span class="p">;</span>
+
+<span class="w">            </span><span class="c1">// CORE: Main computation</span>
+<span class="w">            </span><span class="n">acc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">update</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">],</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">);</span>
+
+<span class="w">            </span><span class="c1">// BOUNDARY: Last iteration teardown</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">j</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">N</span><span class="mi">-1</span><span class="p">)</span>
+<span class="w">                </span><span class="n">B</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">finalize</span><span class="p">(</span><span class="n">acc</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="transformation-steps">Transformation Steps</h3>
+<ol>
+<li>Identify pre-inner-loop code (runs once per outer iteration)</li>
+<li>Move inside inner loop, guard with <code>if (inner_index == 0)</code></li>
+<li>Identify post-inner-loop code</li>
+<li>Move inside inner loop, guard with <code>if (inner_index == last)</code></li>
+<li>Verify no code remains between loop headers</li>
+<li>Apply <code>#pragma HLS LOOP_FLATTEN</code> if desired</li>
+</ol>
+<h3 id="key-constraints">Key Constraints</h3>
+<table>
+<thead>
+<tr>
+<th>Constraint</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Loop structure</td>
+<td>All code inside innermost loop</td>
+</tr>
+<tr>
+<td>Boundary checks</td>
+<td>Must be compile-time evaluable</td>
+</tr>
+<tr>
+<td>Loop bounds</td>
+<td>Should be compile-time constants for LOOP_FLATTEN</td>
+</tr>
+<tr>
+<td>Init pattern</td>
+<td>Use conditional reset, not pre-loop assignment</td>
+</tr>
+</tbody>
+</table>
+<h3 id="required-pragmas">Required Pragmas</h3>
+<table>
+<thead>
+<tr>
+<th>Pragma</th>
+<th>Required?</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#pragma HLS PIPELINE</code></td>
+<td>Yes</td>
+<td>Pipeline the loop iterations</td>
+</tr>
+<tr>
+<td><code>#pragma HLS LOOP_FLATTEN</code></td>
+<td>Optional</td>
+<td>Merge nested loops</td>
+</tr>
+<tr>
+<td><code>#pragma HLS ARRAY_PARTITION</code></td>
+<td>If outer pipeline</td>
+<td>Enable parallel access</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="test-bench-generation-guidelines">Test Bench Generation Guidelines</h2>
+<h3 id="test-bench-template">Test Bench Template</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;kernel.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;fstream&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">din_t</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+<span class="w">    </span><span class="n">dout_t</span><span class="w"> </span><span class="n">B</span><span class="p">[</span><span class="n">M</span><span class="p">];</span>
+<span class="w">    </span><span class="n">dout_t</span><span class="w"> </span><span class="n">B_golden</span><span class="p">[</span><span class="n">M</span><span class="p">];</span>
+
+<span class="w">    </span><span class="c1">// Initialize inputs</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">        </span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">din_t</span><span class="p">)</span><span class="n">i</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Compute golden reference (C model)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">M</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">dint_t</span><span class="w"> </span><span class="n">acc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span>
+<span class="w">            </span><span class="n">acc</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">j</span><span class="p">;</span>
+<span class="w">        </span><span class="n">B_golden</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">acc</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Execute DUT</span>
+<span class="w">    </span><span class="n">kernel</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">B</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Verify</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">errors</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">M</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">B</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">B_golden</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Mismatch at &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">B</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="w">                 </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; vs &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">B_golden</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">            </span><span class="n">errors</span><span class="o">++</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">errors</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Test PASSED&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Test FAILED with &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">errors</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; errors&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="optimization-guidance-for-agents">Optimization Guidance for Agents</h2>
+<h3 id="when-to-apply-this-pattern">When to Apply This Pattern</h3>
+<div class="highlight"><pre><span></span><code>Decision tree:
+├── Nested loop with code between levels?
+│   ├── Yes → Restructure to perfect loop
+│   │         ├── Pre-loop init? → if (j == 0)
+│   │         └── Post-loop code? → if (j == last)
+│   └── No → Already perfect, consider LOOP_FLATTEN
+├── Want to flatten loops?
+│   ├── Yes → Ensure perfect structure, add LOOP_FLATTEN
+│   └── No → Just pipeline inner loop
+└── Pipeline inner or outer?
+    ├── Inner (default): Sequential, low resources
+    └── Outer: Parallel, high resources, needs partition
+</code></pre></div>
+
+<h3 id="performance-optimization">Performance Optimization</h3>
+<table>
+<thead>
+<tr>
+<th>Optimization</th>
+<th>How to Apply</th>
+<th>Expected Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Perfect restructuring</td>
+<td>Move init/teardown inside with conditionals</td>
+<td>Eliminates pipeline bubbles</td>
+</tr>
+<tr>
+<td>LOOP_FLATTEN</td>
+<td>Add pragma after restructuring</td>
+<td>Single flattened loop, no overhead</td>
+</tr>
+<tr>
+<td>Pipeline inner</td>
+<td>Default choice</td>
+<td>M*N cycles, 1x resources</td>
+</tr>
+<tr>
+<td>Pipeline outer</td>
+<td>Add ARRAY_PARTITION</td>
+<td>M cycles, Nx resources</td>
+</tr>
+</tbody>
+</table>
+<h3 id="resource-vs-performance-trade-offs">Resource vs Performance Trade-offs</h3>
+<table>
+<thead>
+<tr>
+<th>Choice</th>
+<th>Performance Impact</th>
+<th>Resource Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Imperfect + inner pipeline</td>
+<td>Pipeline bubbles between outer iters</td>
+<td>Minimal</td>
+</tr>
+<tr>
+<td>Perfect + inner pipeline</td>
+<td>Continuous flow</td>
+<td>Minimal</td>
+</tr>
+<tr>
+<td>Perfect + LOOP_FLATTEN</td>
+<td>Optimal flow</td>
+<td>Minimal</td>
+</tr>
+<tr>
+<td>Perfect + outer pipeline</td>
+<td>Nx throughput</td>
+<td>Nx resources</td>
+</tr>
+</tbody>
+</table>
+<h3 id="parameter-tuning">Parameter Tuning</h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Low Value</th>
+<th>High Value</th>
+<th>Guidance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pipeline location</td>
+<td>Inner loop</td>
+<td>Outer loop</td>
+<td>Inner=low resource, Outer=high throughput</td>
+</tr>
+<tr>
+<td>LOOP_FLATTEN</td>
+<td>Off</td>
+<td>On</td>
+<td>Enable for perfect loops with constant bounds</td>
+</tr>
+</tbody>
+</table>
+<h3 id="common-pitfalls">Common Pitfalls</h3>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Symptom</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Code between loops</td>
+<td>Cannot LOOP_FLATTEN</td>
+<td>Restructure with boundary conditionals</td>
+</tr>
+<tr>
+<td>Variable loop bounds</td>
+<td>LOOP_FLATTEN fails</td>
+<td>Use constants or remove flatten</td>
+</tr>
+<tr>
+<td>Pipeline on outer without partition</td>
+<td>II violations</td>
+<td>Add ARRAY_PARTITION</td>
+</tr>
+<tr>
+<td>Last index off-by-one</td>
+<td>Wrong boundary behavior</td>
+<td>Use <code>j == N-1</code> not <code>j == N</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related-patterns">Related Patterns</h2>
+<ul>
+<li><a href="dataflow-diamond.md">dataflow-diamond</a> - Task-level parallelism (coarser grain)</li>
+<li><a href="memory-bottleneck-fix.md">memory-bottleneck-fix</a> - Shift register for adjacent reads</li>
+</ul>
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Pipelining/Loops/perfect_loop/loop_perfect.cpp">perfect_loop/loop_perfect.cpp</a></td>
+<td>Perfect loop nest example</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Pipelining/Loops/imperfect_loop/loop_imperfect.cpp">imperfect_loop/loop_imperfect.cpp</a></td>
+<td>Imperfect loop (for comparison)</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Pipelining/Loops/perfect_loop/hls_config.cfg">perfect_loop/hls_config.cfg</a></td>
+<td>Pipeline directive configuration</td>
+</tr>
+</tbody>
+</table>
+    </main>
+</body>
+</html>

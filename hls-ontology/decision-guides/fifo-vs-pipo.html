@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIFO vs PIPO Channel Selection - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="fifo-vs-pipo-channel-selection">FIFO vs PIPO Channel Selection</h1>
+<p>This guide helps you choose between FIFO and PIPO (Ping-Pong) channels in dataflow designs.</p>
+<h2 id="quick-decision">Quick Decision</h2>
+<div class="highlight"><pre><span></span><code>Need random access within data block?
+├── No → Use FIFO
+└── Yes → Use PIPO or stream_of_blocks
+</code></pre></div>
+
+<h2 id="channel-types-comparison">Channel Types Comparison</h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>FIFO</th>
+<th>PIPO</th>
+<th>Stream of Blocks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Access pattern</td>
+<td>Sequential only</td>
+<td>Random within buffer</td>
+<td>Random within block</td>
+</tr>
+<tr>
+<td>Synchronization</td>
+<td>Per element</td>
+<td>Per buffer swap</td>
+<td>Per block</td>
+</tr>
+<tr>
+<td>Latency</td>
+<td>Lower</td>
+<td>Higher</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Buffer size</td>
+<td>Small (depth N)</td>
+<td>2× full data</td>
+<td>N blocks</td>
+</tr>
+<tr>
+<td>Best for</td>
+<td>Streaming</td>
+<td>Batch processing</td>
+<td>Mixed patterns</td>
+</tr>
+</tbody>
+</table>
+<h2 id="fifo-channels">FIFO Channels</h2>
+<h3 id="when-to-use">When to Use</h3>
+<ul>
+<li>Data is processed element-by-element</li>
+<li>Each element is read/written exactly once</li>
+<li>Sequential access pattern</li>
+<li>Low latency required</li>
+</ul>
+<h3 id="example">Example</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">producer</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE</span>
+<span class="w">        </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">compute</span><span class="p">(</span><span class="n">i</span><span class="p">));</span><span class="w">  </span><span class="c1">// Write one at a time</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">consumer</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE</span>
+<span class="w">        </span><span class="n">process</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">());</span><span class="w">  </span><span class="c1">// Read one at a time</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="configuration">Configuration</h3>
+<div class="highlight"><pre><span></span><code># In hls_config.cfg
+syn.dataflow.default_channel=fifo
+syn.dataflow.fifo_depth=2
+</code></pre></div>
+
+<h2 id="pipo-ping-pong-channels">PIPO (Ping-Pong) Channels</h2>
+<h3 id="when-to-use_1">When to Use</h3>
+<ul>
+<li>Need random access to elements</li>
+<li>Complete block needed before processing starts</li>
+<li>Producer/consumer operate at different rates</li>
+<li>Algorithm requires seeing all data before output</li>
+</ul>
+<h3 id="example-use-cases">Example Use Cases</h3>
+<ol>
+<li><strong>FFT</strong>: Needs all samples before butterfly operations</li>
+<li><strong>Image filters</strong>: Needs line buffers for neighborhood access</li>
+<li><strong>Matrix operations</strong>: May need random access within tiles</li>
+</ol>
+<h3 id="configuration_1">Configuration</h3>
+<div class="highlight"><pre><span></span><code># In hls_config.cfg
+syn.dataflow.default_channel=pipo
+</code></pre></div>
+
+<h2 id="stream-of-blocks">Stream of Blocks</h2>
+<h3 id="when-to-use_2">When to Use</h3>
+<ul>
+<li>Need random access within blocks</li>
+<li>But streaming between blocks</li>
+<li>Block-level synchronization is sufficient</li>
+</ul>
+<h3 id="example_1">Example</h3>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="n">data_t</span><span class="w"> </span><span class="n">block_t</span><span class="p">[</span><span class="n">BLOCK_SIZE</span><span class="p">];</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">producer</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NUM_BLOCKS</span><span class="p">;</span><span class="w"> </span><span class="n">b</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">hls</span><span class="o">::</span><span class="n">write_lock</span><span class="o">&lt;</span><span class="n">block_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">lock</span><span class="p">(</span><span class="n">out</span><span class="p">);</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">BLOCK_SIZE</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">lock</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">compute</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">);</span><span class="w">  </span><span class="c1">// Random access OK</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span><span class="w">  </span><span class="c1">// Block released here</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">consumer</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream_of_blocks</span><span class="o">&lt;</span><span class="n">block_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">NUM_BLOCKS</span><span class="p">;</span><span class="w"> </span><span class="n">b</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">hls</span><span class="o">::</span><span class="n">read_lock</span><span class="o">&lt;</span><span class="n">block_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">lock</span><span class="p">(</span><span class="n">in</span><span class="p">);</span>
+<span class="w">        </span><span class="c1">// Can access lock[0], lock[5], lock[3] in any order</span>
+<span class="w">        </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lock</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">lock</span><span class="p">[</span><span class="n">BLOCK_SIZE</span><span class="mi">-1</span><span class="p">];</span><span class="w">  </span><span class="c1">// First + last</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h2 id="visual-comparison">Visual Comparison</h2>
+<h3 id="fifo-element-by-element">FIFO (Element-by-Element)</h3>
+<div class="highlight"><pre><span></span><code>Producer: [1]→[2]→[3]→[4]→[5]→...
+              ↓
+Consumer:    [1]→[2]→[3]→[4]→[5]→...
+
+Latency: 1 element
+</code></pre></div>
+
+<h3 id="pipo-buffer-by-buffer">PIPO (Buffer-by-Buffer)</h3>
+<div class="highlight"><pre><span></span><code>Producer: [1,2,3,4,5]────────[6,7,8,9,10]────────...
+                    ↓ swap           ↓ swap
+Consumer:          [1,2,3,4,5]────────[6,7,8,9,10]...
+
+Latency: Full buffer (5 elements)
+</code></pre></div>
+
+<h3 id="stream-of-blocks_1">Stream of Blocks</h3>
+<div class="highlight"><pre><span></span><code>Producer: [Block0]→[Block1]→[Block2]→...
+              ↓
+Consumer:    [Block0]→[Block1]→[Block2]→...
+
+Latency: 1 block
+Random access within each block OK
+</code></pre></div>
+
+<h2 id="performance-considerations">Performance Considerations</h2>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>FIFO</th>
+<th>PIPO</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Throughput</td>
+<td>Higher</td>
+<td>Lower</td>
+</tr>
+<tr>
+<td>Latency</td>
+<td>Lower</td>
+<td>Higher</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>O(depth)</td>
+<td>O(2 × data_size)</td>
+</tr>
+<tr>
+<td>Flexibility</td>
+<td>Lower</td>
+<td>Higher</td>
+</tr>
+</tbody>
+</table>
+<h2 id="summary">Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Channel Choice</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Streaming video/audio</td>
+<td>FIFO</td>
+</tr>
+<tr>
+<td>FFT/DCT</td>
+<td>PIPO or stream_of_blocks</td>
+</tr>
+<tr>
+<td>Simple filter (no history)</td>
+<td>FIFO</td>
+</tr>
+<tr>
+<td>Image convolution</td>
+<td>PIPO (line buffers)</td>
+</tr>
+<tr>
+<td>Packet processing</td>
+<td>FIFO</td>
+</tr>
+<tr>
+<td>Matrix operations</td>
+<td>PIPO</td>
+</tr>
+</tbody>
+</table>
+    </main>
+</body>
+</html>

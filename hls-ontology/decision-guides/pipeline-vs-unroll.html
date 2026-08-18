@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pipeline vs Unroll - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="pipeline-vs-unroll">Pipeline vs Unroll</h1>
+<p><strong>Question:</strong> Should I pipeline or unroll this loop?</p>
+<p><strong>Category:</strong> Loop Optimization</p>
+<blockquote>
+<p><strong>Source:</strong> <a href="../../schema/decision-guides.yaml">decision-guides.yaml → pipeline-vs-unroll</a></p>
+</blockquote>
+<hr />
+<h2 id="quick-answer">Quick Answer</h2>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Outer loops</td>
+<td><strong>Pipeline</strong></td>
+</tr>
+<tr>
+<td>Inner loops</td>
+<td><strong>Unroll</strong> (or both)</td>
+</tr>
+<tr>
+<td>Large iteration count</td>
+<td><strong>Pipeline</strong></td>
+</tr>
+<tr>
+<td>Small iteration count</td>
+<td><strong>Unroll</strong></td>
+</tr>
+<tr>
+<td>Resource constrained</td>
+<td><strong>Pipeline</strong></td>
+</tr>
+<tr>
+<td>Throughput critical</td>
+<td><strong>Combine both</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="fundamental-difference">Fundamental Difference</h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Pipeline</th>
+<th>Unroll</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Type of parallelism</strong></td>
+<td>Temporal (time)</td>
+<td>Spatial (space)</td>
+</tr>
+<tr>
+<td><strong>Effect</strong></td>
+<td>Overlap iterations</td>
+<td>Replicate hardware</td>
+</tr>
+<tr>
+<td><strong>Resources</strong></td>
+<td>Single loop body</td>
+<td>factor × loop body</td>
+</tr>
+<tr>
+<td><strong>Throughput</strong></td>
+<td>1 result per II cycles</td>
+<td>factor results per cycle</td>
+</tr>
+<tr>
+<td><strong>Latency</strong></td>
+<td>N × II cycles</td>
+<td>N / factor cycles</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="visual-comparison">Visual Comparison</h2>
+<h3 id="pipeline-temporal-parallelism">Pipeline (Temporal Parallelism)</h3>
+<p>Overlaps iterations in time:</p>
+<div class="highlight"><pre><span></span><code>Cycle:  1    2    3    4    5    6    7
+Iter 0: [===]
+Iter 1:      [===]
+Iter 2:           [===]
+Iter 3:                [===]
+</code></pre></div>
+
+<p><strong>One hardware instance, multiple iterations in flight.</strong></p>
+<h3 id="unroll-spatial-parallelism">Unroll (Spatial Parallelism)</h3>
+<p>Replicates hardware in space:</p>
+<div class="highlight"><pre><span></span><code>Cycle:  1    2
+HW 0:   [i=0][i=4]
+HW 1:   [i=1][i=5]
+HW 2:   [i=2][i=6]
+HW 3:   [i=3][i=7]
+</code></pre></div>
+
+<p><strong>Multiple hardware instances, each handles one iteration.</strong></p>
+<hr />
+<h2 id="comparison-table">Comparison Table</h2>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Pipeline (II=1)</th>
+<th>Unroll (factor=4)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Throughput</strong></td>
+<td>1 result/cycle</td>
+<td>4 results/cycle</td>
+</tr>
+<tr>
+<td><strong>Latency (N=100)</strong></td>
+<td>100 cycles</td>
+<td>25 cycles</td>
+</tr>
+<tr>
+<td><strong>Resources</strong></td>
+<td>1×</td>
+<td>4×</td>
+</tr>
+<tr>
+<td><strong>Memory ports needed</strong></td>
+<td>1</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="best-practice-combine-both">Best Practice: Combine Both</h2>
+<p>For nested loops, the common pattern is:</p>
+<div class="highlight"><pre><span></span><code><span class="nl">outer</span><span class="p">:</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">M</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE off  </span><span class="c1">// Don&#39;t pipeline outer (optional)</span>
+<span class="w">    </span><span class="nl">inner</span><span class="p">:</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1  </span><span class="c1">// Pipeline inner</span>
+<span class="cp">#pragma HLS UNROLL factor=4  </span><span class="c1">// Also unroll inner</span>
+<span class="w">        </span><span class="c1">// Process 4 elements per cycle</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Or let HLS flatten and pipeline everything:</p>
+<div class="highlight"><pre><span></span><code><span class="nl">outer</span><span class="p">:</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">M</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nl">inner</span><span class="p">:</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1  </span><span class="c1">// Flattens and pipelines both loops</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">process</span><span class="p">(</span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="decision-guide">Decision Guide</h2>
+<div class="highlight"><pre><span></span><code>Is this a nested loop?
+├── Yes
+│   ├── Outer loop → Pipeline (or let inner pipeline flatten it)
+│   └── Inner loop → Unroll + Pipeline
+└── No (single loop)
+    ├── Large iteration count?
+    │   ├── Yes → Pipeline
+    │   └── No → Consider full unroll
+    ├── Resource constrained?
+    │   ├── Yes → Pipeline (single instance)
+    │   └── No → Can unroll more
+    └── Need maximum throughput?
+        └── Yes → Partial unroll + Pipeline
+</code></pre></div>
+
+<hr />
+<h2 id="code-examples">Code Examples</h2>
+<h3 id="pipeline-only">Pipeline Only</h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// Good for large loops, resource efficient</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1024</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="w">    </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="c1">// Throughput: 1 element/cycle</span>
+<span class="c1">// Resources: 1 multiplier</span>
+</code></pre></div>
+
+<h3 id="unroll-only">Unroll Only</h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// Good for small loops needing parallelism</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS UNROLL</span>
+<span class="w">    </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="c1">// Throughput: 8 elements/cycle (all at once)</span>
+<span class="c1">// Resources: 8 multipliers</span>
+</code></pre></div>
+
+<h3 id="pipeline-partial-unroll">Pipeline + Partial Unroll</h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// Best of both worlds</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1024</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="cp">#pragma HLS UNROLL factor=4</span>
+<span class="w">    </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="c1">// Throughput: 4 elements/cycle</span>
+<span class="c1">// Resources: 4 multipliers</span>
+</code></pre></div>
+
+<hr />
+<h2 id="resource-vs-throughput-trade-off">Resource vs Throughput Trade-off</h2>
+<table>
+<thead>
+<tr>
+<th>Configuration</th>
+<th>Throughput</th>
+<th>Resources</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No optimization</td>
+<td>1 elem / N cycles</td>
+<td>1×</td>
+</tr>
+<tr>
+<td>Pipeline II=1</td>
+<td>1 elem / cycle</td>
+<td>1×</td>
+</tr>
+<tr>
+<td>Unroll factor=4</td>
+<td>4 elem / cycle</td>
+<td>4×</td>
+</tr>
+<tr>
+<td>Pipeline + Unroll 4</td>
+<td>4 elem / cycle</td>
+<td>4×</td>
+</tr>
+<tr>
+<td>Full unroll (N=8)</td>
+<td>8 elem / cycle</td>
+<td>8×</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related-pragmas">Related Pragmas</h2>
+<ul>
+<li><code>#pragma HLS PIPELINE</code> - Temporal parallelism</li>
+<li><code>#pragma HLS UNROLL</code> - Spatial parallelism</li>
+<li><code>#pragma HLS ARRAY_PARTITION</code> - Enable parallel memory access</li>
+</ul>
+<hr />
+<h2 id="related">Related</h2>
+<ul>
+<li><a href="when-to-pipeline.html">When to Pipeline</a> - Pipeline decision guide</li>
+<li><a href="when-to-unroll.html">When to Unroll</a> - Unroll decision guide</li>
+<li><a href="when-to-partition.html">When to Partition</a> - Array partitioning</li>
+</ul>
+    </main>
+</body>
+</html>

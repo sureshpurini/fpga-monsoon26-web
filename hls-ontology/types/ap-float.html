@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ap_float / half - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="ap_float-half">ap_float / half</h1>
+<p>Custom and reduced-precision floating-point types for trading accuracy for resources.</p>
+<h2 id="header">Header</h2>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;ap_float.h&gt;</span><span class="c1">   // For ap_float</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_half.h&gt;</span><span class="c1">   // For half</span>
+</code></pre></div>
+
+<hr />
+<h2 id="ap_float">ap_float</h2>
+<p>Custom-width floating-point with configurable mantissa and exponent.</p>
+<h3 id="syntax">Syntax</h3>
+<div class="highlight"><pre><span></span><code><span class="n">ap_float</span><span class="o">&lt;</span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="n">E</span><span class="o">&gt;</span><span class="w"> </span><span class="n">var</span><span class="p">;</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>M</code></td>
+<td>Mantissa (significand) bits - determines precision</td>
+</tr>
+<tr>
+<td><code>E</code></td>
+<td>Exponent bits - determines range</td>
+</tr>
+</tbody>
+</table>
+<h3 id="common-configurations">Common Configurations</h3>
+<table>
+<thead>
+<tr>
+<th>Configuration</th>
+<th>Equivalent</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ap_float&lt;10, 5&gt;</code></td>
+<td>~half precision</td>
+<td>General reduced precision</td>
+</tr>
+<tr>
+<td><code>ap_float&lt;7, 8&gt;</code></td>
+<td>~bfloat16</td>
+<td>ML inference</td>
+</tr>
+<tr>
+<td><code>ap_float&lt;18, 5&gt;</code></td>
+<td>Custom</td>
+<td>Accumulation with extra precision</td>
+</tr>
+</tbody>
+</table>
+<h3 id="example">Example</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;ap_float.h&gt;</span>
+
+<span class="c1">// Custom precision for accumulation</span>
+<span class="k">using</span><span class="w"> </span><span class="n">apf_t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ap_float</span><span class="o">&lt;</span><span class="mi">18</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="o">&gt;</span><span class="p">;</span><span class="w">  </span><span class="c1">// 18-bit mantissa, 5-bit exponent</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">accumulate</span><span class="p">(</span><span class="kt">float</span><span class="o">*</span><span class="w"> </span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="kt">float</span><span class="o">*</span><span class="w"> </span><span class="n">output</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">apf_t</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE</span>
+<span class="w">        </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">apf_t</span><span class="p">(</span><span class="n">input</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span><span class="w">  </span><span class="c1">// Convert and accumulate</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="o">*</span><span class="n">output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">float</span><span class="p">(</span><span class="n">sum</span><span class="p">);</span><span class="w">  </span><span class="c1">// Convert back</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="hardware-accumulator-ap_float_acc">Hardware Accumulator (ap_float_acc)</h2>
+<p>Dedicated accumulator type for accurate summation of ap_float values. Solves the classic floating-point rounding error problem in large summations.</p>
+<h3 id="why-use-ap_float_acc">Why Use ap_float_acc?</h3>
+<p>Summing many floating-point values accumulates rounding errors:
+- Each addition rounds to nearest representable value
+- Errors compound over many iterations
+- Final result can be significantly off</p>
+<p><code>ap_float_acc</code> solves this by:
+- Using wider internal storage (ap_fixed)
+- Delaying final conversion until the last element
+- Preserving precision during intermediate additions</p>
+<h3 id="syntax_1">Syntax</h3>
+<div class="highlight"><pre><span></span><code><span class="n">ap_float_acc</span><span class="o">&lt;</span><span class="n">FloatType</span><span class="p">,</span><span class="w"> </span><span class="n">AccumType</span><span class="o">&gt;</span><span class="w"> </span><span class="n">acc</span><span class="p">;</span>
+<span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acc</span><span class="p">.</span><span class="n">accumulate</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="n">is_last</span><span class="p">);</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FloatType</code></td>
+<td>ap_float type for input/output (e.g., <code>ap_float&lt;18,5&gt;</code>)</td>
+</tr>
+<tr>
+<td><code>AccumType</code></td>
+<td>Internal accumulator type for extended precision (e.g., <code>ap_fixed&lt;32,16&gt;</code>)</td>
+</tr>
+<tr>
+<td><code>is_last</code></td>
+<td>Set <code>true</code> on final iteration to trigger conversion to FloatType</td>
+</tr>
+</tbody>
+</table>
+<h3 id="streaming-accumulation-example">Streaming Accumulation Example</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;ap_float.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_stream.h&gt;</span>
+
+<span class="k">using</span><span class="w"> </span><span class="n">apf_t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ap_float</span><span class="o">&lt;</span><span class="mi">18</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="o">&gt;</span><span class="p">;</span><span class="w">           </span><span class="c1">// Input/output type</span>
+<span class="k">using</span><span class="w"> </span><span class="n">acc_t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">32</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="o">&gt;</span><span class="p">;</span><span class="w">          </span><span class="c1">// Wide internal accumulator</span>
+<span class="k">using</span><span class="w"> </span><span class="n">stream_t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">accurate_sum</span><span class="p">(</span><span class="n">stream_t</span><span class="o">&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">stream_t</span><span class="o">&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">apf_t</span><span class="w"> </span><span class="n">res</span><span class="p">;</span>
+<span class="w">    </span><span class="n">ap_float_acc</span><span class="o">&lt;</span><span class="n">apf_t</span><span class="p">,</span><span class="w"> </span><span class="n">acc_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">acc</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">apf_t</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">        </span><span class="n">res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acc</span><span class="p">.</span><span class="n">accumulate</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">n</span><span class="mi">-1</span><span class="p">);</span><span class="w">  </span><span class="c1">// is_last on final iteration</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">((</span><span class="kt">float</span><span class="p">)</span><span class="n">res</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="choosing-accumtype-width">Choosing AccumType Width</h3>
+<table>
+<thead>
+<tr>
+<th>Input Mantissa</th>
+<th>Recommended AccumType</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10 bits</td>
+<td><code>ap_fixed&lt;24, 12&gt;</code></td>
+<td>~2× mantissa width</td>
+</tr>
+<tr>
+<td>18 bits</td>
+<td><code>ap_fixed&lt;32, 16&gt;</code></td>
+<td>Common for DSP</td>
+</tr>
+<tr>
+<td>23 bits</td>
+<td><code>ap_fixed&lt;48, 24&gt;</code></td>
+<td>Near float precision</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rule of thumb:</strong> AccumType mantissa ≥ 2× input mantissa for multi-thousand element sums.</p>
+<hr />
+<h2 id="half">half</h2>
+<p>IEEE 754 half-precision (16-bit) floating-point.</p>
+<h3 id="bit-layout">Bit Layout</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Bits</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sign</td>
+<td>1</td>
+<td>Sign bit</td>
+</tr>
+<tr>
+<td>Exponent</td>
+<td>5</td>
+<td>Exponent field</td>
+</tr>
+<tr>
+<td>Mantissa</td>
+<td>10</td>
+<td>Significand</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>16</strong></td>
+<td>Half the size of float</td>
+</tr>
+</tbody>
+</table>
+<h3 id="range-and-precision">Range and Precision</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Min positive</td>
+<td>~6.1e-5</td>
+</tr>
+<tr>
+<td>Max value</td>
+<td>~65504</td>
+</tr>
+<tr>
+<td>Precision</td>
+<td>~3 decimal digits</td>
+</tr>
+</tbody>
+</table>
+<h3 id="example_1">Example</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_half.h&gt;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">scale</span><span class="p">(</span><span class="n">half</span><span class="o">*</span><span class="w"> </span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="n">half</span><span class="o">*</span><span class="w"> </span><span class="n">output</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE</span>
+<span class="w">        </span><span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">input</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">half</span><span class="p">(</span><span class="mf">0.5f</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Wide memory access with half</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_vector.h&gt;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">half</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span><span class="o">&gt;</span><span class="w"> </span><span class="n">half32</span><span class="p">;</span><span class="w">  </span><span class="c1">// 512 bits = 32 half values</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">wide_scale</span><span class="p">(</span><span class="n">half32</span><span class="o">*</span><span class="w"> </span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="n">half32</span><span class="o">*</span><span class="w"> </span><span class="n">output</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=input bundle=gmem</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=output bundle=gmem</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE</span>
+<span class="w">        </span><span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">input</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">half</span><span class="p">(</span><span class="mf">2.0f</span><span class="p">);</span><span class="w">  </span><span class="c1">// Scale all 32 values</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="conversion">Conversion</h2>
+<div class="highlight"><pre><span></span><code><span class="c1">// float to half</span>
+<span class="n">half</span><span class="w"> </span><span class="n">h</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">half</span><span class="p">(</span><span class="mf">3.14159f</span><span class="p">);</span>
+
+<span class="c1">// half to float</span>
+<span class="kt">float</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">float</span><span class="p">(</span><span class="n">h</span><span class="p">);</span>
+<span class="c1">// or</span>
+<span class="kt">float</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="p">.</span><span class="n">to_float</span><span class="p">();</span>
+
+<span class="c1">// ap_float to float</span>
+<span class="n">ap_float</span><span class="o">&lt;</span><span class="mi">18</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="o">&gt;</span><span class="w"> </span><span class="n">af</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">3.14159f</span><span class="p">;</span>
+<span class="kt">float</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">float</span><span class="p">(</span><span class="n">af</span><span class="p">);</span>
+</code></pre></div>
+
+<hr />
+<h2 id="when-to-use">When to Use</h2>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>half</code></td>
+<td>ML inference, graphics, bandwidth-limited</td>
+</tr>
+<tr>
+<td><code>ap_float</code></td>
+<td>Custom precision, accumulation, resource optimization</td>
+</tr>
+<tr>
+<td><code>float</code></td>
+<td>Standard precision, compatibility</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="when-not-to-use">When NOT to Use</h2>
+<table>
+<thead>
+<tr>
+<th>Avoid</th>
+<th>Reason</th>
+<th>Alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Scientific computing</td>
+<td>Need high precision</td>
+<td><code>double</code></td>
+</tr>
+<tr>
+<td>Large accumulations</td>
+<td>Rounding errors</td>
+<td><code>ap_float</code> with larger mantissa</td>
+</tr>
+<tr>
+<td>Values outside range</td>
+<td>Overflow/underflow</td>
+<td><code>float</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="performance-notes">Performance Notes</h2>
+<table>
+<thead>
+<tr>
+<th>Consideration</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Conversion latency</td>
+<td>float ↔ half adds pipeline stages</td>
+</tr>
+<tr>
+<td>Native support</td>
+<td>Depends on target FPGA</td>
+</tr>
+<tr>
+<td>Memory bandwidth</td>
+<td>half = 2× throughput vs float</td>
+</tr>
+<tr>
+<td>Vector width</td>
+<td>32 half = 512 bits (AXI bus)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related-types">Related Types</h2>
+<ul>
+<li><a href="hls-vector.md">hls::vector</a> - Combine with half for wide memory access</li>
+<li><a href="ap-fixed.md">ap_fixed</a> - Fixed-point alternative</li>
+</ul>
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Modeling/using_ap_float_accumulator/">Vitis-HLS-Introductory-Examples/.../using_ap_float_accumulator/</a></td>
+<td>Custom ap_float for accumulation</td>
+</tr>
+</tbody>
+</table>
+    </main>
+</body>
+</html>

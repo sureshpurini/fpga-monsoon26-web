@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Interface Patterns - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="memory-interface-patterns">Memory Interface Patterns</h1>
+<p>This guide covers M-AXI memory interfaces, burst optimization, local memory patterns, and storage selection.</p>
+<h2 id="overview">Overview</h2>
+<p>Memory interfaces in HLS fall into two categories:</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Interface</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>External Memory</strong></td>
+<td>M-AXI</td>
+<td>DDR, HBM access via burst transfers</td>
+</tr>
+<tr>
+<td><strong>Local Memory</strong></td>
+<td>BRAM, URAM, LUTRAM</td>
+<td>On-chip arrays, buffers</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="m-axi-interface-basics">M-AXI Interface Basics</h2>
+<h3 id="basic-m-axi-configuration">Basic M-AXI Configuration</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">kernel</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=a depth=1024 offset=slave bundle=gmem \</span>
+<span class="cp">    max_read_burst_length=256 max_write_burst_length=256</span>
+
+<span class="cp">#pragma HLS INTERFACE s_axilite port=a      </span><span class="c1">// Address register</span>
+<span class="cp">#pragma HLS INTERFACE s_axilite port=size   </span><span class="c1">// Size parameter</span>
+<span class="cp">#pragma HLS INTERFACE s_axilite port=return </span><span class="c1">// Control</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="key-m-axi-parameters">Key M-AXI Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>depth</code></td>
+<td>Array size for co-simulation</td>
+<td>Required</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>Address mode: <code>slave</code>, <code>direct</code>, <code>off</code></td>
+<td>slave</td>
+</tr>
+<tr>
+<td><code>bundle</code></td>
+<td>Port grouping name</td>
+<td>gmem</td>
+</tr>
+<tr>
+<td><code>max_read_burst_length</code></td>
+<td>Max elements per read burst</td>
+<td>16</td>
+</tr>
+<tr>
+<td><code>max_write_burst_length</code></td>
+<td>Max elements per write burst</td>
+<td>16</td>
+</tr>
+<tr>
+<td><code>max_widen_bitwidth</code></td>
+<td>Port width for vectorization</td>
+<td>32</td>
+</tr>
+<tr>
+<td><code>latency</code></td>
+<td>Expected memory latency</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>num_read_outstanding</code></td>
+<td>Outstanding read transactions</td>
+<td>16</td>
+</tr>
+<tr>
+<td><code>num_write_outstanding</code></td>
+<td>Outstanding write transactions</td>
+<td>16</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="burst-optimization">Burst Optimization</h2>
+<h3 id="auto-burst-sequential-access">Auto-Burst (Sequential Access)</h3>
+<p>HLS automatically infers bursts for sequential loop access:</p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">auto_burst</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">mem</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">buf</span><span class="p">[</span><span class="n">N</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=mem depth=N</span>
+
+<span class="w">    </span><span class="c1">// Sequential access → auto-burst inferred</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="w">        </span><span class="n">buf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mem</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w">  </span><span class="c1">// Burst read</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="manual-burst-with-hlsburst_maxi">Manual Burst with hls::burst_maxi</h3>
+<p>When auto-burst fails (complex indexing, conditionals), use explicit burst control:</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_burst_maxi.h&quot;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">manual_burst</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">burst_maxi</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">burst_maxi</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=in depth=512 latency=32 bundle=gmem0</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=out depth=512 latency=32 bundle=gmem1</span>
+
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">buf</span><span class="p">[</span><span class="n">MAX_SIZE</span><span class="p">];</span>
+
+<span class="w">    </span><span class="c1">// Explicit burst read</span>
+<span class="w">    </span><span class="n">in</span><span class="p">.</span><span class="n">read_request</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">);</span><span class="w">        </span><span class="c1">// Request: offset, length</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">size</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="w">        </span><span class="n">buf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span><span class="w">          </span><span class="c1">// Read from burst buffer</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Process...</span>
+
+<span class="w">    </span><span class="c1">// Explicit burst write</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">write_request</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">);</span><span class="w">      </span><span class="c1">// Request: offset, length</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">size</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="w">        </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">buf</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span><span class="w">           </span><span class="c1">// Write to burst buffer</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">write_response</span><span class="p">();</span><span class="w">            </span><span class="c1">// Wait for completion</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>hls::burst_maxi API:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>read_request(offset, len)</code></td>
+<td>Request burst read</td>
+</tr>
+<tr>
+<td><code>read()</code></td>
+<td>Get next element from buffer</td>
+</tr>
+<tr>
+<td><code>write_request(offset, len)</code></td>
+<td>Request burst write</td>
+</tr>
+<tr>
+<td><code>write(data)</code></td>
+<td>Add element to write buffer</td>
+</tr>
+<tr>
+<td><code>write_response()</code></td>
+<td>Wait for write acknowledgment</td>
+</tr>
+</tbody>
+</table>
+<h3 id="port-widening">Port Widening</h3>
+<p>Widen M-AXI port for higher bandwidth:</p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">wide_port</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="n">N</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=a bundle=gmem max_widen_bitwidth=512</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=b bundle=gmem</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="w">        </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Effect:</strong> 512-bit port transfers 16 x 32-bit integers per transaction.</p>
+<p><strong>Note:</strong> In Vivado IP flow, add to config:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">config_interface</span><span class="w"> </span><span class="o">-</span>m_axi_max_widen_bitwidth<span class="w"> </span><span class="mi">512</span>
+<span class="nv">config_interface</span><span class="w"> </span><span class="o">-</span>m_axi_alignment_byte_size<span class="w"> </span><span class="mi">64</span>
+</code></pre></div>
+
+<hr />
+<h2 id="port-aliasing">Port Aliasing</h2>
+<p>When two M-AXI ports access the same memory:</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_fence.h&gt;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">writer</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">mem</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">done</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">SIZE</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE</span>
+<span class="w">        </span><span class="n">mem</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">fence</span><span class="p">(</span><span class="n">mem</span><span class="p">,</span><span class="w"> </span><span class="n">done</span><span class="p">);</span><span class="w">  </span><span class="c1">// Ensure writes complete</span>
+<span class="w">    </span><span class="n">done</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span><span class="w">       </span><span class="c1">// Signal completion</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">reader</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">mem</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">done</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF</span>
+<span class="w">    </span><span class="n">done</span><span class="p">.</span><span class="n">read</span><span class="p">();</span><span class="w">            </span><span class="c1">// Wait for writer</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">fence</span><span class="p">(</span><span class="n">done</span><span class="p">,</span><span class="w"> </span><span class="n">mem</span><span class="p">);</span><span class="w">  </span><span class="c1">// Ensure signal before reads</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">SIZE</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE</span>
+<span class="w">        </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">mem</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">top</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">memA</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">memB</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=memA bundle=axi1</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=memB bundle=axi2</span>
+<span class="cp">#pragma HLS ALIAS ports=memA,memB distance=0  </span><span class="c1">// Same memory!</span>
+
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="w"> </span><span class="n">sync</span><span class="p">;</span>
+<span class="w">    </span><span class="n">writer</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">memA</span><span class="p">,</span><span class="w"> </span><span class="n">sync</span><span class="p">);</span>
+<span class="w">    </span><span class="n">reader</span><span class="p">(</span><span class="n">memB</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="n">sync</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Key elements:</strong>
+- <code>#pragma HLS ALIAS</code> tells HLS ports share memory
+- <code>hls::fence(src, dst)</code> orders memory operations
+- Stream acts as synchronization barrier</p>
+<hr />
+<h2 id="m-axi-cache">M-AXI Cache</h2>
+<p>For access patterns with data reuse:</p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">cached_access</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">double</span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=in bundle=aximm depth=1025 \</span>
+<span class="cp">    max_read_burst_length=128 num_read_outstanding=256</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=out bundle=aximm depth=1024</span>
+
+<span class="cp">#pragma HLS cache port=in lines=1 depth=128</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">size</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">];</span><span class="w">  </span><span class="c1">// in[i+1] reused as in[i] next iteration</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Cache parameters:</strong>
+- <code>lines</code>: Number of cache lines (associativity)
+- <code>depth</code>: Elements per cache line</p>
+<p><strong>When to use:</strong> Overlapping access patterns (e.g., <code>in[i] + in[i+1]</code>)</p>
+<hr />
+<h2 id="local-memory-optimization">Local Memory Optimization</h2>
+<h3 id="bram-dual-port-access">BRAM Dual-Port Access</h3>
+<p>Use both BRAM ports with UNROLL factor=2:</p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">dual_port</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">c</span><span class="p">[</span><span class="n">N</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">buf_a</span><span class="p">[</span><span class="n">CHUNK</span><span class="p">],</span><span class="w"> </span><span class="n">buf_b</span><span class="p">[</span><span class="n">CHUNK</span><span class="p">],</span><span class="w"> </span><span class="n">buf_c</span><span class="p">[</span><span class="n">CHUNK</span><span class="p">];</span>
+
+<span class="w">    </span><span class="c1">// ... burst read ...</span>
+
+<span class="nl">process</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">CHUNK</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS UNROLL factor=2  </span><span class="c1">// Use both BRAM ports</span>
+<span class="w">        </span><span class="n">buf_c</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">buf_a</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">buf_b</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// ... burst write ...</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="memory-bottleneck-fix-shift-register">Memory Bottleneck Fix (Shift Register)</h3>
+<p>When accessing multiple adjacent elements:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// PROBLEM: 3 reads per iteration = II=3</span>
+<span class="n">dout_t</span><span class="w"> </span><span class="nf">bad</span><span class="p">(</span><span class="n">din_t</span><span class="w"> </span><span class="n">mem</span><span class="p">[</span><span class="n">N</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">dout_t</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">        </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">mem</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">mem</span><span class="p">[</span><span class="n">i</span><span class="mi">-1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">mem</span><span class="p">[</span><span class="n">i</span><span class="mi">-2</span><span class="p">];</span><span class="w">  </span><span class="c1">// 3 reads!</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">sum</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// SOLUTION: Shift register = 1 read per iteration = II=1</span>
+<span class="n">dout_t</span><span class="w"> </span><span class="nf">good</span><span class="p">(</span><span class="n">din_t</span><span class="w"> </span><span class="n">mem</span><span class="p">[</span><span class="n">N</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">din_t</span><span class="w"> </span><span class="n">tmp0</span><span class="p">,</span><span class="w"> </span><span class="n">tmp1</span><span class="p">,</span><span class="w"> </span><span class="n">tmp2</span><span class="p">;</span>
+<span class="w">    </span><span class="n">dout_t</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">tmp0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mem</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span><span class="w">  </span><span class="c1">// Prime the register</span>
+<span class="w">    </span><span class="n">tmp1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mem</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">tmp2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mem</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w">              </span><span class="c1">// Only 1 read</span>
+<span class="w">        </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">tmp2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">tmp1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">tmp0</span><span class="p">;</span>
+<span class="w">        </span><span class="n">tmp0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp1</span><span class="p">;</span><span class="w">                </span><span class="c1">// Shift</span>
+<span class="w">        </span><span class="n">tmp1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp2</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">sum</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="storage-selection">Storage Selection</h2>
+<h3 id="bind_storage-options">BIND_STORAGE Options</h3>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="n">data_t</span><span class="w"> </span><span class="n">buffer</span><span class="p">[</span><span class="n">SIZE</span><span class="p">];</span>
+<span class="cp">#pragma HLS BIND_STORAGE variable=buffer type=ram_2p impl=uram</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>impl</th>
+<th>Size</th>
+<th>Ports</th>
+<th>Use When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lutram</code></td>
+<td>Small (distributed)</td>
+<td>Many</td>
+<td>Small arrays, many ports</td>
+</tr>
+<tr>
+<td><code>bram</code></td>
+<td>18Kb/36Kb blocks</td>
+<td>1-2</td>
+<td>Medium arrays, standard</td>
+</tr>
+<tr>
+<td><code>uram</code></td>
+<td>288Kb blocks</td>
+<td>2</td>
+<td>Large arrays (&gt;36Kb)</td>
+</tr>
+<tr>
+<td><code>uram_ecc</code></td>
+<td>288Kb + ECC</td>
+<td>2</td>
+<td>Safety-critical</td>
+</tr>
+</tbody>
+</table>
+<h3 id="uram-example">URAM Example</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">uram_buffer</span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">wren</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">rden</span><span class="p">,</span><span class="w"> </span><span class="n">addr_t</span><span class="w"> </span><span class="n">addrW</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="w"> </span><span class="n">datain</span><span class="p">,</span>
+<span class="w">                 </span><span class="n">addr_t</span><span class="w"> </span><span class="n">addrR</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">dataout</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">data_t</span><span class="w"> </span><span class="n">buffer</span><span class="p">[</span><span class="n">NWORDS</span><span class="p">];</span>
+<span class="cp">#pragma HLS DEPENDENCE variable=buffer inter WAR false  </span><span class="c1">// Required for II=1</span>
+<span class="cp">#pragma HLS BIND_STORAGE variable=buffer type=ram_2p impl=uram</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">rden</span><span class="p">)</span>
+<span class="w">        </span><span class="o">*</span><span class="n">dataout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">buffer</span><span class="p">[</span><span class="n">addrR</span><span class="p">];</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">wren</span><span class="p">)</span>
+<span class="w">        </span><span class="n">buffer</span><span class="p">[</span><span class="n">addrW</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">datain</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="rom-inference">ROM Inference</h2>
+<p>Initialize lookup tables in sub-function for ROM inference:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Init function - optimized away at synthesis</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">init_lut</span><span class="p">(</span><span class="kt">int16_t</span><span class="w"> </span><span class="n">table</span><span class="p">[</span><span class="mi">256</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">256</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">table</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int16_t</span><span class="p">)(</span><span class="mf">32768.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">sin</span><span class="p">(</span><span class="n">M_PI</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">128</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">256.0</span><span class="p">));</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Main function</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">kernel</span><span class="p">(</span><span class="kt">int16_t</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="kt">int32_t</span><span class="w"> </span><span class="n">out</span><span class="p">[</span><span class="n">N</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="kt">int16_t</span><span class="w"> </span><span class="n">lut</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span><span class="w">  </span><span class="c1">// Becomes ROM</span>
+
+<span class="w">    </span><span class="n">init_lut</span><span class="p">(</span><span class="n">lut</span><span class="p">);</span><span class="w">  </span><span class="c1">// Evaluated at compile time, disappears</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int32_t</span><span class="p">)</span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="kt">int32_t</span><span class="p">)</span><span class="n">lut</span><span class="p">[</span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="mh">0xFF</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Key:</strong> Init function must be deterministic (no external inputs).</p>
+<hr />
+<h2 id="decision-guide">Decision Guide</h2>
+<div class="highlight"><pre><span></span><code>Memory access pattern?
+├── External memory (DDR/HBM)?
+│   ├── Sequential access → Auto-burst (pointer)
+│   ├── Complex indexing → hls::burst_maxi
+│   ├── Two ports same memory → ALIAS + hls::fence
+│   ├── Data reuse → #pragma HLS cache
+│   └── Need more bandwidth → max_widen_bitwidth
+│
+└── Local array (on-chip)?
+    ├── Large (&gt;36Kb) → URAM
+    ├── Medium → BRAM
+    ├── Small, many ports → LUTRAM
+    ├── Multiple adjacent reads → Shift register
+    ├── Want 2x throughput → UNROLL factor=2
+    └── Read-only computed values → ROM inference
+</code></pre></div>
+
+<hr />
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>Example</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Interface/Memory/using_axi_master/">using_axi_master/</a></td>
+<td>Basic M-AXI with memcpy burst</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Interface/Memory/burst_rw/">burst_rw/</a></td>
+<td>M-AXI burst read/write configuration</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Interface/Memory/manual_burst/">manual_burst/</a></td>
+<td>hls::burst_maxi explicit burst control</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Interface/Memory/aliasing_axi_master_ports/">aliasing_axi_master_ports/</a></td>
+<td>ALIAS pragma with hls::fence</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Interface/Memory/max_widen_port_width/">max_widen_port_width/</a></td>
+<td>Port widening for bandwidth</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Interface/Memory/cache/">cache/</a></td>
+<td>M-AXI cache for data reuse</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Interface/Memory/lmem_2rw/">lmem_2rw/</a></td>
+<td>BRAM dual-port access</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Interface/Memory/memory_bottleneck/">memory_bottleneck/</a></td>
+<td>Shift register optimization</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Interface/Memory/ram_uram/">ram_uram/</a></td>
+<td>URAM with DEPENDENCE</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Interface/Memory/ecc_flags/">ecc_flags/</a></td>
+<td>URAM with ECC</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Interface/Memory/rom_lookup_table_math/">rom_lookup_table_math/</a></td>
+<td>ROM inference for lookup</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Interface/Memory/coefficient_filter/">coefficient_filter/</a></td>
+<td>Hamming window ROM</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related-documentation">Related Documentation</h2>
+<ul>
+<li><a href="aggregation.md">Aggregation/Disaggregation</a> - Struct packing for M-AXI</li>
+<li><a href="../types/hls-burst-maxi.md">hls::burst_maxi Type</a> - Explicit burst API</li>
+<li><a href="../pragmas/index.md#cache">CACHE Pragma</a> - Cache configuration</li>
+<li><a href="../pragmas/index.md#bind_storage">BIND_STORAGE Pragma</a> - Storage selection</li>
+</ul>
+    </main>
+</body>
+</html>

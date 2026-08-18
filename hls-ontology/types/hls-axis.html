@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hls::axis - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="hlsaxis">hls::axis</h1>
+<p>Modern AXI-Stream packet type with flexible data type support. Preferred over ap_axis/ap_axiu for new designs.</p>
+<h2 id="header">Header</h2>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_stream.h&gt;</span>
+</code></pre></div>
+
+<h2 id="syntax">Syntax</h2>
+<div class="highlight"><pre><span></span><code><span class="n">hls</span><span class="o">::</span><span class="n">axis</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="n">WUser</span><span class="p">,</span><span class="w"> </span><span class="n">WId</span><span class="p">,</span><span class="w"> </span><span class="n">WDest</span><span class="o">&gt;</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>T</code></td>
+<td>Data type (any synthesizable type)</td>
+<td>Required</td>
+</tr>
+<tr>
+<td><code>WUser</code></td>
+<td>TUSER width (0 to disable)</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>WId</code></td>
+<td>TID width (0 to disable)</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>WDest</code></td>
+<td>TDEST width (0 to disable)</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="fields">Fields</h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data</code></td>
+<td><code>T</code></td>
+<td>Payload of arbitrary type</td>
+</tr>
+<tr>
+<td><code>keep</code></td>
+<td>auto</td>
+<td>Byte enables (auto-sized)</td>
+</tr>
+<tr>
+<td><code>last</code></td>
+<td><code>bool</code></td>
+<td>End of packet marker (TLAST)</td>
+</tr>
+<tr>
+<td><code>user</code></td>
+<td><code>ap_uint&lt;WUser&gt;</code></td>
+<td>User sideband (if WUser &gt; 0)</td>
+</tr>
+<tr>
+<td><code>id</code></td>
+<td><code>ap_uint&lt;WId&gt;</code></td>
+<td>Stream ID (if WId &gt; 0)</td>
+</tr>
+<tr>
+<td><code>dest</code></td>
+<td><code>ap_uint&lt;WDest&gt;</code></td>
+<td>Destination (if WDest &gt; 0)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="basic-example">Basic Example</h2>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_stream.h&gt;</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">axis</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="o">&gt;</span><span class="w"> </span><span class="n">pkt_t</span><span class="p">;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">pkt_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">pkt_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE axis port=in</span>
+<span class="cp">#pragma HLS INTERFACE axis port=out</span>
+
+<span class="w">    </span><span class="n">pkt_t</span><span class="w"> </span><span class="n">pkt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">    </span><span class="n">pkt</span><span class="p">.</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pkt</span><span class="p">.</span><span class="n">data</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="n">pkt</span><span class="p">.</span><span class="n">last</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w">  </span><span class="c1">// Mark end of packet</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">pkt</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="with-complex-types">With Complex Types</h2>
+<p><code>hls::axis</code> accepts any synthesizable type, unlike ap_axis which requires fixed bit-width:</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_stream.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;complex&gt;</span>
+
+<span class="c1">// Complex number streaming</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">axis</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">complex</span><span class="o">&lt;</span><span class="kt">short</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="o">&gt;</span><span class="w"> </span><span class="n">cplx_pkt_t</span><span class="p">;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">complex_scale</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">cplx_pkt_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">                   </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">cplx_pkt_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE axis port=in</span>
+<span class="cp">#pragma HLS INTERFACE axis port=out</span>
+
+<span class="w">    </span><span class="n">cplx_pkt_t</span><span class="w"> </span><span class="n">pkt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">    </span><span class="n">pkt</span><span class="p">.</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pkt</span><span class="p">.</span><span class="n">data</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">complex</span><span class="o">&lt;</span><span class="kt">short</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="n">pkt</span><span class="p">.</span><span class="n">last</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">pkt</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="with-structs">With Structs</h2>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">pixel_t</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">axis</span><span class="o">&lt;</span><span class="n">pixel_t</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="o">&gt;</span><span class="w"> </span><span class="n">pixel_pkt_t</span><span class="p">;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">brighten</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">pixel_pkt_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">              </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">pixel_pkt_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE axis port=in</span>
+<span class="cp">#pragma HLS INTERFACE axis port=out</span>
+
+<span class="w">    </span><span class="n">pixel_pkt_t</span><span class="w"> </span><span class="n">pkt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">    </span><span class="n">pkt</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">min</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="n">pkt</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">r</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">50</span><span class="p">);</span>
+<span class="w">    </span><span class="n">pkt</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">min</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="n">pkt</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">g</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">50</span><span class="p">);</span>
+<span class="w">    </span><span class="n">pkt</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">min</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="n">pkt</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">b</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">50</span><span class="p">);</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">pkt</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="with-hlsvector-wide-data">With hls::vector (Wide Data)</h2>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_vector.h&gt;</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="o">&gt;</span><span class="w"> </span><span class="n">vec16</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">axis</span><span class="o">&lt;</span><span class="n">vec16</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="o">&gt;</span><span class="w"> </span><span class="n">wide_pkt_t</span><span class="p">;</span><span class="w">  </span><span class="c1">// 512-bit data + 4-bit user</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">wide_process</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">wide_pkt_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">                  </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">wide_pkt_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE axis port=in</span>
+<span class="cp">#pragma HLS INTERFACE axis port=out</span>
+
+<span class="w">    </span><span class="n">wide_pkt_t</span><span class="w"> </span><span class="n">pkt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">    </span><span class="n">pkt</span><span class="p">.</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pkt</span><span class="p">.</span><span class="n">data</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">  </span><span class="c1">// Scale all 16 elements</span>
+<span class="w">    </span><span class="n">pkt</span><span class="p">.</span><span class="n">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xF</span><span class="p">;</span><span class="w">           </span><span class="c1">// Set user field</span>
+<span class="w">    </span><span class="n">pkt</span><span class="p">.</span><span class="n">last</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">pkt</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="with-side-channels">With Side Channels</h2>
+<div class="highlight"><pre><span></span><code><span class="c1">// Full side channel usage</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">axis</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">full_pkt_t</span><span class="p">;</span>
+<span class="c1">// 4-bit TUSER, 2-bit TID, 3-bit TDEST</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">route</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">full_pkt_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">           </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">full_pkt_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out0</span><span class="p">,</span>
+<span class="w">           </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">full_pkt_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE axis port=in</span>
+<span class="cp">#pragma HLS INTERFACE axis port=out0</span>
+<span class="cp">#pragma HLS INTERFACE axis port=out1</span>
+
+<span class="w">    </span><span class="n">full_pkt_t</span><span class="w"> </span><span class="n">pkt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Route based on destination field</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">pkt</span><span class="p">.</span><span class="n">dest</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">out0</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">pkt</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">out1</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">pkt</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="comparison-with-ap_axis">Comparison with ap_axis</h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>hls::axis</th>
+<th>ap_axis/ap_axiu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Data type</td>
+<td>Any synthesizable</td>
+<td>Fixed bit-width only</td>
+</tr>
+<tr>
+<td>Flexibility</td>
+<td>High</td>
+<td>Limited</td>
+</tr>
+<tr>
+<td>Preferred</td>
+<td>New designs</td>
+<td>Legacy compatibility</td>
+</tr>
+<tr>
+<td>Header</td>
+<td>hls_stream.h</td>
+<td>ap_axi_sdata.h</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="when-to-use">When to Use</h2>
+<table>
+<thead>
+<tr>
+<th>Use Case</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>New AXI-Stream designs</td>
+<td>Yes - preferred</td>
+</tr>
+<tr>
+<td>Complex/struct data</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Wide data (vectors)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Legacy code</td>
+<td>Consider ap_axis</td>
+</tr>
+<tr>
+<td>Simple streaming</td>
+<td>Consider plain hls::stream</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related-types">Related Types</h2>
+<ul>
+<li><a href="ap-axis.md">ap_axis / ap_axiu</a> - Legacy AXI-Stream types</li>
+<li><a href="hls-stream.md">hls::stream</a> - Simple streaming without side channels</li>
+<li><a href="hls-vector.md">hls::vector</a> - Wide data for axis packets</li>
+</ul>
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Interface/Streaming/using_axi_stream_with_struct/">Vitis-HLS-Introductory-Examples/.../using_axi_stream_with_struct/</a></td>
+<td>hls::axis with complex data</td>
+</tr>
+</tbody>
+</table>
+    </main>
+</body>
+</html>

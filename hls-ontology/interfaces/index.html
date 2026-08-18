@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLS Interface Guide - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="hls-interface-guide">HLS Interface Guide</h1>
+<p>This guide covers interface selection and configuration for Vitis HLS designs.</p>
+<h2 id="interface-types-overview">Interface Types Overview</h2>
+<table>
+<thead>
+<tr>
+<th>Interface</th>
+<th>Protocol</th>
+<th>Use Case</th>
+<th>Bandwidth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>m_axi</strong></td>
+<td>AXI4 Memory-Mapped</td>
+<td>DDR/HBM access, random access</td>
+<td>High</td>
+</tr>
+<tr>
+<td><strong>axis</strong></td>
+<td>AXI4-Stream</td>
+<td>Streaming data, sequential</td>
+<td>High (sustained)</td>
+</tr>
+<tr>
+<td><strong>s_axilite</strong></td>
+<td>AXI4-Lite</td>
+<td>Scalars, control registers</td>
+<td>Low</td>
+</tr>
+<tr>
+<td><strong>ap_fifo</strong></td>
+<td>FIFO handshake</td>
+<td>Internal streaming</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td><strong>ap_memory</strong></td>
+<td>BRAM interface</td>
+<td>On-chip memory</td>
+<td>High (local)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="quick-decision-guide">Quick Decision Guide</h2>
+<div class="highlight"><pre><span></span><code>What type of data?
+├── Large array/buffer
+│   ├── Sequential access → axis (streaming)
+│   └── Random access → m_axi (memory)
+├── Scalar value → s_axilite
+└── Control signals → s_axilite port=return
+</code></pre></div>
+
+<hr />
+<h2 id="interface-topics">Interface Topics</h2>
+<h3 id="aggregation-disaggregation"><a href="aggregation.md">Aggregation &amp; Disaggregation</a></h3>
+<p>How to handle structs in interfaces:
+- <strong>AGGREGATE</strong>: Pack struct into single wide word
+- <strong>DISAGGREGATE</strong>: Split struct into separate ports
+- <strong>compact modes</strong>: bit, byte, auto, none
+- <strong>Alignment pitfalls</strong>: M-AXI power-of-2 requirement</p>
+<h3 id="memory-interfaces-m-axi"><a href="memory.md">Memory Interfaces (M-AXI)</a></h3>
+<p>Key concepts:
+- Burst transfers for efficiency
+- Auto-burst vs explicit <code>hls::burst_maxi</code>
+- Port widening for bandwidth
+- Cache pragma for data reuse
+- Port aliasing with <code>hls::fence</code>
+- Power-of-2 struct alignment requirement</p>
+<p>Includes: BRAM/URAM storage, shift register optimization, ROM inference</p>
+<h3 id="streaming-interfaces-axi-stream"><a href="streaming.md">Streaming Interfaces (AXI-Stream)</a></h3>
+<p>Key concepts:
+- <code>ap_axis&lt;&gt;</code> / <code>ap_axiu&lt;&gt;</code> for side channels (TUSER, TID, TDEST)
+- <code>hls::axis&lt;&gt;</code> for custom data types (structs, complex)
+- <code>hls::axis_user&lt;&gt;</code> for selective side channels
+- Array of streams: <code>hls::stream&lt;T&gt; s[N]</code> for parallel channels
+- TLAST handling for packet boundaries
+- AXIS to M-AXI conversion with DATAFLOW</p>
+<p>Includes: Type comparison, register modes, stream-to-memory patterns</p>
+<h3 id="register-interfaces-axi-lite">Register Interfaces (AXI-Lite)</h3>
+<p>Key concepts:
+- Scalar parameters via <code>s_axilite</code>
+- Control/status registers (start, done, idle, ready)
+- Custom register offsets with <code>offset=0xNN</code>
+- M-AXI address pointers with <code>offset=slave</code>
+- Autorestart for streaming kernels</p>
+<p><strong>Custom Offset Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">kernel</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE s_axilite port=a bundle=BUS_A offset=0x20</span>
+<span class="cp">#pragma HLS INTERFACE s_axilite port=b bundle=BUS_A offset=0x28</span>
+<span class="cp">#pragma HLS INTERFACE s_axilite port=c bundle=BUS_A offset=0x30</span>
+<span class="cp">#pragma HLS INTERFACE s_axilite port=return bundle=BUS_A</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Reserved Registers (per bundle):</strong>
+| Address | Register |
+|---------|----------|
+| 0x00 | Control (start/done/idle/ready) |
+| 0x04 | Global interrupt enable |
+| 0x08 | IP interrupt enable |
+| 0x0C | IP interrupt status |</p>
+<p>See: <a href="../patterns/autorestart.md">autorestart pattern</a></p>
+<hr />
+<h2 id="struct-handling-in-interfaces">Struct Handling in Interfaces</h2>
+<h3 id="the-alignment-problem">The Alignment Problem</h3>
+<p>M-AXI interfaces require power-of-2 byte alignment. Non-aligned structs cause II violations.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// BAD: 24 bytes - causes II violations</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">A</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="p">;</span><span class="w"> </span><span class="p">};</span>
+
+<span class="c1">// GOOD: Force 32-byte alignment</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">alignas</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="p">;</span><span class="w"> </span><span class="p">};</span>
+</code></pre></div>
+
+<p>See: <a href="../patterns/struct-alignment.md">struct-alignment pattern</a></p>
+<h3 id="aggregate-vs-disaggregate">AGGREGATE vs DISAGGREGATE</h3>
+<table>
+<thead>
+<tr>
+<th>Pragma</th>
+<th>Result</th>
+<th>Use When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#pragma HLS aggregate</code></td>
+<td>Single wide port</td>
+<td>All fields accessed together</td>
+</tr>
+<tr>
+<td><code>#pragma HLS disaggregate</code></td>
+<td>Separate port per field</td>
+<td>Fields go to different destinations</td>
+</tr>
+</tbody>
+</table>
+<h3 id="compact-modes">compact Modes</h3>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Description</th>
+<th>Best For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>compact=bit</code></td>
+<td>Exact bit packing</td>
+<td>Minimum resource</td>
+</tr>
+<tr>
+<td><code>compact=byte</code></td>
+<td>Byte-aligned fields</td>
+<td>Software compatibility</td>
+</tr>
+<tr>
+<td><code>compact=auto</code></td>
+<td>HLS decides</td>
+<td>Default behavior</td>
+</tr>
+<tr>
+<td><code>compact=none</code></td>
+<td>Power-of-2 padding</td>
+<td>M-AXI (forced)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related-documentation">Related Documentation</h2>
+<h3 id="decision-guides">Decision Guides</h3>
+<ul>
+<li><a href="../decision-guides/interface-selection.md">interface-selection</a> - Which interface for this port?</li>
+<li><a href="../decision-guides/aggregate-vs-disaggregate.md">aggregate-vs-disaggregate</a> - Struct packing choice</li>
+<li><a href="../decision-guides/memory-bank-selection.md">memory-bank-selection</a> - DDR/HBM bank assignment</li>
+</ul>
+<h3 id="patterns">Patterns</h3>
+<ul>
+<li><a href="../patterns/struct-alignment.md">struct-alignment</a> - Fix M-AXI alignment issues</li>
+<li><a href="../patterns/manual-burst.md">manual-burst</a> - hls::burst_maxi explicit control</li>
+<li><a href="../patterns/port-aliasing.md">port-aliasing</a> - Two M-AXI ports same memory</li>
+<li><a href="../patterns/memory-bottleneck-fix.md">memory-bottleneck-fix</a> - Shift register optimization</li>
+<li><a href="../patterns/rom-inference.md">rom-inference</a> - Lookup table ROM pattern</li>
+<li><a href="../patterns/axis-to-maxi.md">axis-to-maxi</a> - Stream to memory with bursts</li>
+<li><a href="../patterns/array-of-streams.md">array-of-streams</a> - Multiple parallel AXIS ports</li>
+<li><a href="../patterns/axis-side-channels.md">axis-side-channels</a> - TLAST, TUSER, TID, TDEST</li>
+<li><a href="../patterns/maxi-with-tasks.md">maxi-with-tasks</a> - M-AXI with data-driven tasks</li>
+<li><a href="../patterns/directio-with-tasks.md">directio-with-tasks</a> - DirectIO scalars with tasks</li>
+</ul>
+<h3 id="pragmas">Pragmas</h3>
+<ul>
+<li><a href="../pragmas/index.md#interface">INTERFACE</a> - Interface specification</li>
+<li><a href="../pragmas/index.md#aggregate">AGGREGATE</a> - Struct packing</li>
+<li><a href="../pragmas/index.md#disaggregate">DISAGGREGATE</a> - Struct splitting</li>
+</ul>
+<h3 id="types">Types</h3>
+<ul>
+<li><a href="../types/ap-axis.md">ap_axis</a> - AXI-Stream with side channels</li>
+<li><a href="../types/hls-axis.md">hls::axis</a> - Modern AXI-Stream</li>
+<li><a href="../types/hls-burst-maxi.md">hls::burst_maxi</a> - Explicit burst control</li>
+</ul>
+<hr />
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Aggregation</td>
+<td><code>Interface/Aggregation_Disaggregation/</code></td>
+</tr>
+<tr>
+<td>Memory (M-AXI)</td>
+<td><code>Interface/Memory/</code></td>
+</tr>
+<tr>
+<td>Streaming (AXIS)</td>
+<td><code>Interface/Streaming/</code></td>
+</tr>
+<tr>
+<td>Register (AXI-Lite)</td>
+<td><code>Interface/Register/</code></td>
+</tr>
+</tbody>
+</table>
+    </main>
+</body>
+</html>

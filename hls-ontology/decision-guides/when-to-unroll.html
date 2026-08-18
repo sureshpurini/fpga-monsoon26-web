@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>When to Unroll - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="when-to-unroll">When to Unroll</h1>
+<p><strong>Question:</strong> Should I unroll this loop?</p>
+<p><strong>Category:</strong> Loop Optimization</p>
+<blockquote>
+<p><strong>Source:</strong> <a href="../../schema/decision-guides.yaml">decision-guides.yaml → when-to-unroll</a></p>
+</blockquote>
+<hr />
+<h2 id="quick-decision">Quick Decision</h2>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Small fixed iteration count, need max parallelism</td>
+<td><strong>Full unroll</strong></td>
+</tr>
+<tr>
+<td>Large loop, want some parallelism</td>
+<td><strong>Partial unroll</strong></td>
+</tr>
+<tr>
+<td>Very large iteration count</td>
+<td><strong>Don't unroll</strong></td>
+</tr>
+<tr>
+<td>Sequential dependencies</td>
+<td><strong>Don't unroll</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="unroll-options">Unroll Options</h2>
+<h3 id="full-unroll">Full Unroll</h3>
+<p>Completely unroll all iterations into parallel hardware.</p>
+<div class="highlight"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS UNROLL  </span><span class="c1">// Full unroll (no factor)</span>
+<span class="w">    </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Use when:</strong>
+- Small fixed iteration count (&lt; 16 typically)
+- Need maximum parallelism
+- Array is fully partitioned</p>
+<p><strong>Resources:</strong> 8 multipliers created (one per iteration)</p>
+<h3 id="partial-unroll">Partial Unroll</h3>
+<p>Unroll by a factor, keeping some loop structure.</p>
+<div class="highlight"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1024</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS UNROLL factor=4</span>
+<span class="w">    </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Use when:</strong>
+- Large loop, want some parallelism
+- Limited resources
+- Partial array partition</p>
+<p><strong>Resources:</strong> 4 multipliers, loop runs 256 iterations</p>
+<h3 id="no-unroll">No Unroll</h3>
+<p>Keep loop sequential.</p>
+<div class="highlight"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// No unroll pragma - sequential execution</span>
+<span class="w">    </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Use when:</strong>
+- Very large iteration count
+- Sequential dependencies
+- Memory bandwidth limited</p>
+<hr />
+<h2 id="resource-warning">Resource Warning</h2>
+<blockquote>
+<p><strong>Unrolling multiplies resources by unroll factor!</strong></p>
+<ul>
+<li>N iterations fully unrolled = <strong>N× logic</strong></li>
+<li>Consider partial unroll with factor to balance resources</li>
+</ul>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Loop Size</th>
+<th>Full Unroll</th>
+<th>Partial (factor=4)</th>
+<th>No Unroll</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>8 iterations</td>
+<td>8× resources</td>
+<td>4× resources</td>
+<td>1× resources</td>
+</tr>
+<tr>
+<td>1024 iterations</td>
+<td>1024× resources ❌</td>
+<td>4× resources</td>
+<td>1× resources</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="matching-array-partition">Matching Array Partition</h2>
+<p><strong>Critical:</strong> Unroll factor should match array partition factor!</p>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=arr cyclic factor=4</span>
+
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1024</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS UNROLL factor=4  </span><span class="c1">// Matches partition factor</span>
+<span class="w">    </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">process</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Unroll Factor</th>
+<th>Partition Factor</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4</td>
+<td>4</td>
+<td>✓ Optimal - 4 parallel accesses</td>
+</tr>
+<tr>
+<td>4</td>
+<td>2</td>
+<td>⚠ Memory bottleneck</td>
+</tr>
+<tr>
+<td>4</td>
+<td>8</td>
+<td>⚠ Wasted memory ports</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="decision-flowchart">Decision Flowchart</h2>
+<div class="highlight"><pre><span></span><code>How many loop iterations?
+├── Small &amp; fixed (&lt; 16)
+│   └── Need max parallelism?
+│       ├── Yes → Full unroll + complete partition
+│       └── No → Partial unroll or pipeline
+├── Medium (16-256)
+│   └── Partial unroll (factor=4 or 8)
+│       └── Match array partition factor
+└── Large (&gt; 256)
+    └── Don&#39;t unroll, use pipeline instead
+        └── Or partial unroll with small factor
+</code></pre></div>
+
+<hr />
+<h2 id="unroll-vs-pipeline">Unroll vs Pipeline</h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Unroll</th>
+<th>Pipeline</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Parallelism</strong></td>
+<td>Spatial (replicate hardware)</td>
+<td>Temporal (overlap iterations)</td>
+</tr>
+<tr>
+<td><strong>Resources</strong></td>
+<td>factor × loop body</td>
+<td>Single loop body</td>
+</tr>
+<tr>
+<td><strong>Throughput</strong></td>
+<td>factor results/cycle</td>
+<td>1 result/II cycles</td>
+</tr>
+<tr>
+<td><strong>Best for</strong></td>
+<td>Inner loops</td>
+<td>Outer loops</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Common pattern:</strong> Pipeline outer loop, unroll inner loop.</p>
+<div class="highlight"><pre><span></span><code><span class="nl">outer</span><span class="p">:</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">M</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="w">    </span><span class="nl">inner</span><span class="p">:</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS UNROLL  </span><span class="c1">// Full unroll inner</span>
+<span class="w">        </span><span class="c1">// Process 4 elements per outer iteration</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="related-pragmas">Related Pragmas</h2>
+<ul>
+<li><code>#pragma HLS UNROLL</code> - Unroll loop</li>
+<li><code>#pragma HLS ARRAY_PARTITION</code> - Match partition to unroll</li>
+<li><code>#pragma HLS PIPELINE</code> - Alternative temporal parallelism</li>
+</ul>
+<hr />
+<h2 id="related">Related</h2>
+<ul>
+<li><a href="pipeline-vs-unroll.html">Pipeline vs Unroll</a> - Detailed comparison</li>
+<li><a href="when-to-pipeline.html">When to Pipeline</a> - Pipeline decision guide</li>
+<li><a href="when-to-partition.html">When to Partition</a> - Array partitioning</li>
+</ul>
+    </main>
+</body>
+</html>

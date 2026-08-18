@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storage Selection - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="storage-selection">Storage Selection</h1>
+<p><strong>Question:</strong> Which storage type should I use for this array?</p>
+<p><strong>Category:</strong> Memory Optimization</p>
+<blockquote>
+<p><strong>Source:</strong> <a href="../../schema/decision-guides.yaml">decision-guides.yaml → storage-selection</a></p>
+</blockquote>
+<hr />
+<h2 id="decision-tree">Decision Tree</h2>
+<div class="highlight"><pre><span></span><code>Array size?
+├── Very small (&lt; 64 elements)
+│   └── LUTRAM or Registers
+├── Medium (64 - 4K elements)
+│   └── BRAM
+└── Large (&gt; 4K elements)
+    └── URAM (if available) or multiple BRAM
+</code></pre></div>
+
+<hr />
+<h2 id="storage-comparison">Storage Comparison</h2>
+<table>
+<thead>
+<tr>
+<th>Storage</th>
+<th>Capacity</th>
+<th>Ports</th>
+<th>Best For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Registers</strong></td>
+<td>Very small</td>
+<td>Unlimited</td>
+<td>Tiny arrays, full partition</td>
+</tr>
+<tr>
+<td><strong>LUTRAM</strong></td>
+<td>64 bits/LUT</td>
+<td>Distributed</td>
+<td>Small arrays, many ports</td>
+</tr>
+<tr>
+<td><strong>BRAM</strong></td>
+<td>18Kb or 36Kb</td>
+<td>Up to 2</td>
+<td>Medium arrays</td>
+</tr>
+<tr>
+<td><strong>URAM</strong></td>
+<td>288Kb</td>
+<td>Up to 2</td>
+<td>Large arrays (Versal/UltraScale+)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="registers">Registers</h2>
+<p>Individual flip-flops, unlimited parallel access.</p>
+<h3 id="when-to-use">When to Use</h3>
+<ul>
+<li>Very small arrays (&lt; 16 elements)</li>
+<li>Need full parallel access</li>
+<li>Array is completely partitioned</li>
+</ul>
+<h3 id="characteristics">Characteristics</h3>
+<ul>
+<li><strong>Capacity:</strong> Very small (one element per register)</li>
+<li><strong>Ports:</strong> Unlimited (all elements accessible simultaneously)</li>
+<li><strong>Latency:</strong> 0 cycles (combinational access)</li>
+</ul>
+<h3 id="example">Example</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">small_arr</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=small_arr complete</span>
+<span class="c1">// Becomes 8 individual registers</span>
+</code></pre></div>
+
+<hr />
+<h2 id="lutram-distributed-ram">LUTRAM (Distributed RAM)</h2>
+<p>Small memories distributed across LUTs.</p>
+<h3 id="when-to-use_1">When to Use</h3>
+<ul>
+<li>Small arrays (&lt; 64 elements)</li>
+<li>Need more than 2 ports</li>
+<li>Low latency required</li>
+</ul>
+<h3 id="characteristics_1">Characteristics</h3>
+<ul>
+<li><strong>Capacity:</strong> ~64 bits per LUT</li>
+<li><strong>Ports:</strong> Distributed (can have many read ports)</li>
+<li><strong>Latency:</strong> 0-1 cycles</li>
+</ul>
+<h3 id="example_1">Example</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">lookup_table</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>
+<span class="cp">#pragma HLS BIND_STORAGE variable=lookup_table type=RAM_1P impl=LUTRAM</span>
+</code></pre></div>
+
+<hr />
+<h2 id="bram-block-ram">BRAM (Block RAM)</h2>
+<p>Dedicated memory blocks on FPGA.</p>
+<h3 id="when-to-use_2">When to Use</h3>
+<ul>
+<li>Medium arrays (64 - 4K elements)</li>
+<li>Frequent access patterns</li>
+<li>Standard dual-port access sufficient</li>
+</ul>
+<h3 id="characteristics_2">Characteristics</h3>
+<ul>
+<li><strong>Capacity:</strong> 18Kb (RAMB18) or 36Kb (RAMB36)</li>
+<li><strong>Ports:</strong> Up to 2 (true dual-port)</li>
+<li><strong>Latency:</strong> 1-2 cycles</li>
+</ul>
+<h3 id="example_2">Example</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">buffer</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
+<span class="cp">#pragma HLS BIND_STORAGE variable=buffer type=RAM_2P impl=BRAM</span>
+</code></pre></div>
+
+<h3 id="port-configurations">Port Configurations</h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Read Ports</th>
+<th>Write Ports</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RAM_1P</td>
+<td>1</td>
+<td>1 (shared)</td>
+</tr>
+<tr>
+<td>RAM_2P</td>
+<td>2</td>
+<td>2 (shared)</td>
+</tr>
+<tr>
+<td>RAM_S2P</td>
+<td>1</td>
+<td>1 (separate)</td>
+</tr>
+<tr>
+<td>RAM_T2P</td>
+<td>2</td>
+<td>2 (true dual-port)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="uram-ultra-ram">URAM (Ultra RAM)</h2>
+<p>Large memory blocks on Versal/UltraScale+ devices.</p>
+<h3 id="when-to-use_3">When to Use</h3>
+<ul>
+<li>Large arrays (&gt; 4K elements)</li>
+<li>Versal or UltraScale+ FPGAs</li>
+<li>Need to conserve BRAM</li>
+</ul>
+<h3 id="characteristics_3">Characteristics</h3>
+<ul>
+<li><strong>Capacity:</strong> 288Kb (4K × 72 bits)</li>
+<li><strong>Ports:</strong> Up to 2</li>
+<li><strong>Latency:</strong> 1-2 cycles</li>
+<li><strong>Availability:</strong> Versal, UltraScale+ only</li>
+</ul>
+<h3 id="example_3">Example</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">large_buffer</span><span class="p">[</span><span class="mi">8192</span><span class="p">];</span>
+<span class="cp">#pragma HLS BIND_STORAGE variable=large_buffer type=RAM_2P impl=URAM</span>
+</code></pre></div>
+
+<hr />
+<h2 id="capacity-reference">Capacity Reference</h2>
+<table>
+<thead>
+<tr>
+<th>Storage</th>
+<th>Typical Capacity</th>
+<th>Example Array Size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LUTRAM</td>
+<td>64 bits/LUT</td>
+<td>16 × int (32-bit)</td>
+</tr>
+<tr>
+<td>BRAM (18Kb)</td>
+<td>18,432 bits</td>
+<td>576 × int (32-bit)</td>
+</tr>
+<tr>
+<td>BRAM (36Kb)</td>
+<td>36,864 bits</td>
+<td>1,152 × int (32-bit)</td>
+</tr>
+<tr>
+<td>URAM</td>
+<td>294,912 bits</td>
+<td>9,216 × int (32-bit)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="selection-guide">Selection Guide</h2>
+<div class="highlight"><pre><span></span><code><span class="c1">// Let HLS decide (default)</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="n">N</span><span class="p">];</span><span class="w">  </span><span class="c1">// AUTO selection</span>
+
+<span class="c1">// Force LUTRAM for small array</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">small</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>
+<span class="cp">#pragma HLS BIND_STORAGE variable=small impl=LUTRAM</span>
+
+<span class="c1">// Force BRAM for medium array</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">medium</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
+<span class="cp">#pragma HLS BIND_STORAGE variable=medium impl=BRAM</span>
+
+<span class="c1">// Force URAM for large array (Versal/UltraScale+)</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">large</span><span class="p">[</span><span class="mi">8192</span><span class="p">];</span>
+<span class="cp">#pragma HLS BIND_STORAGE variable=large impl=URAM</span>
+
+<span class="c1">// Complete partition to registers</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">tiny</span><span class="p">[</span><span class="mi">8</span><span class="p">];</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=tiny complete</span>
+</code></pre></div>
+
+<hr />
+<h2 id="ecc-support">ECC Support</h2>
+<p>For error correction (critical applications):</p>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">critical_data</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
+<span class="cp">#pragma HLS BIND_STORAGE variable=critical_data impl=uram_ecc</span>
+</code></pre></div>
+
+<hr />
+<h2 id="related-pragmas">Related Pragmas</h2>
+<ul>
+<li><code>#pragma HLS BIND_STORAGE</code> - Specify storage type</li>
+<li><code>#pragma HLS ARRAY_PARTITION</code> - Create registers via complete partition</li>
+<li><code>#pragma HLS ARRAY_RESHAPE</code> - Change memory word width</li>
+</ul>
+<hr />
+<h2 id="related">Related</h2>
+<ul>
+<li><a href="when-to-partition.html">When to Partition</a> - Array partitioning guide</li>
+<li><a href="../pragmas/index.html#bind_storage">BIND_STORAGE Pragma</a> - Full pragma reference</li>
+</ul>
+    </main>
+</body>
+</html>

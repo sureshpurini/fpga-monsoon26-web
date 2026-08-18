@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ap_fixed and ap_ufixed - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="ap_fixed-and-ap_ufixed">ap_fixed and ap_ufixed</h1>
+<p>Fixed-point arithmetic types for DSP applications - efficient alternative to floating-point.</p>
+<h2 id="header">Header</h2>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;ap_fixed.h&gt;</span>
+</code></pre></div>
+
+<h2 id="syntax">Syntax</h2>
+<div class="highlight"><pre><span></span><code><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="n">W</span><span class="p">,</span><span class="w"> </span><span class="n">I</span><span class="p">,</span><span class="w"> </span><span class="n">Q</span><span class="p">,</span><span class="w"> </span><span class="n">O</span><span class="o">&gt;</span><span class="w">  </span><span class="n">signed_fixed</span><span class="p">;</span><span class="w">    </span><span class="c1">// Signed fixed-point</span>
+<span class="n">ap_ufixed</span><span class="o">&lt;</span><span class="n">W</span><span class="p">,</span><span class="w"> </span><span class="n">I</span><span class="p">,</span><span class="w"> </span><span class="n">Q</span><span class="p">,</span><span class="w"> </span><span class="n">O</span><span class="o">&gt;</span><span class="w"> </span><span class="n">unsigned_fixed</span><span class="p">;</span><span class="w">  </span><span class="c1">// Unsigned fixed-point</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>W</code></td>
+<td>Total bit width</td>
+<td>Required</td>
+</tr>
+<tr>
+<td><code>I</code></td>
+<td>Integer bits (including sign for ap_fixed)</td>
+<td>Required</td>
+</tr>
+<tr>
+<td><code>Q</code></td>
+<td>Quantization mode</td>
+<td><code>AP_TRN</code></td>
+</tr>
+<tr>
+<td><code>O</code></td>
+<td>Overflow mode</td>
+<td><code>AP_WRAP</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Fractional bits</strong> = W - I</p>
+<hr />
+<h2 id="understanding-fixed-point-format">Understanding Fixed-Point Format</h2>
+<div class="highlight"><pre><span></span><code>ap_fixed&lt;16, 8&gt; value;
+// Total: 16 bits
+// Integer: 8 bits (including sign)
+// Fractional: 16 - 8 = 8 bits
+
+Binary representation:
+┌─────────────────────────────────────────┐
+│ S │ I I I I I I I │ F F F F F F F F │
+│(1)│   (7 bits)    │    (8 bits)     │
+└─────────────────────────────────────────┘
+  ↑       ↑                 ↑
+ Sign  Integer part    Fractional part
+
+Range: -128.0 to ~127.996
+Resolution: 1/256 = 0.00390625
+</code></pre></div>
+
+<hr />
+<h2 id="quantization-modes">Quantization Modes</h2>
+<p>How to handle bits lost during operations:</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Behavior</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AP_TRN</code></td>
+<td>Truncate (toward -∞)</td>
+<td>Default, fastest</td>
+</tr>
+<tr>
+<td><code>AP_TRN_ZERO</code></td>
+<td>Truncate toward zero</td>
+<td>Symmetric truncation</td>
+</tr>
+<tr>
+<td><code>AP_RND</code></td>
+<td>Round to nearest (ties to +∞)</td>
+<td>Better accuracy</td>
+</tr>
+<tr>
+<td><code>AP_RND_ZERO</code></td>
+<td>Round to nearest (ties to zero)</td>
+<td>Symmetric rounding</td>
+</tr>
+<tr>
+<td><code>AP_RND_INF</code></td>
+<td>Round to nearest (ties away from zero)</td>
+<td>Statistical</td>
+</tr>
+<tr>
+<td><code>AP_RND_MIN_INF</code></td>
+<td>Round to nearest (ties to -∞)</td>
+<td></td>
+</tr>
+<tr>
+<td><code>AP_RND_CONV</code></td>
+<td>Convergent rounding (ties to even)</td>
+<td>Best for DSP</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="c1">// Truncation (default) - fast, biased toward negative</span>
+<span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="n">AP_TRN</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trunc_val</span><span class="p">;</span>
+
+<span class="c1">// Rounding - slower, more accurate</span>
+<span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="n">AP_RND</span><span class="o">&gt;</span><span class="w"> </span><span class="n">round_val</span><span class="p">;</span>
+
+<span class="c1">// Convergent rounding - unbiased, best for accumulators</span>
+<span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="n">AP_RND_CONV</span><span class="o">&gt;</span><span class="w"> </span><span class="n">conv_val</span><span class="p">;</span>
+</code></pre></div>
+
+<hr />
+<h2 id="overflow-modes">Overflow Modes</h2>
+<p>How to handle values exceeding representable range:</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Behavior</th>
+<th>Extra Logic</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AP_WRAP</code></td>
+<td>Wraparound</td>
+<td>None (default)</td>
+</tr>
+<tr>
+<td><code>AP_WRAP_SM</code></td>
+<td>Sign-magnitude wrap</td>
+<td>Minimal</td>
+</tr>
+<tr>
+<td><code>AP_SAT</code></td>
+<td>Saturate to max/min</td>
+<td>Comparator</td>
+</tr>
+<tr>
+<td><code>AP_SAT_ZERO</code></td>
+<td>Saturate to zero</td>
+<td>Comparator</td>
+</tr>
+<tr>
+<td><code>AP_SAT_SYM</code></td>
+<td>Symmetric saturation</td>
+<td>Comparator</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="c1">// Wraparound (default) - fast, may produce unexpected values</span>
+<span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="n">AP_TRN</span><span class="p">,</span><span class="w"> </span><span class="n">AP_WRAP</span><span class="o">&gt;</span><span class="w"> </span><span class="n">wrap_val</span><span class="p">;</span>
+
+<span class="c1">// Saturation - prevents overflow artifacts</span>
+<span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="n">AP_TRN</span><span class="p">,</span><span class="w"> </span><span class="n">AP_SAT</span><span class="o">&gt;</span><span class="w"> </span><span class="n">sat_val</span><span class="p">;</span>
+<span class="c1">// If result &gt; max, set to max</span>
+<span class="c1">// If result &lt; min, set to min</span>
+</code></pre></div>
+
+<hr />
+<h2 id="basic-operations">Basic Operations</h2>
+<div class="highlight"><pre><span></span><code><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">10.5</span><span class="p">;</span>
+<span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">3.25</span><span class="p">;</span>
+
+<span class="c1">// Arithmetic</span>
+<span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="mi">9</span><span class="o">&gt;</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w">    </span><span class="c1">// 13.75</span>
+<span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="mi">9</span><span class="o">&gt;</span><span class="w"> </span><span class="n">diff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w">   </span><span class="c1">// 7.25</span>
+<span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">32</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="o">&gt;</span><span class="w"> </span><span class="n">prod</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w">  </span><span class="c1">// 34.125</span>
+<span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">quot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w">   </span><span class="c1">// ~3.23</span>
+
+<span class="c1">// Comparison</span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">eq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">b</span><span class="p">);</span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">gt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">);</span>
+</code></pre></div>
+
+<hr />
+<h2 id="common-patterns">Common Patterns</h2>
+<h3 id="dsp-accumulator">DSP Accumulator</h3>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="n">AP_RND_CONV</span><span class="p">,</span><span class="w"> </span><span class="n">AP_SAT</span><span class="o">&gt;</span><span class="w"> </span><span class="n">sample_t</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">32</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="n">AP_RND_CONV</span><span class="p">,</span><span class="w"> </span><span class="n">AP_SAT</span><span class="o">&gt;</span><span class="w"> </span><span class="n">accum_t</span><span class="p">;</span>
+
+<span class="n">accum_t</span><span class="w"> </span><span class="nf">accumulate</span><span class="p">(</span><span class="n">sample_t</span><span class="w"> </span><span class="n">samples</span><span class="p">[],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">accum_t</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">samples</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w">  </span><span class="c1">// Wide accumulator prevents overflow</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">sum</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="fir-filter">FIR Filter</h3>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">coeff_t</span><span class="p">;</span><span class="w">   </span><span class="c1">// Coefficients: small integer, high precision</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">data_t</span><span class="p">;</span><span class="w">    </span><span class="c1">// Data: larger integer range</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">32</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="o">&gt;</span><span class="w"> </span><span class="n">accum_t</span><span class="p">;</span><span class="w">  </span><span class="c1">// Accumulator: wide for multiply-add</span>
+
+<span class="n">data_t</span><span class="w"> </span><span class="nf">fir_filter</span><span class="p">(</span><span class="n">data_t</span><span class="w"> </span><span class="n">x</span><span class="p">[],</span><span class="w"> </span><span class="n">coeff_t</span><span class="w"> </span><span class="n">h</span><span class="p">[],</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">accum_t</span><span class="w"> </span><span class="n">acc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">acc</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">h</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">data_t</span><span class="p">)</span><span class="n">acc</span><span class="p">;</span><span class="w">  </span><span class="c1">// Truncate back to data width</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="converting-from-floating-point">Converting from Floating-Point</h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// Design in float first</span>
+<span class="kt">float</span><span class="w"> </span><span class="nf">compute_float</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.75f</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5f</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// Convert to fixed-point</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="n">AP_RND</span><span class="p">,</span><span class="w"> </span><span class="n">AP_SAT</span><span class="o">&gt;</span><span class="w"> </span><span class="n">fixed_t</span><span class="p">;</span>
+<span class="n">fixed_t</span><span class="w"> </span><span class="nf">compute_fixed</span><span class="p">(</span><span class="n">fixed_t</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">fixed_t</span><span class="w"> </span><span class="n">k1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.75</span><span class="p">;</span><span class="w">   </span><span class="c1">// Automatically converted</span>
+<span class="w">    </span><span class="n">fixed_t</span><span class="w"> </span><span class="n">k2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">k1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">k2</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="type-conversion-patterns">Type Conversion Patterns</h2>
+<h3 id="unary-operator-conversion">Unary Operator Conversion</h3>
+<p>Use unary <code>+</code> to force type conversion with proper quantization:</p>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="n">ap_ufixed</span><span class="o">&lt;</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="n">AP_RND</span><span class="p">,</span><span class="w"> </span><span class="n">AP_SAT</span><span class="o">&gt;</span><span class="w"> </span><span class="n">narrow_t</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">22</span><span class="p">,</span><span class="w"> </span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="n">AP_TRN</span><span class="p">,</span><span class="w"> </span><span class="n">AP_SAT</span><span class="o">&gt;</span><span class="w"> </span><span class="n">wide_t</span><span class="p">;</span>
+
+<span class="n">narrow_t</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">100.5</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="n">wide_t</span><span class="w"> </span><span class="n">accum</span><span class="p">;</span>
+
+<span class="c1">// Force conversion to wider type with quantization applied</span>
+<span class="n">accum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">+</span><span class="n">input</span><span class="p">;</span><span class="w">  </span><span class="c1">// Unary + triggers conversion</span>
+</code></pre></div>
+
+<p>This is cleaner than explicit casting when the target type handles quantization.</p>
+<h3 id="mixed-precision-strategy">Mixed Precision Strategy</h3>
+<p>Use different precisions for different roles in your datapath:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Input: Narrow, with rounding for precision</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_ufixed</span><span class="o">&lt;</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="n">AP_RND</span><span class="p">,</span><span class="w"> </span><span class="n">AP_SAT</span><span class="o">&gt;</span><span class="w"> </span><span class="n">input_t</span><span class="p">;</span>
+
+<span class="c1">// Accumulator: Wide, truncate for speed, saturate for safety</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">22</span><span class="p">,</span><span class="w"> </span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="n">AP_TRN</span><span class="p">,</span><span class="w"> </span><span class="n">AP_SAT</span><span class="o">&gt;</span><span class="w"> </span><span class="n">accum_t</span><span class="p">;</span>
+
+<span class="c1">// Output: Widest, defaults OK (final result)</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">36</span><span class="p">,</span><span class="w"> </span><span class="mi">30</span><span class="o">&gt;</span><span class="w"> </span><span class="n">output_t</span><span class="p">;</span>
+
+<span class="n">output_t</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="n">input_t</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">input_t</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">accum_t</span><span class="w"> </span><span class="n">sum</span><span class="p">;</span>
+<span class="w">    </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">+</span><span class="n">a</span><span class="p">;</span><span class="w">              </span><span class="c1">// Convert to accumulator width</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w">        </span><span class="c1">// Multiply in wide format</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Width progression:</strong> Input (narrow) → Accumulator (wide) → Output (widest)</p>
+<hr />
+<h2 id="choosing-quantization-and-overflow-modes">Choosing Quantization and Overflow Modes</h2>
+<h3 id="practical-mode-selection">Practical Mode Selection</h3>
+<table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>Quantization</th>
+<th>Overflow</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Precision critical (inputs)</td>
+<td><code>AP_RND</code></td>
+<td><code>AP_SAT</code></td>
+<td>Best accuracy, safe</td>
+</tr>
+<tr>
+<td>Speed critical (intermediates)</td>
+<td><code>AP_TRN</code></td>
+<td><code>AP_WRAP</code></td>
+<td>Fastest, smallest hardware</td>
+</tr>
+<tr>
+<td>Accumulators</td>
+<td><code>AP_RND_CONV</code></td>
+<td><code>AP_SAT</code></td>
+<td>Unbiased, prevents overflow</td>
+</tr>
+<tr>
+<td>Final output</td>
+<td><code>AP_TRN</code></td>
+<td><code>AP_SAT</code></td>
+<td>Fast but safe</td>
+</tr>
+</tbody>
+</table>
+<h3 id="mode-trade-offs">Mode Trade-offs</h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// SLOW but ACCURATE - use for inputs/outputs</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="n">AP_RND</span><span class="p">,</span><span class="w"> </span><span class="n">AP_SAT</span><span class="o">&gt;</span><span class="w"> </span><span class="n">accurate_t</span><span class="p">;</span>
+<span class="c1">// Extra hardware: rounder + saturation comparator</span>
+
+<span class="c1">// FAST but RISKY - use for wide intermediates where overflow is impossible</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">32</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="n">AP_TRN</span><span class="p">,</span><span class="w"> </span><span class="n">AP_WRAP</span><span class="o">&gt;</span><span class="w"> </span><span class="n">fast_t</span><span class="p">;</span>
+<span class="c1">// Minimal hardware: just truncation</span>
+
+<span class="c1">// BALANCED - common choice for accumulators</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">32</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="n">AP_TRN</span><span class="p">,</span><span class="w"> </span><span class="n">AP_SAT</span><span class="o">&gt;</span><span class="w"> </span><span class="n">balanced_t</span><span class="p">;</span>
+<span class="c1">// Truncate for speed, but saturate to prevent catastrophic overflow</span>
+</code></pre></div>
+
+<hr />
+<h2 id="choosing-bit-widths">Choosing Bit Widths</h2>
+<h3 id="integer-bits-i">Integer Bits (I)</h3>
+<div class="highlight"><pre><span></span><code>I = ceil(log2(max_value)) + 1 (for signed)
+I = ceil(log2(max_value))     (for unsigned)
+
+Example: Values range -100 to +100
+I = ceil(log2(100)) + 1 = 7 + 1 = 8 bits
+</code></pre></div>
+
+<h3 id="fractional-bits-w-i">Fractional Bits (W - I)</h3>
+<div class="highlight"><pre><span></span><code>Fractional bits = -log2(required_resolution)
+
+Example: Need resolution of 0.001
+F = -log2(0.001) ≈ 10 bits
+</code></pre></div>
+
+<h3 id="total-width-w">Total Width (W)</h3>
+<div class="highlight"><pre><span></span><code>W = I + F
+
+Example: Range ±100 with resolution 0.001
+W = 8 + 10 = 18 bits
+</code></pre></div>
+
+<h3 id="width-rules-for-common-operations">Width Rules for Common Operations</h3>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Output Integer Width</th>
+<th>Output Fractional Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Add/Sub</td>
+<td>max(I1, I2) + 1</td>
+<td>max(F1, F2)</td>
+</tr>
+<tr>
+<td>Multiply</td>
+<td>I1 + I2</td>
+<td>F1 + F2</td>
+</tr>
+<tr>
+<td>Square Root</td>
+<td>(I + 1) / 2</td>
+<td>≥ F / 2</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Square root example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Input: 24 bits total, 8 integer bits</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_ufixed</span><span class="o">&lt;</span><span class="mi">24</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">input_t</span><span class="p">;</span><span class="w">   </span><span class="c1">// Range: 0 to 255.999...</span>
+
+<span class="c1">// Output integer width = (8 + 1) / 2 = 4</span>
+<span class="c1">// sqrt(255) ≈ 16, which fits in 4 integer bits</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_ufixed</span><span class="o">&lt;</span><span class="mi">28</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="n">output_t</span><span class="p">;</span><span class="w">  </span><span class="c1">// Range: 0 to 15.999...</span>
+</code></pre></div>
+
+<hr />
+<h2 id="ap_fixed-vs-ap_ufixed">ap_fixed vs ap_ufixed</h2>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Sign</th>
+<th>Range</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ap_fixed&lt;W, I&gt;</code></td>
+<td>Signed</td>
+<td>-2^(I-1) to 2^(I-1) - 2^(-(W-I))</td>
+</tr>
+<tr>
+<td><code>ap_ufixed&lt;W, I&gt;</code></td>
+<td>Unsigned</td>
+<td>0 to 2^I - 2^(-(W-I))</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="n">signed_val</span><span class="p">;</span><span class="w">   </span><span class="c1">// -8.0 to ~7.9375</span>
+<span class="n">ap_ufixed</span><span class="o">&lt;</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="o">&gt;</span><span class="w"> </span><span class="n">unsigned_val</span><span class="p">;</span><span class="w"> </span><span class="c1">// 0 to ~15.9375</span>
+</code></pre></div>
+
+<hr />
+<h2 id="when-to-use">When to Use</h2>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DSP / signal processing</td>
+<td>Yes - primary use case</td>
+</tr>
+<tr>
+<td>Replace floating-point</td>
+<td>Yes - more efficient in hardware</td>
+</tr>
+<tr>
+<td>Need predictable precision</td>
+<td>Yes - exact bit control</td>
+</tr>
+<tr>
+<td>Audio processing</td>
+<td>Yes - commonly 16/24-bit fixed</td>
+</tr>
+<tr>
+<td>Simple integer math</td>
+<td>No - use <code>ap_int</code> instead</td>
+</tr>
+<tr>
+<td>Need very wide dynamic range</td>
+<td>No - consider floating-point</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related-types">Related Types</h2>
+<ul>
+<li><a href="ap-int-uint.md">ap_int / ap_uint</a> - Integer types</li>
+<li><a href="hls-vector.md">ap_float</a> - Custom floating-point</li>
+</ul>
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Modeling/using_fixed_point/">using_fixed_point/</a></td>
+<td>Mixed precision with different quantization/overflow modes</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Modeling/fixed_point_sqrt/">fixed_point_sqrt/</a></td>
+<td>Template-based square root algorithm</td>
+</tr>
+</tbody>
+</table>
+    </main>
+</body>
+</html>

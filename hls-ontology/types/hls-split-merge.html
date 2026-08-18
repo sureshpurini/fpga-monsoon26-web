@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hls::split and hls::merge - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="hlssplit-and-hlsmerge">hls::split and hls::merge</h1>
+<p>Fan-out (split) and fan-in (merge) channel types for parallel data distribution in dataflow designs.</p>
+<h2 id="header">Header</h2>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_np_channel.h&gt;</span>
+</code></pre></div>
+
+<hr />
+<h2 id="hlssplit-fan-out">hls::split (Fan-Out)</h2>
+<p>Distributes data from <strong>one producer</strong> to <strong>N parallel consumers</strong>.</p>
+<div class="highlight"><pre><span></span><code>                    ┌──► consumer0
+                    │
+Producer ──► SPLIT ─┼──► consumer1
+                    │
+                    └──► consumer2
+</code></pre></div>
+
+<h3 id="round-robin">Round Robin</h3>
+<div class="highlight"><pre><span></span><code><span class="n">hls</span><span class="o">::</span><span class="n">split</span><span class="o">::</span><span class="n">round_robin</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="n">D</span><span class="p">,</span><span class="w"> </span><span class="n">DEPTH</span><span class="o">&gt;</span><span class="w"> </span><span class="n">s</span><span class="p">;</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>T</code></td>
+<td>Data type (e.g., <code>ap_uint&lt;32&gt;</code>, <code>int</code>)</td>
+</tr>
+<tr>
+<td><code>N</code></td>
+<td>Number of output streams</td>
+</tr>
+<tr>
+<td><code>D</code></td>
+<td>Elements per output before rotating</td>
+</tr>
+<tr>
+<td><code>DEPTH</code></td>
+<td>FIFO depth for each output</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Behavior:</strong> Sends D elements to out[0], then D to out[1], ..., wraps back to out[0].</p>
+<div class="highlight"><pre><span></span><code><span class="n">hls</span><span class="o">::</span><span class="n">split</span><span class="o">::</span><span class="n">round_robin</span><span class="o">&lt;</span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="o">&gt;</span><span class="w"> </span><span class="n">s</span><span class="p">;</span>
+<span class="c1">// With D=2, N=4:</span>
+<span class="c1">// Elements {0,1} → out[0]</span>
+<span class="c1">// Elements {2,3} → out[1]</span>
+<span class="c1">// Elements {4,5} → out[2]</span>
+<span class="c1">// Elements {6,7} → out[3]</span>
+<span class="c1">// Elements {8,9} → out[0] (wrap)</span>
+</code></pre></div>
+
+<h3 id="load-balance">Load Balance</h3>
+<div class="highlight"><pre><span></span><code><span class="n">hls</span><span class="o">::</span><span class="n">split</span><span class="o">::</span><span class="n">load_balance</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="n">DEPTH</span><span class="o">&gt;</span><span class="w"> </span><span class="n">s</span><span class="p">;</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>T</code></td>
+<td>Data type</td>
+</tr>
+<tr>
+<td><code>N</code></td>
+<td>Number of output streams</td>
+</tr>
+<tr>
+<td><code>DEPTH</code></td>
+<td>FIFO depth for each output</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Note:</strong> No D parameter - distribution is dynamic based on available space.</p>
+<p><strong>Behavior:</strong> Sends each element to first output that has space in its FIFO.</p>
+<div class="highlight"><pre><span></span><code><span class="n">hls</span><span class="o">::</span><span class="n">split</span><span class="o">::</span><span class="n">load_balance</span><span class="o">&lt;</span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="o">&gt;</span><span class="w"> </span><span class="n">s</span><span class="p">;</span>
+<span class="c1">// Distribution depends on which consumer is faster</span>
+</code></pre></div>
+
+<h3 id="split-members">Split Members</h3>
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>s.in</code></td>
+<td><code>hls::stream&lt;T&gt;&amp;</code></td>
+<td>Single input (producer writes here)</td>
+</tr>
+<tr>
+<td><code>s.out[i]</code></td>
+<td><code>hls::stream&lt;T&gt;&amp;</code></td>
+<td>Output array (consumers read from these)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="hlsmerge-fan-in">hls::merge (Fan-In)</h2>
+<p>Collects data from <strong>N parallel producers</strong> into <strong>one consumer</strong>.</p>
+<div class="highlight"><pre><span></span><code>producer0 ──┐
+            │
+producer1 ──┼──► MERGE ──► Consumer
+            │
+producer2 ──┘
+</code></pre></div>
+
+<h3 id="round-robin_1">Round Robin</h3>
+<div class="highlight"><pre><span></span><code><span class="n">hls</span><span class="o">::</span><span class="n">merge</span><span class="o">::</span><span class="n">round_robin</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="n">D</span><span class="p">,</span><span class="w"> </span><span class="n">DEPTH</span><span class="o">&gt;</span><span class="w"> </span><span class="n">s</span><span class="p">;</span>
+</code></pre></div>
+
+<p><strong>Behavior:</strong> Reads D elements from in[0], then D from in[1], ..., wraps back.</p>
+<div class="highlight"><pre><span></span><code><span class="n">hls</span><span class="o">::</span><span class="n">merge</span><span class="o">::</span><span class="n">round_robin</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="o">&gt;</span><span class="w"> </span><span class="n">s</span><span class="p">;</span>
+<span class="c1">// Reads 5 elements from in[0] → output</span>
+<span class="c1">// Reads 5 elements from in[1] → output</span>
+<span class="c1">// ...</span>
+</code></pre></div>
+
+<h3 id="load-balance_1">Load Balance</h3>
+<div class="highlight"><pre><span></span><code><span class="n">hls</span><span class="o">::</span><span class="n">merge</span><span class="o">::</span><span class="n">load_balance</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="p">,</span><span class="w"> </span><span class="n">DEPTH</span><span class="o">&gt;</span><span class="w"> </span><span class="n">s</span><span class="p">;</span>
+</code></pre></div>
+
+<p><strong>Behavior:</strong> Reads from first input that has data available.</p>
+<h3 id="merge-members">Merge Members</h3>
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>s.in[i]</code></td>
+<td><code>hls::stream&lt;T&gt;&amp;</code></td>
+<td>Input array (producers write to these)</td>
+</tr>
+<tr>
+<td><code>s.out</code></td>
+<td><code>hls::stream&lt;T&gt;&amp;</code></td>
+<td>Single output (consumer reads from here)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="complete-example">Complete Example</h2>
+<h3 id="split-round-robin">Split Round Robin</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_np_channel.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_stream.h&quot;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">producer</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS inline off</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">consumer</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS inline off</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">());</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">dut</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">         </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;&gt;&amp;</span><span class="w"> </span><span class="n">out1</span><span class="p">,</span>
+<span class="w">         </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;&gt;&amp;</span><span class="w"> </span><span class="n">out2</span><span class="p">,</span>
+<span class="w">         </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;&gt;&amp;</span><span class="w"> </span><span class="n">out3</span><span class="p">,</span>
+<span class="w">         </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;&gt;&amp;</span><span class="w"> </span><span class="n">out4</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS dataflow</span>
+
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">split</span><span class="o">::</span><span class="n">round_robin</span><span class="o">&lt;</span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="o">&gt;</span><span class="w"> </span><span class="n">s</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">//                      T            N  D  DEPTH</span>
+
+<span class="w">    </span><span class="n">producer</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">);</span><span class="w">           </span><span class="c1">// Writes 16 elements total</span>
+<span class="w">    </span><span class="n">consumer</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">out1</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">);</span><span class="w">  </span><span class="c1">// Each reads 16/4 = 4 elements</span>
+<span class="w">    </span><span class="n">consumer</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">out</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">out2</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">);</span>
+<span class="w">    </span><span class="n">consumer</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">out</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="n">out3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">);</span>
+<span class="w">    </span><span class="n">consumer</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">out</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="w"> </span><span class="n">out4</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="merge-round-robin">Merge Round Robin</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">dut</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in1</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in2</span><span class="p">,</span>
+<span class="w">         </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in3</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in4</span><span class="p">,</span>
+<span class="w">         </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS dataflow</span>
+
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">merge</span><span class="o">::</span><span class="n">round_robin</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="o">&gt;</span><span class="w"> </span><span class="n">s</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">producer</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">in</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">in1</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">);</span><span class="w">  </span><span class="c1">// Each writes 16 elements</span>
+<span class="w">    </span><span class="n">producer</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">in</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">in2</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">);</span>
+<span class="w">    </span><span class="n">producer</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">in</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="n">in3</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">);</span>
+<span class="w">    </span><span class="n">producer</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">in</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="w"> </span><span class="n">in4</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">);</span>
+<span class="w">    </span><span class="n">consumer</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">);</span><span class="w">    </span><span class="c1">// Reads 4 × 16 = 64 total</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="round-robin-vs-load-balance">Round Robin vs Load Balance</h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Round Robin</th>
+<th>Load Balance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Distribution</td>
+<td>Fixed rotation</td>
+<td>Dynamic (first available)</td>
+</tr>
+<tr>
+<td>D parameter</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Deterministic</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Output ordering</td>
+<td>Predictable</td>
+<td>Varies by timing</td>
+</tr>
+<tr>
+<td>Hardware</td>
+<td>Simpler</td>
+<td>More complex (arbitration)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="when-to-use-round-robin">When to Use Round Robin</h3>
+<ul>
+<li>All consumers/producers have equal processing time</li>
+<li>Predictable ordering required for correctness</li>
+<li>Testing needs reproducible results</li>
+</ul>
+<h3 id="when-to-use-load-balance">When to Use Load Balance</h3>
+<ul>
+<li>Variable processing times</li>
+<li>One stage might stall (cache miss, etc.)</li>
+<li>Maximum throughput is priority</li>
+<li>Work-stealing style parallelism</li>
+</ul>
+<hr />
+<h2 id="parameter-guidelines">Parameter Guidelines</h2>
+<h3 id="choosing-n-parallelism">Choosing N (Parallelism)</h3>
+<div class="highlight"><pre><span></span><code>N = number of parallel units
+- Higher N → more parallelism, more resources
+- Lower N → less parallelism, fewer resources
+</code></pre></div>
+
+<h3 id="choosing-d-distribution-factor">Choosing D (Distribution Factor)</h3>
+<div class="highlight"><pre><span></span><code>D = elements per output before rotating
+- D=1 → Fine-grained interleaving
+- D&gt;1 → Coarser batches (better memory patterns)
+</code></pre></div>
+
+<h3 id="choosing-depth-fifo-size">Choosing DEPTH (FIFO Size)</h3>
+<div class="highlight"><pre><span></span><code>DEPTH = buffer size
+- Too small → Deadlock or stalls
+- Too large → Wastes BRAM
+- Rule: DEPTH &gt;= D * 2 for round_robin
+</code></pre></div>
+
+<hr />
+<h2 id="related-types">Related Types</h2>
+<ul>
+<li><a href="hls-stream.md">hls::stream</a> - Basic streaming channel</li>
+<li><a href="../patterns/merge-split.md">Merge-Split Pattern</a> - Full pattern documentation</li>
+</ul>
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Channels/merge_split/split_round_robin/">Vitis-HLS-Introductory-Examples/.../split_round_robin/</a></td>
+<td>Round robin split</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Channels/merge_split/split_load_balance/">Vitis-HLS-Introductory-Examples/.../split_load_balance/</a></td>
+<td>Load balance split</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Channels/merge_split/merge_round_robin/">Vitis-HLS-Introductory-Examples/.../merge_round_robin/</a></td>
+<td>Round robin merge</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Channels/merge_split/merge_load_balance/">Vitis-HLS-Introductory-Examples/.../merge_load_balance/</a></td>
+<td>Load balance merge</td>
+</tr>
+</tbody>
+</table>
+    </main>
+</body>
+</html>

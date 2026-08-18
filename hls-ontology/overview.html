@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLS Ontology Overview - HLS Ontology</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="types/ap-float.html">Ap Float</a></li>
+        <li><a href="types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="types/hls-task.html">Hls Task</a></li>
+        <li><a href="types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="interfaces/index.html">Index</a></li>
+        <li><a href="interfaces/memory.html">Memory</a></li>
+        <li><a href="interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="patterns/index.html">Index</a></li>
+        <li><a href="patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="decision-guides/index.html">Index</a></li>
+        <li><a href="decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="hls-ontology-overview">HLS Ontology Overview</h1>
+<p>This ontology provides a comprehensive knowledge base for Vitis HLS code generation and optimization.</p>
+<h2 id="what-is-hls">What is HLS?</h2>
+<p>High-Level Synthesis (HLS) converts C/C++ code into hardware description (RTL) that can run on FPGAs. The key challenge is guiding the synthesis tool to produce efficient hardware through pragmas and coding patterns.</p>
+<h2 id="ontology-structure">Ontology Structure</h2>
+<div class="highlight"><pre><span></span><code>schema/
+├── pragmas.yaml         # All HLS directives
+├── types.yaml           # HLS-specific data types
+├── interfaces.yaml      # Hardware interface protocols
+└── optimization-rules.yaml  # Decision guides
+</code></pre></div>
+
+<h2 id="core-concepts">Core Concepts</h2>
+<h3 id="1-pragmas">1. Pragmas</h3>
+<p>Pragmas are directives that guide HLS synthesis:</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS PIPELINE II=1      </span><span class="c1">// Pipeline a loop</span>
+<span class="cp">#pragma HLS DATAFLOW           </span><span class="c1">// Enable task parallelism</span>
+<span class="cp">#pragma HLS INTERFACE m_axi    </span><span class="c1">// Memory interface</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION    </span><span class="c1">// Parallel array access</span>
+</code></pre></div>
+
+<p>See: <a href="../schema/pragmas.yaml">schema/pragmas.yaml</a></p>
+<h3 id="2-types">2. Types</h3>
+<p>HLS provides specialized types for hardware:</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hls::stream&lt;T&gt;</code></td>
+<td>Streaming channels</td>
+</tr>
+<tr>
+<td><code>hls::vector&lt;T,N&gt;</code></td>
+<td>SIMD vectors</td>
+</tr>
+<tr>
+<td><code>ap_int&lt;W&gt;</code></td>
+<td>Arbitrary precision integers</td>
+</tr>
+<tr>
+<td><code>ap_fixed&lt;W,I&gt;</code></td>
+<td>Fixed-point numbers</td>
+</tr>
+</tbody>
+</table>
+<p>See: <a href="../schema/types.yaml">schema/types.yaml</a></p>
+<h3 id="3-interfaces">3. Interfaces</h3>
+<p>Hardware interfaces connect the kernel to memory and host:</p>
+<table>
+<thead>
+<tr>
+<th>Interface</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>m_axi</code></td>
+<td>Memory access (DDR, HBM)</td>
+</tr>
+<tr>
+<td><code>s_axilite</code></td>
+<td>Control registers, scalars</td>
+</tr>
+<tr>
+<td><code>axis</code></td>
+<td>Streaming data</td>
+</tr>
+</tbody>
+</table>
+<p>See: <a href="../schema/interfaces.yaml">schema/interfaces.yaml</a></p>
+<h3 id="4-optimization-rules">4. Optimization Rules</h3>
+<p>Decision guides for common optimization choices:</p>
+<ul>
+<li>FIFO vs PIPO channels</li>
+<li>When to pipeline vs unroll</li>
+<li>Memory partitioning strategies</li>
+<li>Interface selection</li>
+</ul>
+<p>See: <a href="../schema/optimization-rules.yaml">schema/optimization-rules.yaml</a></p>
+<h2 id="quick-reference">Quick Reference</h2>
+<h3 id="dataflow-pattern-diamond">Dataflow Pattern (Diamond)</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">diamond</span><span class="p">(</span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">data_t</span><span class="w"> </span><span class="n">c1</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">c2</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">c3</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">c4</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="w">    </span><span class="n">funcA</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">);</span><span class="w">   </span><span class="c1">// Fork</span>
+<span class="w">    </span><span class="n">funcB</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c3</span><span class="p">);</span><span class="w">       </span><span class="c1">// Path 1</span>
+<span class="w">    </span><span class="n">funcC</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">c4</span><span class="p">);</span><span class="w">       </span><span class="c1">// Path 2</span>
+<span class="w">    </span><span class="n">funcD</span><span class="p">(</span><span class="n">c3</span><span class="p">,</span><span class="w"> </span><span class="n">c4</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">);</span><span class="w">  </span><span class="c1">// Join</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="streaming-with-hlsstream">Streaming with hls::stream</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE axis port=in</span>
+<span class="cp">#pragma HLS INTERFACE axis port=out</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">in</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">data_t</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">        </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">val</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="memory-interface">Memory Interface</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">kernel</span><span class="p">(</span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">mem_in</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">mem_out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=mem_in depth=1024</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=mem_out depth=1024</span>
+<span class="cp">#pragma HLS INTERFACE s_axilite port=size</span>
+<span class="cp">#pragma HLS INTERFACE s_axilite port=return</span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h2 id="source">Source</h2>
+<p>Knowledge extracted from <a href="https://github.com/Xilinx/Vitis-HLS-Introductory-Examples">Vitis-HLS-Introductory-Examples</a>.</p>
+    </main>
+</body>
+</html>

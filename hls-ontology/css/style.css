@@ -1,0 +1,249 @@
+/* HLS Ontology Documentation Styles */
+
+:root {
+    --primary-color: #2563eb;
+    --primary-dark: #1d4ed8;
+    --bg-color: #f8fafc;
+    --sidebar-bg: #1e293b;
+    --sidebar-text: #e2e8f0;
+    --text-color: #334155;
+    --code-bg: #f1f5f9;
+    --border-color: #e2e8f0;
+    --link-color: #2563eb;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background: var(--bg-color);
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Navigation */
+.sidebar {
+    width: 280px;
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    padding: 20px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.sidebar h2 {
+    font-size: 1.25rem;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar h2 a {
+    color: white;
+    text-decoration: none;
+}
+
+.sidebar h2 a:hover {
+    color: var(--primary-color);
+}
+
+.nav-section {
+    margin-bottom: 20px;
+}
+
+.nav-section h3 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+    margin-bottom: 8px;
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar li {
+    margin-bottom: 4px;
+}
+
+.sidebar a {
+    color: var(--sidebar-text);
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.sidebar a:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+
+/* Main Content */
+.content {
+    margin-left: 280px;
+    padding: 40px;
+    max-width: 900px;
+    flex: 1;
+}
+
+.content h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #0f172a;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+
+.content h2 {
+    font-size: 1.5rem;
+    margin-top: 40px;
+    margin-bottom: 16px;
+    color: #1e293b;
+}
+
+.content h3 {
+    font-size: 1.2rem;
+    margin-top: 30px;
+    margin-bottom: 12px;
+    color: #334155;
+}
+
+.content p {
+    margin-bottom: 16px;
+}
+
+.content a {
+    color: var(--link-color);
+    text-decoration: none;
+}
+
+.content a:hover {
+    text-decoration: underline;
+}
+
+/* Code Blocks */
+pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 16px;
+    overflow-x: auto;
+    margin: 16px 0;
+    font-size: 0.9rem;
+}
+
+code {
+    font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+    font-size: 0.9em;
+}
+
+:not(pre) > code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: #c7254e;
+}
+
+/* Syntax Highlighting */
+.highlight {
+    background: var(--code-bg);
+}
+
+.highlight .c { color: #6a737d; }  /* Comment */
+.highlight .k { color: #d73a49; }  /* Keyword */
+.highlight .n { color: #24292e; }  /* Name */
+.highlight .s { color: #032f62; }  /* String */
+.highlight .m { color: #005cc5; }  /* Number */
+.highlight .o { color: #d73a49; }  /* Operator */
+.highlight .p { color: #24292e; }  /* Punctuation */
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 0.95rem;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border: 1px solid var(--border-color);
+}
+
+th {
+    background: var(--code-bg);
+    font-weight: 600;
+    color: #1e293b;
+}
+
+tr:hover {
+    background: #f8fafc;
+}
+
+/* Lists */
+ul, ol {
+    margin: 16px 0;
+    padding-left: 24px;
+}
+
+li {
+    margin-bottom: 8px;
+}
+
+/* Blockquotes */
+blockquote {
+    border-left: 4px solid var(--primary-color);
+    padding-left: 16px;
+    margin: 16px 0;
+    color: #64748b;
+    font-style: italic;
+}
+
+/* ASCII Diagrams */
+pre.diagram {
+    font-family: monospace;
+    line-height: 1.4;
+    background: white;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+
+    .content {
+        margin-left: 0;
+        padding: 20px;
+    }
+
+    body {
+        flex-direction: column;
+    }
+}
+
+/* Print */
+@media print {
+    .sidebar {
+        display: none;
+    }
+
+    .content {
+        margin-left: 0;
+        max-width: 100%;
+    }
+}

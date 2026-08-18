@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hls::FIR - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="hlsfir">hls::FIR</h1>
+<p>Vitis HLS FIR Filter IP wrapper for Finite Impulse Response filter operations. Provides a highly optimized, pre-built FIR implementation supporting single-rate, decimation, and interpolation filters.</p>
+<h2 id="overview">Overview</h2>
+<p>The <code>hls::FIR</code> class wraps the Xilinx FIR Compiler IP core for use in Vitis HLS designs. It supports configurable filter types, coefficient sets, and sample rate conversion.</p>
+<div class="highlight"><pre><span></span><code>Input Samples                      Output Samples
+   x[n]     ─────► FIR Filter ─────►   y[n]
+            h[0], h[1], ..., h[N-1]
+</code></pre></div>
+
+<p><strong>Key difference from FFT:</strong> FIR uses an object-based API where the filter object must be declared <code>static</code> to preserve the delay line state between invocations.</p>
+<h2 id="header">Header</h2>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_fir.h&quot;</span>
+</code></pre></div>
+
+<h2 id="syntax">Syntax</h2>
+<div class="highlight"><pre><span></span><code><span class="c1">// 1. Declare static FIR object</span>
+<span class="k">static</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">FIR</span><span class="o">&lt;</span><span class="n">CONFIG</span><span class="o">&gt;</span><span class="w"> </span><span class="n">fir</span><span class="p">;</span>
+
+<span class="c1">// 2. Call run() method</span>
+<span class="n">fir</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="n">output</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">config</span><span class="p">);</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>input</code></td>
+<td>array</td>
+<td>Input samples</td>
+</tr>
+<tr>
+<td><code>output</code></td>
+<td>array</td>
+<td>Output samples</td>
+</tr>
+<tr>
+<td><code>config</code></td>
+<td>pointer</td>
+<td>Coefficient set selector (optional)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="configuration">Configuration</h2>
+<p>FIR is configured via a struct inheriting from <code>hls::ip_fir::params_t</code>. Use <code>static const</code> members (not OVERRIDE macro like FFT).</p>
+<h3 id="configuration-template">Configuration Template</h3>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">my_fir_config</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">ip_fir</span><span class="o">::</span><span class="n">params_t</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">input_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">64</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">output_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">64</span><span class="p">;</span><span class="w">   </span><span class="c1">// Same for single_rate</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">num_coeffs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">21</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">coeff_sets</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">sample_period</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">filter_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">ip_fir</span><span class="o">::</span><span class="n">single_rate</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">rate_change</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">ip_fir</span><span class="o">::</span><span class="n">integer</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">coeff_vec</span><span class="p">[</span><span class="mi">21</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">9</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">9</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">    </span><span class="p">};</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<h3 id="configuration-parameters">Configuration Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>input_length</code></td>
+<td>unsigned</td>
+<td>Number of input samples per invocation</td>
+</tr>
+<tr>
+<td><code>output_length</code></td>
+<td>unsigned</td>
+<td>Number of output samples (depends on filter type)</td>
+</tr>
+<tr>
+<td><code>num_coeffs</code></td>
+<td>unsigned</td>
+<td>Number of filter coefficients (taps)</td>
+</tr>
+<tr>
+<td><code>coeff_sets</code></td>
+<td>unsigned</td>
+<td>Number of coefficient sets (default: 1)</td>
+</tr>
+<tr>
+<td><code>sample_period</code></td>
+<td>double</td>
+<td>Sample period (e.g., 0.5 for 2x decimation)</td>
+</tr>
+<tr>
+<td><code>filter_type</code></td>
+<td>enum</td>
+<td>single_rate, decimation, or interpolation</td>
+</tr>
+<tr>
+<td><code>rate_change</code></td>
+<td>enum</td>
+<td>integer or fractional</td>
+</tr>
+<tr>
+<td><code>decim_rate</code></td>
+<td>unsigned</td>
+<td>Decimation factor (for decimation filter)</td>
+</tr>
+<tr>
+<td><code>interp_rate</code></td>
+<td>unsigned</td>
+<td>Interpolation factor (for interpolation filter)</td>
+</tr>
+<tr>
+<td><code>coeff_vec</code></td>
+<td>double[]</td>
+<td>Filter coefficients array</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="filter-types">Filter Types</h2>
+<h3 id="single-rate">Single Rate</h3>
+<p>No sample rate change. Output length equals input length.</p>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">config</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">ip_fir</span><span class="o">::</span><span class="n">params_t</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">filter_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">ip_fir</span><span class="o">::</span><span class="n">single_rate</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">input_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">64</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">output_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">64</span><span class="p">;</span><span class="w">  </span><span class="c1">// Same as input</span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<h3 id="decimation">Decimation</h3>
+<p>Reduce sample rate. Output length = input length / decim_rate.</p>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">config</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">ip_fir</span><span class="o">::</span><span class="n">params_t</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">filter_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">ip_fir</span><span class="o">::</span><span class="n">decimation</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">rate_change</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">ip_fir</span><span class="o">::</span><span class="n">integer</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">decim_rate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">input_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">output_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">  </span><span class="c1">// input / decim_rate</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">sample_period</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span><span class="w">  </span><span class="c1">// For 2x decimation</span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<h3 id="interpolation">Interpolation</h3>
+<p>Increase sample rate. Output length = input length × interp_rate.</p>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">config</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">ip_fir</span><span class="o">::</span><span class="n">params_t</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">filter_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">ip_fir</span><span class="o">::</span><span class="n">interpolation</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">rate_change</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">ip_fir</span><span class="o">::</span><span class="n">integer</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">interp_rate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">input_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">32</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">output_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">64</span><span class="p">;</span><span class="w">  </span><span class="c1">// input * interp_rate</span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<hr />
+<h2 id="data-types">Data Types</h2>
+<p>FIR uses <code>ap_fixed</code> types for input, output, and coefficients. Output width should accommodate coefficient accumulation growth.</p>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="o">&gt;</span><span class="w"> </span><span class="n">s_data_t</span><span class="p">;</span><span class="w">   </span><span class="c1">// Input: 16-bit signed</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">24</span><span class="p">,</span><span class="w"> </span><span class="mi">24</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_data_t</span><span class="p">;</span><span class="w">   </span><span class="c1">// Output: wider for accumulation</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">config_t</span><span class="p">;</span><span class="w">         </span><span class="c1">// Coefficient set selector</span>
+</code></pre></div>
+
+<p><strong>Output width guideline:</strong></p>
+<div class="highlight"><pre><span></span><code>output_bits &gt;= input_bits + coeff_bits + log2(num_coeffs)
+</code></pre></div>
+
+<hr />
+<h2 id="runtime-coefficient-switching">Runtime Coefficient Switching</h2>
+<p>The <code>config</code> parameter selects which coefficient set to use at runtime:</p>
+<div class="highlight"><pre><span></span><code><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">total_coeffs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">7</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w">  </span><span class="c1">// num_coeffs * coeff_sets</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">fir_config</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">ip_fir</span><span class="o">::</span><span class="n">params_t</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">num_coeffs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">7</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">coeff_sets</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">coeff_vec</span><span class="p">[</span><span class="n">total_coeffs</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Set 0: lowpass</span>
+<span class="w">        </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">        </span><span class="c1">// Set 1: highpass</span>
+<span class="w">        </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">-2</span><span class="p">,</span><span class="w"> </span><span class="mi">-3</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">-3</span><span class="p">,</span><span class="w"> </span><span class="mi">-2</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span>
+<span class="w">        </span><span class="c1">// Set 2: bandpass</span>
+<span class="w">        </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">    </span><span class="p">};</span>
+<span class="p">};</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">fir_top</span><span class="p">(</span><span class="n">s_data_t</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">m_data_t</span><span class="w"> </span><span class="n">out</span><span class="p">[</span><span class="n">M</span><span class="p">],</span><span class="w"> </span><span class="n">config_t</span><span class="o">*</span><span class="w"> </span><span class="n">config</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS dataflow</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">FIR</span><span class="o">&lt;</span><span class="n">fir_config</span><span class="o">&gt;</span><span class="w"> </span><span class="n">fir</span><span class="p">;</span>
+<span class="w">    </span><span class="n">fir</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="n">config</span><span class="p">);</span><span class="w">  </span><span class="c1">// config = 0, 1, or 2</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="complete-example">Complete Example</h2>
+<h3 id="header-fir_toph">Header (fir_top.h)</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;ap_fixed.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_fir.h&quot;</span>
+
+<span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">FIR_LENGTH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">INPUT_LENGTH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FIR_LENGTH</span><span class="p">;</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">OUTPUT_LENGTH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FIR_LENGTH</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">  </span><span class="c1">// Decimation by 2</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">COEFF_NUM</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">7</span><span class="p">;</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">COEFF_SETS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">total_num_coeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">COEFF_NUM</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">COEFF_SETS</span><span class="p">;</span>
+
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="o">&gt;</span><span class="w"> </span><span class="n">s_data_t</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_fixed</span><span class="o">&lt;</span><span class="mi">24</span><span class="p">,</span><span class="w"> </span><span class="mi">24</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_data_t</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">config_t</span><span class="p">;</span>
+
+<span class="k">struct</span><span class="w"> </span><span class="nc">fir_config</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">ip_fir</span><span class="o">::</span><span class="n">params_t</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">input_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">INPUT_LENGTH</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">output_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OUTPUT_LENGTH</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">num_coeffs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">COEFF_NUM</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">coeff_sets</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">COEFF_SETS</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">sample_period</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">filter_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">ip_fir</span><span class="o">::</span><span class="n">decimation</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">rate_change</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">ip_fir</span><span class="o">::</span><span class="n">integer</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="n">decim_rate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">coeff_vec</span><span class="p">[</span><span class="n">total_num_coeff</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">-4</span><span class="p">,</span><span class="w"> </span><span class="mi">-3</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">-6</span><span class="p">,</span>
+<span class="w">        </span><span class="mi">-13</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">44</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">44</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">-13</span><span class="p">,</span>
+<span class="w">        </span><span class="mi">-6</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">-3</span><span class="p">,</span><span class="w"> </span><span class="mi">-4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span>
+<span class="w">    </span><span class="p">};</span>
+<span class="p">};</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">fir_top</span><span class="p">(</span><span class="n">s_data_t</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">INPUT_LENGTH</span><span class="p">],</span><span class="w"> </span><span class="n">m_data_t</span><span class="w"> </span><span class="n">out</span><span class="p">[</span><span class="n">OUTPUT_LENGTH</span><span class="p">],</span>
+<span class="w">             </span><span class="n">config_t</span><span class="o">*</span><span class="w"> </span><span class="n">config</span><span class="p">);</span>
+</code></pre></div>
+
+<h3 id="implementation-fir_topcpp">Implementation (fir_top.cpp)</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;fir_top.h&quot;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">fir_top</span><span class="p">(</span><span class="n">s_data_t</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">INPUT_LENGTH</span><span class="p">],</span><span class="w"> </span><span class="n">m_data_t</span><span class="w"> </span><span class="n">out</span><span class="p">[</span><span class="n">OUTPUT_LENGTH</span><span class="p">],</span>
+<span class="w">             </span><span class="n">config_t</span><span class="o">*</span><span class="w"> </span><span class="n">config</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS dataflow</span>
+
+<span class="w">    </span><span class="c1">// Static FIR object - MUST be static to preserve delay line</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">FIR</span><span class="o">&lt;</span><span class="n">fir_config</span><span class="o">&gt;</span><span class="w"> </span><span class="n">fir</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">fir</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="n">config</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="when-to-use">When to Use</h2>
+<ul>
+<li>Need optimized FIR filter implementation</li>
+<li>Lowpass, highpass, bandpass, or custom filter response</li>
+<li>Sample rate conversion (decimation/interpolation)</li>
+<li>Anti-aliasing or anti-imaging filters</li>
+<li>Polyphase filters with multiple coefficient sets</li>
+</ul>
+<h2 id="when-not-to-use">When Not to Use</h2>
+<ul>
+<li>Need IIR (Infinite Impulse Response) filter</li>
+<li>Very short filters (&lt; 4 taps) - direct implementation may be simpler</li>
+<li>Need adaptive coefficients updated at runtime</li>
+</ul>
+<hr />
+<h2 id="best-practices">Best Practices</h2>
+<ol>
+<li><strong>Always declare FIR object as <code>static</code></strong> - preserves delay line between calls</li>
+<li><strong>Size output type for accumulation</strong> - prevent overflow</li>
+<li><strong>Use <code>coeff_sets</code> for runtime switching</strong> - avoids multiple instances</li>
+<li><strong>Apply <code>#pragma HLS DATAFLOW</code></strong> - enables streaming operation</li>
+<li><strong>For decimation, set <code>sample_period</code></strong> appropriately (e.g., 0.5 for 2x)</li>
+</ol>
+<hr />
+<h2 id="common-pitfalls">Common Pitfalls</h2>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Symptom</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Non-static FIR object</td>
+<td>Filter state reset each call</td>
+<td>Use <code>static hls::FIR&lt;config&gt; fir;</code></td>
+</tr>
+<tr>
+<td>Output overflow</td>
+<td>Clipping, wrong results</td>
+<td>Increase output width</td>
+</tr>
+<tr>
+<td>Wrong output_length</td>
+<td>Synthesis error</td>
+<td>Match filter type (single: equal, decim: /rate, interp: ×rate)</td>
+</tr>
+<tr>
+<td>Wrong coeff_vec size</td>
+<td>Missing coefficients</td>
+<td>Size = num_coeffs × coeff_sets</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>Example</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/DSP/fir/decimator/">decimator</a></td>
+<td>Decimation FIR with 3 coefficient sets</td>
+</tr>
+</tbody>
+</table>
+<h2 id="related">Related</h2>
+<ul>
+<li><a href="ap-fixed.md">ap_fixed</a> - Fixed-point types</li>
+<li><a href="../patterns/fir-usage.md">fir-usage pattern</a> - FIR usage pattern</li>
+<li><a href="hls-fft.md">hls::fft</a> - FFT IP (similar DSP IP pattern)</li>
+</ul>
+    </main>
+</body>
+</html>

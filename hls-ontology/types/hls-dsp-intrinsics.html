@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSP Intrinsics Library - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="dsp-intrinsics-library">DSP Intrinsics Library</h1>
+<p>Low-level access to AMD/Xilinx DSP hardware slices for maximum control and efficiency. Use DSP intrinsics when you need explicit control over DSP cascade architectures that auto-inference cannot produce.</p>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#what-is-a-dsp-slice">What is a DSP Slice?</a></li>
+<li><a href="#why-use-dsp-intrinsics">Why Use DSP Intrinsics?</a></li>
+<li><a href="#header-and-namespace">Header and Namespace</a></li>
+<li><a href="#the-cascade-class">The cascade Class</a></li>
+<li><a href="#register-flags">Register Flags</a></li>
+<li><a href="#the-mul_add-method">The mul_add Method</a></li>
+<li><a href="#cascade-connections">Cascade Connections</a></li>
+<li><a href="#fir-architectures">FIR Architectures</a></li>
+<li><a href="#complete-examples">Complete Examples</a></li>
+<li><a href="#when-to-use">When to Use</a></li>
+<li><a href="#common-pitfalls">Common Pitfalls</a></li>
+<li><a href="#related-resources">Related Resources</a></li>
+</ol>
+<hr />
+<h2 id="what-is-a-dsp-slice">What is a DSP Slice?</h2>
+<p>A <strong>DSP slice</strong> is a dedicated hardware block on AMD/Xilinx FPGAs designed for high-speed arithmetic operations. Think of it as a specialized calculator built into the chip that's optimized for signal processing.</p>
+<h3 id="whats-inside-a-dsp-slice">What's Inside a DSP Slice?</h3>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────────┐
+│                         DSP58 Slice                              │
+│                                                                  │
+│   A Input ──►[REG_A1]──►[REG_A2]──►┐                            │
+│                                    ├──►[MULTIPLIER]──►[REG_M]──►│
+│   B Input ──►[REG_B1]──►[REG_B2]──►┘        │                   │
+│                              │              │                    │
+│                              ▼              ▼                    │
+│                         B-chain out    [ADDER/ACC]──►[REG_P]──►Output
+│                          (bcout)            ▲                    │
+│                                             │                    │
+│   C Input ─────────────────────────────────►┘                    │
+│   (or P-chain in: pcin)                                          │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+
+<p><strong>Key components:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Multiplier</td>
+<td>27x24 bit multiplier (on DSP58)</td>
+</tr>
+<tr>
+<td>Adder/Accumulator</td>
+<td>48+ bit adder that combines A×B with C input</td>
+</tr>
+<tr>
+<td>Pipeline Registers</td>
+<td>Optional registers at each stage (REG_A1, REG_A2, REG_B1, REG_B2, REG_M, REG_P)</td>
+</tr>
+<tr>
+<td>Cascade Connections</td>
+<td>Direct paths to chain multiple DSP slices together</td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-basic-operation">The Basic Operation</h3>
+<p>A DSP slice computes:</p>
+<div class="highlight"><pre><span></span><code>Result = A × B + C
+</code></pre></div>
+
+<p>This is called a <strong>multiply-accumulate (MAC)</strong> operation. When pipelined (all registers enabled), it completes in one clock cycle (with some latency for the pipeline to fill).</p>
+<hr />
+<h2 id="why-use-dsp-intrinsics">Why Use DSP Intrinsics?</h2>
+<p>When you write normal HLS code like:</p>
+<div class="highlight"><pre><span></span><code><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">c</span><span class="p">;</span>
+</code></pre></div>
+
+<p>Vitis HLS automatically infers DSP usage. This is called <strong>auto-inference</strong> and works well for simple cases.</p>
+<p><strong>However</strong>, DSP intrinsics give you <strong>explicit control</strong> over:</p>
+<ol>
+<li><strong>Pipeline registers</strong> - Choose exactly which registers are enabled (affects timing vs latency)</li>
+<li><strong>Cascade connections</strong> - Chain DSP slices together without using general fabric routing</li>
+<li><strong>Architecture</strong> - Build specific topologies (systolic arrays, transposed structures)</li>
+</ol>
+<h3 id="when-auto-inference-falls-short">When Auto-Inference Falls Short</h3>
+<table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>Problem</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Long DSP chains</td>
+<td>HLS routes through fabric, hurting timing</td>
+<td>Use cascade connections</td>
+</tr>
+<tr>
+<td>High clock frequency</td>
+<td>Not enough pipeline registers</td>
+<td>Explicitly enable registers</td>
+</tr>
+<tr>
+<td>Systolic arrays</td>
+<td>HLS can't infer B-chain cascade</td>
+<td>Use intrinsics with bcout</td>
+</tr>
+<tr>
+<td>Custom MAC structures</td>
+<td>HLS uses generic inference</td>
+<td>Direct control via intrinsics</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="header-and-namespace">Header and Namespace</h2>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_dsp_builtins.h&gt;</span>
+</code></pre></div>
+
+<h3 id="available-namespaces">Available Namespaces</h3>
+<table>
+<thead>
+<tr>
+<th>Namespace</th>
+<th>Use For</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hls::dsp58</code></td>
+<td>Real numbers</td>
+<td>DSP58 slices on Versal architecture</td>
+</tr>
+<tr>
+<td><code>hls::dspcplx</code></td>
+<td>Complex numbers</td>
+<td>Complex operations (uses multiple DSP slices)</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="c1">// For real-valued arithmetic:</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">hls</span><span class="o">::</span><span class="nn">dsp58</span><span class="p">;</span>
+
+<span class="c1">// For complex-valued arithmetic:</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">hls</span><span class="o">::</span><span class="nn">dspcplx</span><span class="p">;</span>
+</code></pre></div>
+
+<h3 id="pre-defined-types">Pre-defined Types</h3>
+<p>Each namespace provides types that match the DSP slice port widths:</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>A_t</code></td>
+<td>A-input operand (typically used for coefficients)</td>
+</tr>
+<tr>
+<td><code>B_t</code></td>
+<td>B-input operand (typically used for data)</td>
+</tr>
+<tr>
+<td><code>C_t</code></td>
+<td>C-input / accumulator width</td>
+</tr>
+<tr>
+<td><code>R_t</code></td>
+<td>Result type with <code>.pcout</code> and <code>.bcout</code> members</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="the-cascade-class">The cascade Class</h2>
+<p>The <code>cascade&lt;FLAGS&gt;</code> class template represents a single DSP slice with configurable pipeline registers.</p>
+<h3 id="syntax">Syntax</h3>
+<div class="highlight"><pre><span></span><code><span class="n">cascade</span><span class="o">&lt;</span><span class="n">FLAGS</span><span class="o">&gt;</span><span class="w"> </span><span class="n">my_dsp</span><span class="p">;</span>
+</code></pre></div>
+
+<p>Where <code>FLAGS</code> is a combination of register flags OR'd together:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Example: Enable A1, B1, M, and P registers</span>
+<span class="n">cascade</span><span class="o">&lt;</span><span class="n">REG_A1</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">REG_B1</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">REG_M</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">REG_P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">my_dsp</span><span class="p">;</span>
+</code></pre></div>
+
+<h3 id="how-to-think-about-it">How to Think About It</h3>
+<div class="highlight"><pre><span></span><code>Your Code                 Hardware Generated
+──────────                ──────────────────
+cascade&lt;...&gt; dsp;    ──►  One physical DSP slice on FPGA
+dsp.mul_add(a,b,c)   ──►  Route signals through that DSP
+</code></pre></div>
+
+<hr />
+<h2 id="register-flags">Register Flags</h2>
+<p>The <code>FLAGS</code> template parameter controls which internal registers are enabled.</p>
+<h3 id="individual-register-flags">Individual Register Flags</h3>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Location</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>REG_A1</code></td>
+<td>First A-input register</td>
+<td>+1 cycle latency on A path</td>
+</tr>
+<tr>
+<td><code>REG_A2</code></td>
+<td>Second A-input register</td>
+<td>+1 more cycle on A path</td>
+</tr>
+<tr>
+<td><code>REG_B1</code></td>
+<td>First B-input register</td>
+<td>+1 cycle latency on B path</td>
+</tr>
+<tr>
+<td><code>REG_B2</code></td>
+<td>Second B-input register</td>
+<td>+1 more cycle on B path, <strong>required for B-chain cascade</strong></td>
+</tr>
+<tr>
+<td><code>REG_M</code></td>
+<td>Multiplier output register</td>
+<td>Registers A×B before addition</td>
+</tr>
+<tr>
+<td><code>REG_P</code></td>
+<td>Output/accumulator register</td>
+<td>Registers final output</td>
+</tr>
+</tbody>
+</table>
+<h3 id="convenience-flags-dspcplx-only">Convenience Flags (dspcplx only)</h3>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Equivalent To</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>BALANCED_PIPELINE</code></td>
+<td><code>REG_A1 \| REG_B1</code></td>
+<td>Balanced timing on A and B paths</td>
+</tr>
+<tr>
+<td><code>FULL_PIPELINE</code></td>
+<td><code>REG_A1 \| REG_A2 \| REG_B1 \| REG_B2</code></td>
+<td>Maximum pipelining</td>
+</tr>
+</tbody>
+</table>
+<h3 id="common-configurations">Common Configurations</h3>
+<table>
+<thead>
+<tr>
+<th>Configuration</th>
+<th>Flags</th>
+<th>Latency</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Minimal</td>
+<td><code>REG_M \| REG_P</code></td>
+<td>2 cycles</td>
+<td>Low latency, may not meet timing at high Fmax</td>
+</tr>
+<tr>
+<td>Standard</td>
+<td><code>REG_A1 \| REG_B1 \| REG_M \| REG_P</code></td>
+<td>4 cycles</td>
+<td>Good balance, recommended default</td>
+</tr>
+<tr>
+<td>B-chain enabled</td>
+<td><code>REG_A1 \| REG_B1 \| REG_B2 \| REG_M \| REG_P</code></td>
+<td>5 cycles</td>
+<td>Required for systolic arrays using bcout</td>
+</tr>
+<tr>
+<td>Maximum</td>
+<td><code>REG_A1 \| REG_A2 \| REG_B1 \| REG_B2 \| REG_M \| REG_P</code></td>
+<td>6 cycles</td>
+<td>Highest clock frequency</td>
+</tr>
+</tbody>
+</table>
+<h3 id="trade-off-rule">Trade-off Rule</h3>
+<div class="highlight"><pre><span></span><code>MORE REGISTERS = Better timing (higher Fmax) but MORE LATENCY
+FEWER REGISTERS = Lower latency but may not meet timing at high frequencies
+</code></pre></div>
+
+<hr />
+<h2 id="the-mul_add-method">The mul_add Method</h2>
+<p>The primary method for DSP operations:</p>
+<div class="highlight"><pre><span></span><code><span class="n">R_t</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">my_dsp</span><span class="p">.</span><span class="n">mul_add</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="p">);</span>
+</code></pre></div>
+
+<p><strong>Computes:</strong> <code>result = a × b + c</code></p>
+<h3 id="parameters">Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>a</code></td>
+<td><code>A_t</code></td>
+<td>A operand (typically coefficient)</td>
+</tr>
+<tr>
+<td><code>b</code></td>
+<td><code>B_t</code></td>
+<td>B operand (typically data)</td>
+</tr>
+<tr>
+<td><code>c</code></td>
+<td><code>C_t</code></td>
+<td>C operand (added to product, or 0 for multiply-only)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="return-value">Return Value</h3>
+<p>Returns <code>R_t</code> structure with two members:</p>
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>result.pcout</code></td>
+<td><code>C_t</code></td>
+<td>P-chain output - the main result (a×b+c)</td>
+</tr>
+<tr>
+<td><code>result.bcout</code></td>
+<td><code>B_t</code></td>
+<td>B-chain output - passes B input to next DSP</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="cascade-connections">Cascade Connections</h2>
+<p>DSP slices can be chained together using <strong>cascade connections</strong> - direct paths between adjacent DSP slices that don't use general fabric routing.</p>
+<h3 id="two-types-of-cascades">Two Types of Cascades</h3>
+<h4 id="p-chain-accumulator-cascade">P-Chain (Accumulator Cascade)</h4>
+<p>Connects the output of one DSP to the C-input of the next.</p>
+<p><strong>Use for:</strong> Accumulating partial products (like in FIR filters)</p>
+<div class="highlight"><pre><span></span><code>DSP0: a0×b + 0 ─────► DSP1: a1×b + prev ─────► DSP2: a2×b + prev ─────► result
+                pcout                  pcout                  pcout
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code><span class="c1">// Access via:</span>
+<span class="n">C_t</span><span class="w"> </span><span class="n">accumulated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">pcout</span><span class="p">;</span>
+</code></pre></div>
+
+<h4 id="b-chain-data-cascade">B-Chain (Data Cascade)</h4>
+<p>Passes the B input from one DSP to the next.</p>
+<p><strong>Use for:</strong> Systolic arrays where data flows through the chain</p>
+<div class="highlight"><pre><span></span><code>DSP0              DSP1              DSP2
+[a0×b]  ────────► [a1×b]  ────────► [a2×b]
+    │   bcout        │   bcout        │
+    └────────────────┴────────────────┴───► (data flows right)
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code><span class="c1">// Access via:</span>
+<span class="n">B_t</span><span class="w"> </span><span class="n">cascaded_data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">bcout</span><span class="p">;</span>
+
+<span class="c1">// NOTE: Requires REG_B2 flag!</span>
+</code></pre></div>
+
+<h3 id="why-cascades-matter">Why Cascades Matter</h3>
+<table>
+<thead>
+<tr>
+<th>Without Cascade</th>
+<th>With Cascade</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Results route through fabric</td>
+<td>Direct DSP-to-DSP connection</td>
+</tr>
+<tr>
+<td>Higher routing delay</td>
+<td>Lower delay</td>
+</tr>
+<tr>
+<td>May not meet timing</td>
+<td>Better timing</td>
+</tr>
+<tr>
+<td>Uses routing resources</td>
+<td>Uses dedicated cascade paths</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="fir-architectures">FIR Architectures</h2>
+<p>The two classic FIR filter architectures demonstrate cascade usage:</p>
+<h3 id="transposed-fir">Transposed FIR</h3>
+<p><strong>Data is broadcast (fanned out) to all DSPs simultaneously.</strong>
+<strong>Results cascade through P-chain.</strong></p>
+<div class="highlight"><pre><span></span><code>Input x ───┬────────┬────────┬────────┐
+           │        │        │        │
+           ▼        ▼        ▼        ▼
+         [h0]     [h1]     [h2]     [h3]   ← Coefficients (stationary)
+           │        │        │        │
+           ▼        ▼        ▼        ▼
+         [×]      [×]      [×]      [×]    ← Multipliers
+           │        │        │        │
+           ▼        ▼        ▼        ▼
+     0 ──►[+]─────►[+]─────►[+]─────►[+]──► Output y
+              pcout    pcout    pcout
+</code></pre></div>
+
+<p><strong>Characteristics:</strong>
+- Data broadcast to all taps simultaneously (higher fan-out)
+- Uses only P-chain cascade
+- Lower latency (data doesn't travel through chain)
+- Good for shorter filters</p>
+<h3 id="systolic-fir">Systolic FIR</h3>
+<p><strong>Coefficients are stationary. Data flows through B-chain.</strong>
+<strong>Results accumulate through P-chain.</strong></p>
+<div class="highlight"><pre><span></span><code>Coefficients: h0       h1       h2       h3   (stationary in DSPs)
+               │        │        │        │
+               ▼        ▼        ▼        ▼
+Input x ────►[×]─────►[×]─────►[×]─────►[×]
+              │ bcout   │ bcout   │ bcout   │
+              ▼        ▼        ▼        ▼
+Bias ──────►[+]─────►[+]─────►[+]─────►[+]──► Output y
+                pcout    pcout    pcout
+</code></pre></div>
+
+<p><strong>Characteristics:</strong>
+- Data flows through B-chain (systolic movement)
+- Coefficients are stationary (loaded once)
+- Uses both B-chain and P-chain cascades
+- Higher latency (data must propagate through chain)
+- Lower fan-out (each stage feeds only the next)
+- Scales better for many taps</p>
+<h3 id="which-architecture-to-choose">Which Architecture to Choose?</h3>
+<table>
+<thead>
+<tr>
+<th>Factor</th>
+<th>Transposed</th>
+<th>Systolic</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Latency</td>
+<td>Lower</td>
+<td>Higher</td>
+</tr>
+<tr>
+<td>Fan-out</td>
+<td>Higher (data broadcast)</td>
+<td>Lower (point-to-point)</td>
+</tr>
+<tr>
+<td>Scalability</td>
+<td>Limited by fan-out</td>
+<td>Better for many taps</td>
+</tr>
+<tr>
+<td>Cascade usage</td>
+<td>P-chain only</td>
+<td>Both P-chain and B-chain</td>
+</tr>
+<tr>
+<td>Complexity</td>
+<td>Simpler</td>
+<td>More complex</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="complete-examples">Complete Examples</h2>
+<h3 id="example-1-transposed-fir-4-tap">Example 1: Transposed FIR (4-tap)</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_dsp_builtins.h&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">hls</span><span class="o">::</span><span class="nn">dsp58</span><span class="p">;</span>
+
+<span class="c1">// Single multiply-accumulate stage</span>
+<span class="n">C_t</span><span class="w"> </span><span class="nf">one_stage_mult_add</span><span class="p">(</span><span class="n">A_t</span><span class="w"> </span><span class="n">coeff</span><span class="p">,</span><span class="w"> </span><span class="n">B_t</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">C_t</span><span class="w"> </span><span class="n">prev_result</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">cascade</span><span class="o">&lt;</span><span class="n">REG_A1</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">REG_B1</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">REG_M</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">REG_P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dsp</span><span class="p">;</span>
+<span class="w">    </span><span class="n">R_t</span><span class="w"> </span><span class="n">res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dsp</span><span class="p">.</span><span class="n">mul_add</span><span class="p">(</span><span class="n">coeff</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">prev_result</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">res</span><span class="p">.</span><span class="n">pcout</span><span class="p">;</span><span class="w">  </span><span class="c1">// P-chain output to next stage</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">transposed_fir</span><span class="p">(</span><span class="kt">long</span><span class="o">&amp;</span><span class="w"> </span><span class="n">data_out</span><span class="p">,</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">data_in</span><span class="p">,</span>
+<span class="w">                    </span><span class="kt">long</span><span class="w"> </span><span class="n">h0</span><span class="p">,</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">h1</span><span class="p">,</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">h2</span><span class="p">,</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">h3</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cp">#pragma HLS pipeline II=1</span>
+
+<span class="w">    </span><span class="n">A_t</span><span class="w"> </span><span class="n">data_fanout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data_in</span><span class="p">;</span><span class="w">  </span><span class="c1">// Data broadcast to all stages</span>
+
+<span class="w">    </span><span class="c1">// Chain through P-chain: each stage adds to previous result</span>
+<span class="w">    </span><span class="n">C_t</span><span class="w"> </span><span class="n">pc_0_1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">one_stage_mult_add</span><span class="p">(</span><span class="n">h0</span><span class="p">,</span><span class="w"> </span><span class="n">data_fanout</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">       </span><span class="c1">// h0×x + 0</span>
+<span class="w">    </span><span class="n">C_t</span><span class="w"> </span><span class="n">pc_1_2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">one_stage_mult_add</span><span class="p">(</span><span class="n">h1</span><span class="p">,</span><span class="w"> </span><span class="n">data_fanout</span><span class="p">,</span><span class="w"> </span><span class="n">pc_0_1</span><span class="p">);</span><span class="w">  </span><span class="c1">// h1×x + prev</span>
+<span class="w">    </span><span class="n">C_t</span><span class="w"> </span><span class="n">pc_2_3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">one_stage_mult_add</span><span class="p">(</span><span class="n">h2</span><span class="p">,</span><span class="w"> </span><span class="n">data_fanout</span><span class="p">,</span><span class="w"> </span><span class="n">pc_1_2</span><span class="p">);</span><span class="w">  </span><span class="c1">// h2×x + prev</span>
+<span class="w">    </span><span class="n">C_t</span><span class="w"> </span><span class="n">p_3</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">one_stage_mult_add</span><span class="p">(</span><span class="n">h3</span><span class="p">,</span><span class="w"> </span><span class="n">data_fanout</span><span class="p">,</span><span class="w"> </span><span class="n">pc_2_3</span><span class="p">);</span><span class="w">  </span><span class="c1">// h3×x + prev</span>
+
+<span class="w">    </span><span class="n">data_out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p_3</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="example-2-systolic-fir-template-class">Example 2: Systolic FIR (Template Class)</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_dsp_builtins.h&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">hls</span><span class="o">::</span><span class="nn">dsp58</span><span class="p">;</span>
+
+<span class="cp">#define TAPS 4</span>
+<span class="cp">#define N 10</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SystolicFIR</span><span class="w"> </span><span class="p">{</span>
+<span class="k">private</span><span class="o">:</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">long</span><span class="o">*</span><span class="w"> </span><span class="n">coeff_</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">long</span><span class="w"> </span><span class="n">bias_</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// First DSP: receives external input (no B2 needed)</span>
+<span class="w">    </span><span class="n">cascade</span><span class="o">&lt;</span><span class="n">REG_A1</span><span class="o">|</span><span class="n">REG_B1</span><span class="o">|</span><span class="n">REG_M</span><span class="o">|</span><span class="n">REG_P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dsp0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Remaining DSPs: receive B-chain cascade (NEED REG_B2!)</span>
+<span class="w">    </span><span class="n">cascade</span><span class="o">&lt;</span><span class="n">REG_A1</span><span class="o">|</span><span class="n">REG_B1</span><span class="o">|</span><span class="n">REG_B2</span><span class="o">|</span><span class="n">REG_M</span><span class="o">|</span><span class="n">REG_P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dsp_chain</span><span class="p">[</span><span class="n">size</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">];</span>
+
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">SystolicFIR</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">long</span><span class="o">*</span><span class="w"> </span><span class="n">coeff</span><span class="p">,</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">bias</span><span class="p">)</span>
+<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">coeff_</span><span class="p">(</span><span class="n">coeff</span><span class="p">),</span><span class="w"> </span><span class="n">bias_</span><span class="p">(</span><span class="n">bias</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// CRITICAL: Partition array for parallel DSP instances</span>
+<span class="w">        </span><span class="cp">#pragma HLS ARRAY_PARTITION variable=dsp_chain complete dim=1</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">long</span><span class="w"> </span><span class="n">compute</span><span class="p">(</span><span class="n">B_t</span><span class="w"> </span><span class="n">input</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// First stage: coeff[0] × input + bias</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dsp0</span><span class="p">.</span><span class="n">mul_add</span><span class="p">(</span><span class="n">coeff_</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="n">bias_</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// Remaining stages: cascade via B-chain and P-chain</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">size</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="cp">#pragma HLS UNROLL  </span><span class="c1">// CRITICAL: Create parallel hardware</span>
+<span class="w">            </span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dsp_chain</span><span class="p">[</span><span class="n">j</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">].</span><span class="n">mul_add</span><span class="p">(</span>
+<span class="w">                </span><span class="n">coeff_</span><span class="p">[</span><span class="n">j</span><span class="p">],</span><span class="w">   </span><span class="c1">// Coefficient for this stage</span>
+<span class="w">                </span><span class="n">out</span><span class="p">.</span><span class="n">bcout</span><span class="p">,</span><span class="w">   </span><span class="c1">// Data from B-chain cascade</span>
+<span class="w">                </span><span class="n">out</span><span class="p">.</span><span class="n">pcout</span><span class="w">    </span><span class="c1">// Result from P-chain cascade</span>
+<span class="w">            </span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">out</span><span class="p">.</span><span class="n">pcout</span><span class="p">;</span><span class="w">  </span><span class="c1">// Final accumulated result</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">systolic_fir</span><span class="p">(</span><span class="kt">long</span><span class="w"> </span><span class="n">coeffs</span><span class="p">[</span><span class="n">TAPS</span><span class="p">],</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">data</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">bias</span><span class="p">,</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">out</span><span class="p">[</span><span class="n">N</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cp">#pragma HLS ARRAY_PARTITION variable=coeffs complete dim=1</span>
+
+<span class="w">    </span><span class="n">SystolicFIR</span><span class="o">&lt;</span><span class="n">TAPS</span><span class="o">&gt;</span><span class="w"> </span><span class="n">fir</span><span class="p">(</span><span class="n">coeffs</span><span class="p">,</span><span class="w"> </span><span class="n">bias</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fir</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="example-3-test-bench">Example 3: Test Bench</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;systolic_fir.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">long</span><span class="w"> </span><span class="n">coeffs</span><span class="p">[</span><span class="n">TAPS</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">};</span>
+<span class="w">    </span><span class="kt">long</span><span class="w"> </span><span class="n">data</span><span class="p">[</span><span class="n">N</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">};</span><span class="w">  </span><span class="c1">// Impulse input</span>
+<span class="w">    </span><span class="kt">long</span><span class="w"> </span><span class="n">bias</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">long</span><span class="w"> </span><span class="n">out</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+
+<span class="w">    </span><span class="n">systolic_fir</span><span class="p">(</span><span class="n">coeffs</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">bias</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Impulse response:&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;out[&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;] = &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// Expected for impulse input:</span>
+<span class="w">    </span><span class="c1">// out[0]=1, out[1]=2, out[2]=3, out[3]=4, out[4..9]=0</span>
+<span class="w">    </span><span class="c1">// (impulse response = filter coefficients)</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="when-to-use">When to Use</h2>
+<h3 id="use-dsp-intrinsics-when">Use DSP Intrinsics When:</h3>
+<ul>
+<li>Need explicit control over DSP pipeline registers</li>
+<li>Building systolic array or cascade architectures</li>
+<li>Auto-inference not meeting timing or resource goals</li>
+<li>Custom multiply-accumulate structures beyond standard patterns</li>
+<li>High-performance signal processing (matched filters, correlators)</li>
+<li>Implementing FFT butterflies with specific cascade topology</li>
+</ul>
+<h3 id="do-not-use-dsp-intrinsics-when">Do NOT Use DSP Intrinsics When:</h3>
+<ul>
+<li>Standard FIR filter with rate conversion → use <code>hls::FIR</code> IP instead</li>
+<li>Simple arithmetic operations → let HLS infer DSP automatically</li>
+<li>Portability needed across device families → intrinsics are device-specific</li>
+<li>Unfamiliar with DSP architecture → start with auto-inference</li>
+</ul>
+<h3 id="comparison-table">Comparison Table</h3>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Code</th>
+<th>Pros</th>
+<th>Cons</th>
+<th>Use When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Auto-inference</td>
+<td><code>r = a*b+c;</code></td>
+<td>Simple, portable</td>
+<td>No cascade control</td>
+<td>Simple arithmetic</td>
+</tr>
+<tr>
+<td>hls::FIR IP</td>
+<td><code>fir.run(...)</code></td>
+<td>Optimized, easy</td>
+<td>FIR only</td>
+<td>Standard filtering</td>
+</tr>
+<tr>
+<td>DSP Intrinsics</td>
+<td><code>dsp.mul_add(...)</code></td>
+<td>Full control</td>
+<td>Complex, device-specific</td>
+<td>Custom architectures</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="common-pitfalls">Common Pitfalls</h2>
+<h3 id="1-missing-array_partition">1. Missing ARRAY_PARTITION</h3>
+<p><strong>Problem:</strong> DSP array not partitioned</p>
+<p><strong>Symptom:</strong> Sequential hardware instead of parallel cascade</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// WRONG</span>
+<span class="n">cascade</span><span class="o">&lt;</span><span class="p">...</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dsp_chain</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+<span class="c1">// Loop uses dsp_chain elements</span>
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code><span class="c1">// CORRECT</span>
+<span class="n">cascade</span><span class="o">&lt;</span><span class="p">...</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dsp_chain</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=dsp_chain complete dim=1</span>
+</code></pre></div>
+
+<h3 id="2-missing-unroll">2. Missing UNROLL</h3>
+<p><strong>Problem:</strong> Cascade loop not unrolled</p>
+<p><strong>Symptom:</strong> Single DSP reused iteratively instead of parallel chain</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// WRONG</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">size</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dsp</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">mul_add</span><span class="p">(...);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code><span class="c1">// CORRECT</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">size</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cp">#pragma HLS UNROLL</span>
+<span class="w">    </span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dsp</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">mul_add</span><span class="p">(...);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="3-missing-reg_b2-for-b-chain">3. Missing REG_B2 for B-Chain</h3>
+<p><strong>Problem:</strong> Using bcout without REG_B2 flag</p>
+<p><strong>Symptom:</strong> bcout not available or incorrect timing</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// WRONG - Missing REG_B2</span>
+<span class="n">cascade</span><span class="o">&lt;</span><span class="n">REG_A1</span><span class="o">|</span><span class="n">REG_B1</span><span class="o">|</span><span class="n">REG_M</span><span class="o">|</span><span class="n">REG_P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dsp_chain</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+<span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dsp_chain</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">mul_add</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">.</span><span class="n">bcout</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">.</span><span class="n">pcout</span><span class="p">);</span>
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code><span class="c1">// CORRECT - Add REG_B2 for DSPs receiving bcout</span>
+<span class="n">cascade</span><span class="o">&lt;</span><span class="n">REG_A1</span><span class="o">|</span><span class="n">REG_B1</span><span class="o">|</span><span class="n">REG_B2</span><span class="o">|</span><span class="n">REG_M</span><span class="o">|</span><span class="n">REG_P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dsp_chain</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+</code></pre></div>
+
+<h3 id="4-wrong-namespace">4. Wrong Namespace</h3>
+<p><strong>Problem:</strong> Using wrong namespace for data type</p>
+<p><strong>Symptom:</strong> Type mismatches, compilation errors</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// For real-valued:</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">hls</span><span class="o">::</span><span class="nn">dsp58</span><span class="p">;</span>
+
+<span class="c1">// For complex-valued:</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">hls</span><span class="o">::</span><span class="nn">dspcplx</span><span class="p">;</span>
+</code></pre></div>
+
+<h3 id="5-insufficient-registers-for-timing">5. Insufficient Registers for Timing</h3>
+<p><strong>Problem:</strong> Too few registers for target clock frequency</p>
+<p><strong>Symptom:</strong> Timing failures at high clock rates</p>
+<p><strong>Solution:</strong> Add more register stages:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Maximum pipelining for best timing</span>
+<span class="n">cascade</span><span class="o">&lt;</span><span class="n">REG_A1</span><span class="o">|</span><span class="n">REG_A2</span><span class="o">|</span><span class="n">REG_B1</span><span class="o">|</span><span class="n">REG_B2</span><span class="o">|</span><span class="n">REG_M</span><span class="o">|</span><span class="n">REG_P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dsp</span><span class="p">;</span>
+<span class="c1">// 6 cycles latency but best timing</span>
+</code></pre></div>
+
+<hr />
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>Example</th>
+<th>Path</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Systolic FIR</td>
+<td><code>DSP/DSP_Intrinsic_Library/systolic_fir/</code></td>
+<td>Real-valued systolic FIR using B-chain and P-chain cascade</td>
+</tr>
+<tr>
+<td>Transposed FIR</td>
+<td><code>DSP/DSP_Intrinsic_Library/transposed_fir/</code></td>
+<td>Transposed FIR with data fanout and P-chain accumulation</td>
+</tr>
+<tr>
+<td>Complex Systolic</td>
+<td><code>DSP/DSP_Intrinsic_Library/systolic_fir_using_complex/</code></td>
+<td>Complex-valued systolic FIR using hls::dspcplx</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related-resources">Related Resources</h2>
+<ul>
+<li><a href="../patterns/dsp-intrinsics.md">dsp-intrinsics pattern</a> - Usage pattern with decision guide</li>
+<li><a href="hls-fft.md">hls::fft</a> - FFT IP (similar DSP IP pattern)</li>
+<li><a href="hls-fir.md">hls::FIR</a> - FIR Filter IP (simpler alternative for standard filters)</li>
+<li><a href="ap-fixed.md">ap_fixed</a> - Fixed-point types often used with DSP</li>
+</ul>
+    </main>
+</body>
+</html>

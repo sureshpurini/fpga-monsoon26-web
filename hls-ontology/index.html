@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - HLS Ontology</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="types/ap-float.html">Ap Float</a></li>
+        <li><a href="types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="types/hls-task.html">Hls Task</a></li>
+        <li><a href="types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="interfaces/index.html">Index</a></li>
+        <li><a href="interfaces/memory.html">Memory</a></li>
+        <li><a href="interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="patterns/index.html">Index</a></li>
+        <li><a href="patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="decision-guides/index.html">Index</a></li>
+        <li><a href="decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="hls-codegen-optimization-ontology">HLS Codegen &amp; Optimization Ontology</h1>
+<p>Welcome to the HLS Ontology documentation.</p>
+<h2 id="quick-links">Quick Links</h2>
+<ul>
+<li><a href="overview.html">Overview</a> - Introduction to HLS concepts</li>
+<li><a href="pragmas/index.html">Pragmas</a> - HLS directive reference</li>
+<li><a href="types/index.html">Types</a> - HLS data types</li>
+<li><a href="patterns/index.html">Patterns</a> - Implementation patterns ("How do I implement X?")</li>
+<li><a href="decision-guides/index.html">Decision Guides</a> - Decision rules ("Should I use X or Y?")</li>
+</ul>
+<h2 id="schema-files-for-agents">Schema Files (for Agents)</h2>
+<ul>
+<li><a href="../schema/pragmas.yaml">pragmas.yaml</a> - 27 pragmas across 9 categories</li>
+<li><a href="../schema/types.yaml">types.yaml</a> - HLS data types</li>
+<li><a href="../schema/patterns.yaml">patterns.yaml</a> - 4 implementation patterns</li>
+<li><a href="../schema/decision-guides.yaml">decision-guides.yaml</a> - 11 decision guides</li>
+</ul>
+<h2 id="source">Source</h2>
+<p>Knowledge extracted from <a href="https://github.com/Xilinx/Vitis-HLS-Introductory-Examples">Vitis-HLS-Introductory-Examples</a>.</p>
+    </main>
+</body>
+</html>

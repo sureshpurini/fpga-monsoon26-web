@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimization Priority - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="optimization-priority">Optimization Priority</h1>
+<p><strong>Question:</strong> In what order should I apply optimizations?</p>
+<p><strong>Category:</strong> Strategy</p>
+<blockquote>
+<p><strong>Source:</strong> <a href="../../schema/decision-guides.yaml">decision-guides.yaml → optimization-priority</a></p>
+</blockquote>
+<hr />
+<h2 id="priority-order">Priority Order</h2>
+<p>Apply optimizations in this order for best results:</p>
+<table>
+<thead>
+<tr>
+<th>Priority</th>
+<th>Optimization</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Algorithm</strong></td>
+<td>Highest - choose efficient algorithm first</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Dataflow</strong></td>
+<td>High - enable task-level parallelism</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Interface</strong></td>
+<td>High - select appropriate interfaces</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Memory</strong></td>
+<td>Medium - optimize access and storage</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Loops</strong></td>
+<td>Medium - pipeline and/or unroll</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Fine-tuning</strong></td>
+<td>Low - adjust pragma parameters</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="1-algorithm-selection-highest-priority">1. Algorithm Selection (Highest Priority)</h2>
+<p><strong>Choose the right algorithm before optimizing the wrong one.</strong></p>
+<ul>
+<li>Select algorithms with inherent parallelism</li>
+<li>Prefer streaming over batch processing</li>
+<li>Consider data access patterns</li>
+</ul>
+<div class="highlight"><pre><span></span><code>❌ Optimizing O(n²) algorithm
+✓ Switching to O(n log n) algorithm
+</code></pre></div>
+
+<hr />
+<h2 id="2-dataflow-task-level-parallelism">2. Dataflow (Task-Level Parallelism)</h2>
+<p><strong>Enable concurrent execution of stages.</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">kernel</span><span class="p">(...)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="w">    </span><span class="n">stage1</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">c1</span><span class="p">);</span><span class="w">     </span><span class="c1">// These run</span>
+<span class="w">    </span><span class="n">stage2</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">);</span><span class="w">     </span><span class="c1">// in parallel</span>
+<span class="w">    </span><span class="n">stage3</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">);</span><span class="w">    </span><span class="c1">// (pipelined)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li>Identify independent processing stages</li>
+<li>Choose appropriate topology</li>
+<li>Select channel types (FIFO vs PIPO)</li>
+</ul>
+<p>See: <a href="dataflow-topology.html">Dataflow Topology</a></p>
+<hr />
+<h2 id="3-interface-selection">3. Interface Selection</h2>
+<p><strong>Match interfaces to data access patterns.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Data Type</th>
+<th>Interface</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Large arrays (DDR/HBM)</td>
+<td><code>m_axi</code></td>
+</tr>
+<tr>
+<td>Streaming data</td>
+<td><code>axis</code></td>
+</tr>
+<tr>
+<td>Scalar parameters</td>
+<td><code>s_axilite</code></td>
+</tr>
+</tbody>
+</table>
+<p>See: <a href="interface-selection.html">Interface Selection</a></p>
+<hr />
+<h2 id="4-memory-optimization">4. Memory Optimization</h2>
+<p><strong>Optimize memory access and storage.</strong></p>
+<ul>
+<li>Partition arrays for parallel access</li>
+<li>Choose appropriate storage (BRAM/URAM/LUTRAM)</li>
+<li>Optimize burst transfers</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=arr cyclic factor=4</span>
+<span class="cp">#pragma HLS BIND_STORAGE variable=arr impl=BRAM</span>
+</code></pre></div>
+
+<p>See: <a href="when-to-partition.html">When to Partition</a>, <a href="storage-selection.html">Storage Selection</a></p>
+<hr />
+<h2 id="5-loop-optimization">5. Loop Optimization</h2>
+<p><strong>Pipeline and unroll loops for throughput.</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nl">outer</span><span class="p">:</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">M</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nl">inner</span><span class="p">:</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="cp">#pragma HLS UNROLL factor=4</span>
+<span class="w">        </span><span class="c1">// Process elements</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>See: <a href="pipeline-vs-unroll.html">Pipeline vs Unroll</a></p>
+<hr />
+<h2 id="6-fine-tuning">6. Fine-Tuning</h2>
+<p><strong>Adjust parameters based on synthesis reports.</strong></p>
+<ul>
+<li>Tune II targets</li>
+<li>Adjust FIFO depths</li>
+<li>Balance resource usage</li>
+</ul>
+<hr />
+<h2 id="iterative-process">Iterative Process</h2>
+<div class="highlight"><pre><span></span><code>1. Synthesize baseline
+       ↓
+2. Check reports for bottlenecks
+       ↓
+3. Apply targeted optimization
+       ↓
+4. Re-synthesize and compare
+       ↓
+5. Repeat until goals met
+</code></pre></div>
+
+<h3 id="what-to-check-in-reports">What to Check in Reports</h3>
+<table>
+<thead>
+<tr>
+<th>Report Section</th>
+<th>What to Look For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Latency</td>
+<td>Total cycles, per-function latency</td>
+</tr>
+<tr>
+<td>II</td>
+<td>Achieved vs target initiation interval</td>
+</tr>
+<tr>
+<td>Resources</td>
+<td>LUT, FF, BRAM, DSP usage</td>
+</tr>
+<tr>
+<td>Timing</td>
+<td>Clock frequency achieved</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="common-bottlenecks-and-fixes">Common Bottlenecks and Fixes</h2>
+<table>
+<thead>
+<tr>
+<th>Bottleneck</th>
+<th>Symptom</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Memory bandwidth</strong></td>
+<td>High latency, low throughput</td>
+<td>Partition arrays, widen ports, use HBM</td>
+</tr>
+<tr>
+<td><strong>Loop II</strong></td>
+<td>II &gt; 1</td>
+<td>Check dependencies, add DEPENDENCE pragma</td>
+</tr>
+<tr>
+<td><strong>Resource usage</strong></td>
+<td>Over 80% utilization</td>
+<td>Reduce unroll factor, share resources</td>
+</tr>
+<tr>
+<td><strong>Latency</strong></td>
+<td>High cycle count</td>
+<td>Pipeline more, reduce loop overhead</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="bottleneck-decision-tree">Bottleneck Decision Tree</h2>
+<div class="highlight"><pre><span></span><code>What&#39;s limiting performance?
+├── Throughput (elements/sec)?
+│   ├── Memory bound → Partition, widen, more banks
+│   └── Compute bound → Pipeline, unroll
+├── Latency (total cycles)?
+│   ├── Loop overhead → Flatten, merge loops
+│   └── Stage latency → Pipeline deeper
+├── Resources (utilization)?
+│   ├── BRAM → Use URAM, reduce arrays
+│   ├── DSP → Use fabric impl
+│   └── LUT/FF → Reduce unroll factor
+└── Timing (frequency)?
+    └── Add pipeline stages, reduce logic depth
+</code></pre></div>
+
+<hr />
+<h2 id="example-optimization-flow">Example Optimization Flow</h2>
+<div class="highlight"><pre><span></span><code><span class="c1">// Step 1: Baseline</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">kernel</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">process</span><span class="p">(</span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Step 2: Add dataflow structure</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">kernel</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">c1</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+<span class="w">    </span><span class="n">load</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">);</span>
+<span class="w">    </span><span class="n">compute</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">);</span>
+<span class="w">    </span><span class="n">store</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Step 3: Add interfaces</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=in</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=out</span>
+
+<span class="c1">// Step 4: Optimize memory</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=c1 cyclic factor=4</span>
+
+<span class="c1">// Step 5: Pipeline loops</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">}</span>
+
+<span class="c1">// Step 6: Fine-tune based on reports</span>
+</code></pre></div>
+
+<hr />
+<h2 id="related">Related</h2>
+<ul>
+<li><a href="dataflow-topology.html">Dataflow Topology</a> - Task-level parallelism</li>
+<li><a href="interface-selection.html">Interface Selection</a> - Port interfaces</li>
+<li><a href="pipeline-vs-unroll.html">Pipeline vs Unroll</a> - Loop optimization</li>
+<li><a href="when-to-partition.html">When to Partition</a> - Memory optimization</li>
+</ul>
+    </main>
+</body>
+</html>

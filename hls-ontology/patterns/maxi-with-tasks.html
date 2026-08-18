@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M-AXI Memory Interface with Data-Driven Tasks - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="m-axi-memory-interface-with-data-driven-tasks">M-AXI Memory Interface with Data-Driven Tasks</h1>
+<p>How to use M-AXI memory interface (pointer to DDR/HBM) with data-driven tasks (<code>hls::task</code>).</p>
+<h2 id="overview">Overview</h2>
+<p>Data-driven tasks can access external memory (DDR/HBM) through M-AXI interface by marking the memory pointer as <strong>stable</strong>. This enables memory-accessing tasks that persist across kernel invocations.</p>
+<h3 id="key-requirement">Key Requirement</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS stable variable=mem  </span><span class="c1">// CRITICAL for task usage</span>
+</code></pre></div>
+
+<p>This pragma tells HLS that the pointer address doesn't change during kernel operation, enabling safe use with persistent tasks.</p>
+<hr />
+<h2 id="when-to-use">When to Use</h2>
+<table>
+<thead>
+<tr>
+<th>Use Case</th>
+<th>Why M-AXI with Tasks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Large lookup tables</td>
+<td>Data too large for on-chip storage</td>
+</tr>
+<tr>
+<td>Persistent state in memory</td>
+<td>State needs to survive power cycles</td>
+</tr>
+<tr>
+<td>Memory-based buffers</td>
+<td>Circular buffers, FIFOs in DDR</td>
+</tr>
+<tr>
+<td>Data logging</td>
+<td>Write results to memory for host</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="when-not-to-use">When NOT to Use</h2>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Use Instead</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Small data that fits in streams</td>
+<td><code>hls::stream</code></td>
+</tr>
+<tr>
+<td>Random access in small blocks</td>
+<td><code>hls::stream_of_blocks</code></td>
+</tr>
+<tr>
+<td>No memory access needed</td>
+<td>Pure stream-based tasks</td>
+</tr>
+<tr>
+<td>High-bandwidth streaming</td>
+<td>AXI-Stream interface</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="architecture">Architecture</h2>
+<div class="highlight"><pre><span></span><code>in ─→ [process_23] ─→ int_fifo ─→ [process_11] ─→ int_fifo2 ─→ [write_process] ─→ out
+                                                                      │
+                                                                      ▼
+                                                                    mem[]
+                                                                 (DDR/HBM)
+</code></pre></div>
+
+<hr />
+<h2 id="implementation">Implementation</h2>
+<h3 id="task-functions">Task Functions</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_task.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_stream.h&quot;</span>
+
+<span class="c1">// Pure stream-based processing tasks</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">process_23</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE off</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">val</span><span class="p">;</span>
+<span class="w">    </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">val</span><span class="p">);</span>
+<span class="w">    </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">23</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">val</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">process_11</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE off</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">val</span><span class="p">;</span>
+<span class="w">    </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">val</span><span class="p">);</span>
+<span class="w">    </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">11</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">val</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Memory-accessing task</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">write_process</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">mem</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">val</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">  </span><span class="c1">// Persistent address counter</span>
+
+<span class="w">    </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">val</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">addr</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">32</span><span class="p">)</span>
+<span class="w">        </span><span class="n">addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">mem</span><span class="p">[</span><span class="n">addr</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">val</span><span class="p">;</span><span class="w">       </span><span class="c1">// Write to DDR/HBM</span>
+<span class="w">    </span><span class="n">addr</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mem</span><span class="p">[</span><span class="n">addr</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">];</span><span class="w">   </span><span class="c1">// Read back from DDR/HBM</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">val</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Key points:</strong>
+- Use <code>static</code> variables for persistent state (address counters)
+- Memory pointer passed as regular parameter to task function
+- <code>#pragma HLS INLINE off</code> prevents inlining of task functions</p>
+<h3 id="top-function">Top Function</h3>
+<div class="highlight"><pre><span></span><code><span class="k">extern</span><span class="w"> </span><span class="s">&quot;C&quot;</span><span class="w"> </span><span class="p">{</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">stable_pointer</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">mem</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="cp">#pragma HLS INTERFACE mode = m_axi bundle = gmem depth = 256 \</span>
+<span class="cp">    max_read_burst_length = 16 max_widen_bitwidth = 512 \</span>
+<span class="cp">    max_write_burst_length = 16 num_read_outstanding = 16 \</span>
+<span class="cp">    num_write_outstanding = 16 port = mem</span>
+<span class="cp">#pragma HLS stable variable = mem   </span><span class="c1">// CRITICAL for task usage</span>
+
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">int_fifo</span><span class="p">(</span><span class="s">&quot;int_fifo&quot;</span><span class="p">);</span>
+<span class="cp">#pragma HLS STREAM depth = 512 type = fifo variable = int_fifo</span>
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">int_fifo2</span><span class="p">(</span><span class="s">&quot;int_fifo2&quot;</span><span class="p">);</span>
+<span class="cp">#pragma HLS STREAM depth = 512 type = fifo variable = int_fifo2</span>
+
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">task</span><span class="w"> </span><span class="n">t1</span><span class="p">(</span><span class="n">process_23</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">int_fifo</span><span class="p">);</span>
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">task</span><span class="w"> </span><span class="n">t2</span><span class="p">(</span><span class="n">process_11</span><span class="p">,</span><span class="w"> </span><span class="n">int_fifo</span><span class="p">,</span><span class="w"> </span><span class="n">int_fifo2</span><span class="p">);</span>
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">task</span><span class="w"> </span><span class="n">t3</span><span class="p">(</span><span class="n">write_process</span><span class="p">,</span><span class="w"> </span><span class="n">int_fifo2</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="n">mem</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="p">}</span><span class="w"> </span><span class="c1">// extern &quot;C&quot;</span>
+</code></pre></div>
+
+<hr />
+<h2 id="m-axi-interface-parameters">M-AXI Interface Parameters</h2>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS INTERFACE mode=m_axi bundle=gmem port=mem \</span>
+<span class="cp">    depth=256 \</span>
+<span class="cp">    max_read_burst_length=16 \</span>
+<span class="cp">    max_write_burst_length=16 \</span>
+<span class="cp">    max_widen_bitwidth=512 \</span>
+<span class="cp">    num_read_outstanding=16 \</span>
+<span class="cp">    num_write_outstanding=16</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+<th>Typical Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bundle</code></td>
+<td>Memory bundle name</td>
+<td><code>gmem</code>, <code>gmem0</code></td>
+</tr>
+<tr>
+<td><code>depth</code></td>
+<td>Array depth hint (for sim)</td>
+<td>Actual array size</td>
+</tr>
+<tr>
+<td><code>max_read_burst_length</code></td>
+<td>Max elements per read burst</td>
+<td>16, 32, 64</td>
+</tr>
+<tr>
+<td><code>max_write_burst_length</code></td>
+<td>Max elements per write burst</td>
+<td>16, 32, 64</td>
+</tr>
+<tr>
+<td><code>max_widen_bitwidth</code></td>
+<td>Max bus width for vectorization</td>
+<td>512</td>
+</tr>
+<tr>
+<td><code>num_read_outstanding</code></td>
+<td>Outstanding read transactions</td>
+<td>16</td>
+</tr>
+<tr>
+<td><code>num_write_outstanding</code></td>
+<td>Outstanding write transactions</td>
+<td>16</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="the-pragma-hls-stable-pragma">The <code>#pragma HLS stable</code> Pragma</h2>
+<h3 id="why-its-required">Why It's Required</h3>
+<ul>
+<li>Data-driven tasks (<code>hls::task</code>) run <strong>persistently</strong> across kernel invocations</li>
+<li>Without <code>stable</code>, HLS assumes the pointer might change each invocation</li>
+<li>With <code>stable</code>, HLS knows the pointer is <strong>constant</strong> for the task lifetime</li>
+</ul>
+<h3 id="what-it-enables">What It Enables</h3>
+<ul>
+<li>Pointer value can be cached in task hardware</li>
+<li>Safe memory access from persistent task</li>
+<li>Correct synthesis of memory-accessing tasks</li>
+</ul>
+<hr />
+<h2 id="test-bench">Test Bench</h2>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_stream.h&quot;</span>
+
+<span class="k">extern</span><span class="w"> </span><span class="s">&quot;C&quot;</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">stable_pointer</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">mem</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="p">);</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">memory</span><span class="p">[</span><span class="mi">512</span><span class="p">];</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">val</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Initialize</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">in</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+<span class="w">        </span><span class="n">memory</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Execute</span>
+<span class="w">    </span><span class="n">stable_pointer</span><span class="p">(</span><span class="n">memory</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Verify: output = input × 23 × 11</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">out</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">val</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">val</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">23</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">11</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%d != %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">val</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">23</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">11</span><span class="p">);</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="code-generation-guidelines">Code Generation Guidelines</h2>
+<h3 id="template-for-m-axi-with-tasks">Template for M-AXI with Tasks</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_task.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_stream.h&quot;</span>
+
+<span class="c1">// Memory-accessing task</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">mem_task</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">DATA_T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">DATA_T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span>
+<span class="w">              </span><span class="n">DATA_T</span><span class="o">*</span><span class="w"> </span><span class="n">mem</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">DATA_T</span><span class="w"> </span><span class="n">val</span><span class="p">;</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">  </span><span class="c1">// Persistent address</span>
+
+<span class="w">    </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">val</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">addr</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">MEM_SIZE</span><span class="p">)</span>
+<span class="w">        </span><span class="n">addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">mem</span><span class="p">[</span><span class="n">addr</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">val</span><span class="p">;</span>
+<span class="w">    </span><span class="n">addr</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">mem</span><span class="p">[</span><span class="n">addr</span><span class="mi">-1</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="c1">// Top function</span>
+<span class="k">extern</span><span class="w"> </span><span class="s">&quot;C&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">top</span><span class="p">(</span><span class="n">DATA_T</span><span class="o">*</span><span class="w"> </span><span class="n">mem</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">DATA_T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">DATA_T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="cp">#pragma HLS INTERFACE mode=m_axi bundle=gmem port=mem depth=DEPTH</span>
+<span class="cp">#pragma HLS stable variable=mem</span>
+
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">DATA_T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">internal</span><span class="p">;</span>
+<span class="cp">#pragma HLS STREAM depth=FIFO_DEPTH variable=internal</span>
+
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">task</span><span class="w"> </span><span class="n">t1</span><span class="p">(</span><span class="n">process_task</span><span class="p">,</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">internal</span><span class="p">);</span>
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">task</span><span class="w"> </span><span class="n">t2</span><span class="p">(</span><span class="n">mem_task</span><span class="p">,</span><span class="w"> </span><span class="n">internal</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="n">mem</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="common-pitfalls">Common Pitfalls</h2>
+<h3 id="pitfall-1-missing-pragma-hls-stable">Pitfall 1: Missing <code>#pragma HLS stable</code></h3>
+<p><strong>Problem:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">top</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">mem</span><span class="p">,</span><span class="w"> </span><span class="p">...)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE mode=m_axi port=mem</span>
+<span class="w">    </span><span class="c1">// Missing: #pragma HLS stable variable=mem</span>
+<span class="w">    </span><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">task</span><span class="w"> </span><span class="n">t</span><span class="p">(</span><span class="n">mem_task</span><span class="p">,</span><span class="w"> </span><span class="p">...,</span><span class="w"> </span><span class="n">mem</span><span class="p">);</span><span class="w">  </span><span class="c1">// ERROR</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Solution:</strong> Add <code>#pragma HLS stable variable=mem</code>.</p>
+<h3 id="pitfall-2-multiple-tasks-accessing-same-memory">Pitfall 2: Multiple Tasks Accessing Same Memory</h3>
+<p><strong>Problem:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">task</span><span class="w"> </span><span class="n">t1</span><span class="p">(</span><span class="n">task_a</span><span class="p">,</span><span class="w"> </span><span class="p">...,</span><span class="w"> </span><span class="n">mem</span><span class="p">);</span><span class="w">  </span><span class="c1">// Writes to mem</span>
+<span class="n">hls_thread_local</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">task</span><span class="w"> </span><span class="n">t2</span><span class="p">(</span><span class="n">task_b</span><span class="p">,</span><span class="w"> </span><span class="p">...,</span><span class="w"> </span><span class="n">mem</span><span class="p">);</span><span class="w">  </span><span class="c1">// Also writes to mem - CONFLICT!</span>
+</code></pre></div>
+
+<p><strong>Solution:</strong> Pass memory pointer to only ONE task, or use separate bundles:</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS INTERFACE mode=m_axi bundle=gmem0 port=mem_a</span>
+<span class="cp">#pragma HLS INTERFACE mode=m_axi bundle=gmem1 port=mem_b</span>
+</code></pre></div>
+
+<h3 id="pitfall-3-non-static-address-counter">Pitfall 3: Non-Static Address Counter</h3>
+<p><strong>Problem:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">mem_task</span><span class="p">(...,</span><span class="w"> </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">mem</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">  </span><span class="c1">// Resets every invocation!</span>
+<span class="w">    </span><span class="n">mem</span><span class="p">[</span><span class="n">addr</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">val</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Solution:</strong> Use <code>static</code> for persistent state:</p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">mem_task</span><span class="p">(...,</span><span class="w"> </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">mem</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">  </span><span class="c1">// Persists across invocations</span>
+<span class="w">    </span><span class="n">mem</span><span class="p">[</span><span class="n">addr</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">val</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="performance-considerations">Performance Considerations</h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Burst efficiency</strong></td>
+<td>Use sequential memory access patterns</td>
+</tr>
+<tr>
+<td><strong>Bus width</strong></td>
+<td>Set <code>max_widen_bitwidth=512</code> for full bandwidth</td>
+</tr>
+<tr>
+<td><strong>Outstanding transactions</strong></td>
+<td>Increase for latency hiding</td>
+</tr>
+<tr>
+<td><strong>FIFO depth</strong></td>
+<td>Sufficient depth between tasks to decouple</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="decision-tree">Decision Tree</h2>
+<div class="highlight"><pre><span></span><code>Need external memory access in data-driven task?
+├── Yes → Is memory accessed by single task?
+│         ├── Yes → Use M-AXI + #pragma HLS stable
+│         │         └── Pass pointer to that task only
+│         └── No → Consider:
+│                  ├── Separate memory bundles for each task
+│                  └── Or redesign to single memory task
+└── No → Use pure stream-based tasks
+</code></pre></div>
+
+<hr />
+<h2 id="related-documentation">Related Documentation</h2>
+<ul>
+<li><a href="../types/hls-task.md">hls::task</a> - Data-driven task type</li>
+<li><a href="directio-with-tasks.md">directio-with-tasks</a> - DirectIO scalars with tasks</li>
+<li><a href="data-driven-splitter.md">data-driven-splitter</a> - Conditional routing pattern</li>
+</ul>
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>Example</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Data_driven/using_maxi_in_tasks/">using_maxi_in_tasks</a></td>
+<td>M-AXI pointer with stable pragma</td>
+</tr>
+</tbody>
+</table>
+<h2 id="yaml-source">YAML Source</h2>
+<p>See <code>schema/patterns.yaml</code> - <code>maxi-with-tasks</code> entry for machine-readable definition.</p>
+    </main>
+</body>
+</html>

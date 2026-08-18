@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Bank Selection - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="memory-bank-selection">Memory Bank Selection</h1>
+<p><strong>Question:</strong> How should I assign ports to DDR/HBM banks?</p>
+<p><strong>Category:</strong> Interface</p>
+<hr />
+<h2 id="key-principles">Key Principles</h2>
+<ol>
+<li><strong>Separate read and write ports to different banks</strong> - Avoid contention</li>
+<li><strong>Use multiple banks for parallel access</strong> - Maximize bandwidth</li>
+<li><strong>Match bank assignment to access patterns</strong> - Optimize for your workload</li>
+<li><strong>Use <code>group_id()</code> in host code</strong> - Match connectivity file</li>
+</ol>
+<hr />
+<h2 id="good-patterns">Good Patterns</h2>
+<h3 id="parallel-readwrite">Parallel Read/Write</h3>
+<p>Separate input and output to different banks for parallel access:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[connectivity]</span>
+<span class="na">sp</span><span class="o">=</span><span class="s">kernel.input:DDR[0]</span>
+<span class="na">sp</span><span class="o">=</span><span class="s">kernel.output:DDR[1]</span>
+</code></pre></div>
+
+<p><strong>Result:</strong> Reads and writes happen in parallel, no bank contention.</p>
+<h3 id="multiple-inputs">Multiple Inputs</h3>
+<p>Distribute multiple inputs across banks for full bandwidth:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[connectivity]</span>
+<span class="na">sp</span><span class="o">=</span><span class="s">kernel.in1:HBM[0]</span>
+<span class="na">sp</span><span class="o">=</span><span class="s">kernel.in2:HBM[1]</span>
+<span class="na">sp</span><span class="o">=</span><span class="s">kernel.in3:HBM[2]</span>
+<span class="na">sp</span><span class="o">=</span><span class="s">kernel.out:HBM[3]</span>
+</code></pre></div>
+
+<p><strong>Result:</strong> Each input gets dedicated bandwidth.</p>
+<h3 id="read-modify-write">Read-Modify-Write</h3>
+<p>For in-place operations, use separate read/write bundles:</p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">kernel</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">data_in</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">data_out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=data_in bundle=gmem0</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=data_out bundle=gmem1</span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code><span class="k">[connectivity]</span>
+<span class="na">sp</span><span class="o">=</span><span class="s">kernel.gmem0:DDR[0]</span>
+<span class="na">sp</span><span class="o">=</span><span class="s">kernel.gmem1:DDR[1]</span>
+</code></pre></div>
+
+<hr />
+<h2 id="bad-patterns">Bad Patterns</h2>
+<h3 id="same-bank-for-readwrite">Same Bank for Read/Write</h3>
+<p><strong>Problem:</strong> Read and write compete for same bank bandwidth.</p>
+<div class="highlight"><pre><span></span><code><span class="k">[connectivity]</span>
+<span class="na">sp</span><span class="o">=</span><span class="s">kernel.input:DDR[0]</span>
+<span class="na">sp</span><span class="o">=</span><span class="s">kernel.output:DDR[0]</span><span class="w">  </span><span class="c1"># BAD: Same bank as input!</span>
+</code></pre></div>
+
+<p><strong>Fix:</strong> Use different banks.</p>
+<h3 id="all-ports-on-single-bank">All Ports on Single Bank</h3>
+<p><strong>Problem:</strong> All memory access serialized through one bank.</p>
+<div class="highlight"><pre><span></span><code><span class="k">[connectivity]</span>
+<span class="na">sp</span><span class="o">=</span><span class="s">kernel.in1:DDR[0]</span>
+<span class="na">sp</span><span class="o">=</span><span class="s">kernel.in2:DDR[0]</span><span class="w">  </span><span class="c1"># BAD</span>
+<span class="na">sp</span><span class="o">=</span><span class="s">kernel.in3:DDR[0]</span><span class="w">  </span><span class="c1"># BAD</span>
+<span class="na">sp</span><span class="o">=</span><span class="s">kernel.out:DDR[0]</span><span class="w">  </span><span class="c1"># BAD</span>
+</code></pre></div>
+
+<p><strong>Fix:</strong> Distribute across banks.</p>
+<hr />
+<h2 id="ddr-vs-hbm">DDR vs HBM</h2>
+<table>
+<thead>
+<tr>
+<th>Memory</th>
+<th>Banks</th>
+<th>Bandwidth/Bank</th>
+<th>Total Bandwidth</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DDR</strong></td>
+<td>2-4</td>
+<td>~19 GB/s</td>
+<td>~38-76 GB/s</td>
+<td>General purpose</td>
+</tr>
+<tr>
+<td><strong>HBM</strong></td>
+<td>32</td>
+<td>~14 GB/s</td>
+<td>~460 GB/s</td>
+<td>High bandwidth</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ddr-guidelines">DDR Guidelines</h3>
+<ul>
+<li>Typically 2-4 banks available</li>
+<li>Each bank: ~19 GB/s</li>
+<li>Use for moderate bandwidth needs</li>
+</ul>
+<h3 id="hbm-guidelines">HBM Guidelines</h3>
+<ul>
+<li>32 banks available (pseudo-channels)</li>
+<li>Each bank: ~14 GB/s</li>
+<li>Aggregate: ~460 GB/s</li>
+<li>Use for memory-bound kernels</li>
+</ul>
+<hr />
+<h2 id="host-code-matching">Host Code Matching</h2>
+<p>Ensure host code matches connectivity file using <code>group_id()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Host code</span>
+<span class="n">cl</span><span class="o">::</span><span class="n">Buffer</span><span class="w"> </span><span class="nf">buffer_in</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">CL_MEM_READ_ONLY</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">);</span>
+<span class="n">cl</span><span class="o">::</span><span class="n">Buffer</span><span class="w"> </span><span class="nf">buffer_out</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">CL_MEM_WRITE_ONLY</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">);</span>
+
+<span class="c1">// Set memory bank (must match connectivity file)</span>
+<span class="n">buffer_in</span><span class="p">.</span><span class="n">setMemoryBank</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span><span class="w">  </span><span class="c1">// DDR[0]</span>
+<span class="n">buffer_out</span><span class="p">.</span><span class="n">setMemoryBank</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span><span class="w"> </span><span class="c1">// DDR[1]</span>
+</code></pre></div>
+
+<p>Or use <code>cl_mem_ext_ptr_t</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">cl_mem_ext_ptr_t</span><span class="w"> </span><span class="n">ext_in</span><span class="p">,</span><span class="w"> </span><span class="n">ext_out</span><span class="p">;</span>
+<span class="n">ext_in</span><span class="p">.</span><span class="n">flags</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">XCL_MEM_TOPOLOGY</span><span class="p">;</span><span class="w">  </span><span class="c1">// Bank 0</span>
+<span class="n">ext_out</span><span class="p">.</span><span class="n">flags</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">XCL_MEM_TOPOLOGY</span><span class="p">;</span><span class="w"> </span><span class="c1">// Bank 1</span>
+</code></pre></div>
+
+<hr />
+<h2 id="connectivity-file-format">Connectivity File Format</h2>
+<p>Create <code>connectivity.cfg</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[connectivity]</span>
+<span class="c1"># Format: sp=&lt;kernel&gt;.&lt;port&gt;:&lt;memory&gt;[bank]</span>
+
+<span class="c1"># Single kernel</span>
+<span class="na">sp</span><span class="o">=</span><span class="s">mykernel.input:DDR[0]</span>
+<span class="na">sp</span><span class="o">=</span><span class="s">mykernel.output:DDR[1]</span>
+
+<span class="c1"># Multiple kernels</span>
+<span class="na">sp</span><span class="o">=</span><span class="s">kernel1.data:HBM[0]</span>
+<span class="na">sp</span><span class="o">=</span><span class="s">kernel2.data:HBM[1]</span>
+
+<span class="c1"># Kernel-to-kernel streaming (no memory)</span>
+<span class="na">stream_connect</span><span class="o">=</span><span class="s">kernel1.out:kernel2.in</span>
+</code></pre></div>
+
+<p>Use with v++:</p>
+<div class="highlight"><pre><span></span><code>v++<span class="w"> </span>--link<span class="w"> </span>--config<span class="w"> </span>connectivity.cfg<span class="w"> </span>...
+</code></pre></div>
+
+<hr />
+<h2 id="decision-guide">Decision Guide</h2>
+<div class="highlight"><pre><span></span><code>How many memory ports?
+├── 1 port (read-only or write-only)
+│   └── Any single bank is fine
+├── 2 ports (1 read, 1 write)
+│   └── Separate to different banks
+├── Many ports
+│   └── Distribute across available banks
+│       ├── DDR: 2-4 banks
+│       └── HBM: Up to 32 banks
+└── Bandwidth-critical?
+    ├── Yes → Use HBM, maximize bank spread
+    └── No → DDR is sufficient
+</code></pre></div>
+
+<hr />
+<h2 id="related">Related</h2>
+<ul>
+<li><a href="interface-selection.html">Interface Selection</a> - Choosing interface types</li>
+<li><a href="../pragmas/index.html#interface">INTERFACE Pragma</a> - m_axi parameters</li>
+</ul>
+    </main>
+</body>
+</html>

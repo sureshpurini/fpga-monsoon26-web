@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explicit vs Implicit Streams - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="explicit-vs-implicit-streams">Explicit vs Implicit Streams</h1>
+<p><strong>Question:</strong> Should I use explicit <code>hls::stream</code> or implicit array channels?</p>
+<p><strong>Category:</strong> Dataflow</p>
+<hr />
+<h2 id="decision-summary">Decision Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Use When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Explicit <code>hls::stream&lt;T&gt;</code></strong></td>
+<td>Need fine-grained control, variable sizes, complex patterns</td>
+</tr>
+<tr>
+<td><strong>Implicit arrays</strong></td>
+<td>Simple dataflow, fixed sizes, simpler code preferred</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="when-to-use-explicit-hlsstream">When to Use Explicit hls::stream</h2>
+<p>Use <code>hls::stream&lt;T&gt;</code> when you need:</p>
+<ul>
+<li><strong>Fine-grained control over FIFO depth</strong> - Set exact buffer sizes</li>
+<li><strong>Variable data sizes</strong> - Runtime-determined element counts</li>
+<li><strong>Complex streaming patterns</strong> - Multiple reads/writes per iteration</li>
+<li><strong>Non-blocking operations</strong> - Use <code>read_nb()</code> / <code>write_nb()</code></li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">data_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">;</span>
+<span class="cp">#pragma HLS STREAM variable=c1 depth=16  </span><span class="c1">// Control depth</span>
+<span class="cp">#pragma HLS dataflow</span>
+<span class="n">funcA</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">c1</span><span class="p">);</span>
+<span class="n">funcB</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">);</span>
+<span class="n">funcC</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">);</span>
+</code></pre></div>
+
+<hr />
+<h2 id="when-to-use-implicit-arrays">When to Use Implicit Arrays</h2>
+<p>Use simple arrays when:</p>
+<ul>
+<li><strong>Simple dataflow with fixed sizes</strong> - Known at compile time</li>
+<li><strong>Want HLS to infer channel type</strong> - Let tool decide FIFO vs PIPO</li>
+<li><strong>Simpler code preferred</strong> - Less boilerplate</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">data_t</span><span class="w"> </span><span class="n">c1</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">c2</span><span class="p">[</span><span class="n">N</span><span class="p">];</span><span class="w">  </span><span class="c1">// Arrays become channels automatically</span>
+<span class="cp">#pragma HLS dataflow</span>
+<span class="n">funcA</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">c1</span><span class="p">);</span>
+<span class="n">funcB</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">);</span>
+<span class="n">funcC</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">);</span>
+</code></pre></div>
+
+<hr />
+<h2 id="code-comparison">Code Comparison</h2>
+<h3 id="implicit-array-based">Implicit (Array-based)</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">top</span><span class="p">(</span><span class="n">data_t</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">data_t</span><span class="w"> </span><span class="n">out</span><span class="p">[</span><span class="n">N</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">data_t</span><span class="w"> </span><span class="n">c1</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">c2</span><span class="p">[</span><span class="n">N</span><span class="p">];</span><span class="w">  </span><span class="c1">// Arrays become PIPO channels</span>
+
+<span class="cp">#pragma HLS dataflow</span>
+
+<span class="w">    </span><span class="n">funcA</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">c1</span><span class="p">);</span><span class="w">   </span><span class="c1">// Writes to c1</span>
+<span class="w">    </span><span class="n">funcB</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">);</span><span class="w">   </span><span class="c1">// Reads c1, writes c2</span>
+<span class="w">    </span><span class="n">funcC</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">);</span><span class="w">  </span><span class="c1">// Reads c2</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Pros:</strong>
+- Simpler syntax
+- Familiar array semantics
+- HLS infers channel type</p>
+<p><strong>Cons:</strong>
+- Less control over implementation
+- Default is PIPO (2× memory)</p>
+<h3 id="explicit-hlsstream">Explicit (hls::stream)</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">top</span><span class="p">(</span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">data_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">data_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">;</span>
+
+<span class="cp">#pragma HLS dataflow</span>
+
+<span class="w">    </span><span class="n">funcA</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">c1</span><span class="p">);</span><span class="w">   </span><span class="c1">// Writes to c1</span>
+<span class="w">    </span><span class="n">funcB</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">);</span><span class="w">   </span><span class="c1">// Reads c1, writes c2</span>
+<span class="w">    </span><span class="n">funcC</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">);</span><span class="w">  </span><span class="c1">// Reads c2</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Pros:</strong>
+- Explicit FIFO semantics
+- Control over depth
+- Non-blocking operations available
+- Clearer intent</p>
+<p><strong>Cons:</strong>
+- More verbose
+- Must use stream API (read/write)</p>
+<hr />
+<h2 id="key-differences">Key Differences</h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Implicit Arrays</th>
+<th>Explicit hls::stream</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Default channel type</strong></td>
+<td>PIPO (ping-pong)</td>
+<td>FIFO</td>
+</tr>
+<tr>
+<td><strong>Memory usage</strong></td>
+<td>2× array size</td>
+<td>Configurable depth</td>
+</tr>
+<tr>
+<td><strong>Access pattern</strong></td>
+<td>Array indexing</td>
+<td>read()/write() API</td>
+</tr>
+<tr>
+<td><strong>Non-blocking</strong></td>
+<td>Not available</td>
+<td>read_nb()/write_nb()</td>
+</tr>
+<tr>
+<td><strong>Depth control</strong></td>
+<td>Via STREAM pragma</td>
+<td>Via STREAM pragma or template</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="converting-between-styles">Converting Between Styles</h2>
+<h3 id="array-to-stream">Array to Stream</h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// Before (implicit)</span>
+<span class="n">data_t</span><span class="w"> </span><span class="n">channel</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+
+<span class="c1">// After (explicit)</span>
+<span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">data_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">channel</span><span class="p">;</span>
+<span class="cp">#pragma HLS STREAM variable=channel depth=N</span>
+</code></pre></div>
+
+<h3 id="making-arrays-act-like-fifos">Making Arrays Act Like FIFOs</h3>
+<div class="highlight"><pre><span></span><code><span class="n">data_t</span><span class="w"> </span><span class="n">channel</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+<span class="cp">#pragma HLS STREAM variable=channel type=fifo depth=2</span>
+</code></pre></div>
+
+<hr />
+<h2 id="examples">Examples</h2>
+<table>
+<thead>
+<tr>
+<th>Style</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Implicit arrays</td>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Channels/simple_fifos/">simple_fifos</a></td>
+</tr>
+<tr>
+<td>Explicit streams</td>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Channels/using_fifos/">using_fifos</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related">Related</h2>
+<ul>
+<li><a href="fifo-vs-pipo.html">FIFO vs PIPO</a> - Channel type selection</li>
+<li><a href="dataflow-topology.html">Dataflow Topology</a> - Overall dataflow structure</li>
+<li><a href="../types/hls-stream.html">hls::stream Type</a> - Stream type documentation</li>
+</ul>
+    </main>
+</body>
+</html>

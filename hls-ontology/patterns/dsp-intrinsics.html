@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSP Intrinsics Usage - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="dsp-intrinsics-usage">DSP Intrinsics Usage</h1>
+<p>Use the Vitis HLS DSP Intrinsics Library for direct control over DSP hardware slices. This enables custom cascade architectures like systolic arrays and transposed FIR structures that auto-inference cannot produce.</p>
+<h2 id="overview">Overview</h2>
+<p>DSP intrinsics provide low-level access to FPGA DSP slices (DSP58 on Versal, DSP48 on older devices). While HLS can automatically infer DSP usage for simple arithmetic, intrinsics give you explicit control over:</p>
+<ul>
+<li><strong>Pipeline registers</strong> - Control latency vs timing trade-offs</li>
+<li><strong>Cascade connections</strong> - Chain DSP slices efficiently</li>
+<li><strong>Architecture</strong> - Build systolic arrays, transposed structures, etc.</li>
+</ul>
+<div class="highlight"><pre><span></span><code>Standard HLS:    result = a * b + c;     → HLS decides DSP usage
+DSP Intrinsics:  dsp.mul_add(a, b, c);   → You control everything
+</code></pre></div>
+
+<hr />
+<h2 id="key-constructs">Key Constructs</h2>
+<table>
+<thead>
+<tr>
+<th>Construct</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#include &lt;hls_dsp_builtins.h&gt;</code></td>
+<td>DSP intrinsics header</td>
+</tr>
+<tr>
+<td><code>using namespace hls::dsp58;</code></td>
+<td>Real-valued DSP operations</td>
+</tr>
+<tr>
+<td><code>using namespace hls::dspcplx;</code></td>
+<td>Complex-valued DSP operations</td>
+</tr>
+<tr>
+<td><code>cascade&lt;FLAGS&gt; dsp;</code></td>
+<td>DSP slice with configurable registers</td>
+</tr>
+<tr>
+<td><code>dsp.mul_add(a, b, c)</code></td>
+<td>Compute a × b + c</td>
+</tr>
+<tr>
+<td><code>result.pcout</code></td>
+<td>P-chain output (accumulated result)</td>
+</tr>
+<tr>
+<td><code>result.bcout</code></td>
+<td>B-chain output (data cascade)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="understanding-dsp-slice-architecture">Understanding DSP Slice Architecture</h2>
+<h3 id="whats-inside-a-dsp-slice">What's Inside a DSP Slice</h3>
+<div class="highlight"><pre><span></span><code>┌──────────────────────────────────────────────────────────────┐
+│                        DSP58 Slice                            │
+│                                                               │
+│  A ──►[REG_A1]──►[REG_A2]──►┐                                │
+│                             ├──►[MULTIPLIER]──►[REG_M]──►┐   │
+│  B ──►[REG_B1]──►[REG_B2]──►┘         │                  │   │
+│                       │               ▼                  ▼   │
+│                       │          [ADDER/ACC]──►[REG_P]──►OUT │
+│                       ▼               ▲                      │
+│                   B-chain out         │                      │
+│                    (bcout)     C input (or P-chain in)       │
+└──────────────────────────────────────────────────────────────┘
+</code></pre></div>
+
+<p><strong>The basic operation:</strong> <code>Output = A × B + C</code></p>
+<h3 id="register-flags">Register Flags</h3>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Purpose</th>
+<th>Latency Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>REG_A1</code></td>
+<td>First A-input register</td>
+<td>+1 cycle on A path</td>
+</tr>
+<tr>
+<td><code>REG_A2</code></td>
+<td>Second A-input register</td>
+<td>+1 more cycle on A path</td>
+</tr>
+<tr>
+<td><code>REG_B1</code></td>
+<td>First B-input register</td>
+<td>+1 cycle on B path</td>
+</tr>
+<tr>
+<td><code>REG_B2</code></td>
+<td>Second B-input register</td>
+<td>+1 more cycle, <strong>required for bcout</strong></td>
+</tr>
+<tr>
+<td><code>REG_M</code></td>
+<td>Multiplier output register</td>
+<td>Registers A×B product</td>
+</tr>
+<tr>
+<td><code>REG_P</code></td>
+<td>Output register</td>
+<td>Registers final result</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Trade-off:</strong> More registers = better timing but higher latency.</p>
+<h3 id="cascade-connections">Cascade Connections</h3>
+<p>DSP slices can be chained using dedicated cascade paths:</p>
+<p><strong>P-Chain (Accumulator Cascade):</strong></p>
+<div class="highlight"><pre><span></span><code>DSP0 ──pcout──► DSP1 ──pcout──► DSP2 ──pcout──► Result
+      (result)       (result)       (result)
+</code></pre></div>
+
+<p>Used for accumulating partial products.</p>
+<p><strong>B-Chain (Data Cascade):</strong></p>
+<div class="highlight"><pre><span></span><code>Data ──► DSP0 ──bcout──► DSP1 ──bcout──► DSP2
+              (data)          (data)
+</code></pre></div>
+
+<p>Used for systolic arrays where data flows through the chain.</p>
+<hr />
+<h2 id="architecture-comparison">Architecture Comparison</h2>
+<h3 id="transposed-fir-vs-systolic-fir">Transposed FIR vs Systolic FIR</h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Transposed FIR</th>
+<th>Systolic FIR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Data flow</td>
+<td>Broadcast (fan-out)</td>
+<td>Cascade (B-chain)</td>
+</tr>
+<tr>
+<td>Cascades used</td>
+<td>P-chain only</td>
+<td>P-chain + B-chain</td>
+</tr>
+<tr>
+<td>Latency</td>
+<td>Lower</td>
+<td>Higher</td>
+</tr>
+<tr>
+<td>Fan-out</td>
+<td>Higher</td>
+<td>Lower</td>
+</tr>
+<tr>
+<td>Scalability</td>
+<td>Limited by fan-out</td>
+<td>Better for many taps</td>
+</tr>
+<tr>
+<td>Complexity</td>
+<td>Simpler</td>
+<td>More complex</td>
+</tr>
+</tbody>
+</table>
+<h3 id="transposed-fir-architecture">Transposed FIR Architecture</h3>
+<div class="highlight"><pre><span></span><code>Input x ───┬────────┬────────┬────────┐
+           │        │        │        │  (data broadcast)
+           ▼        ▼        ▼        ▼
+         [h0]     [h1]     [h2]     [h3]
+           │        │        │        │
+           ▼        ▼        ▼        ▼
+     0 ──►[+]─────►[+]─────►[+]─────►[+]──► y
+              pcout    pcout    pcout
+
+y = h0×x + h1×x + h2×x + h3×x
+</code></pre></div>
+
+<h3 id="systolic-fir-architecture">Systolic FIR Architecture</h3>
+<div class="highlight"><pre><span></span><code>Coeffs: h0       h1       h2       h3  (stationary)
+         │        │        │        │
+         ▼        ▼        ▼        ▼
+x ────►[×]─────►[×]─────►[×]─────►[×]
+        │ bcout  │ bcout  │ bcout  │  (data flows via B-chain)
+        ▼        ▼        ▼        ▼
+bias ─►[+]─────►[+]─────►[+]─────►[+]──► y
+          pcout    pcout    pcout      (results via P-chain)
+</code></pre></div>
+
+<hr />
+<h2 id="code-generation-guidelines">Code Generation Guidelines</h2>
+<h3 id="transposed-fir-template">Transposed FIR Template</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_dsp_builtins.h&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">hls</span><span class="o">::</span><span class="nn">dsp58</span><span class="p">;</span>
+
+<span class="c1">// Single multiply-accumulate stage</span>
+<span class="n">C_t</span><span class="w"> </span><span class="nf">one_stage</span><span class="p">(</span><span class="n">A_t</span><span class="w"> </span><span class="n">coeff</span><span class="p">,</span><span class="w"> </span><span class="n">B_t</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">C_t</span><span class="w"> </span><span class="n">prev_result</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Standard pipeline: 4 cycles latency</span>
+<span class="w">    </span><span class="n">cascade</span><span class="o">&lt;</span><span class="n">REG_A1</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">REG_B1</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">REG_M</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">REG_P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dsp</span><span class="p">;</span>
+<span class="w">    </span><span class="n">R_t</span><span class="w"> </span><span class="n">res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dsp</span><span class="p">.</span><span class="n">mul_add</span><span class="p">(</span><span class="n">coeff</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">prev_result</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">res</span><span class="p">.</span><span class="n">pcout</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">transposed_fir_4tap</span><span class="p">(</span><span class="kt">long</span><span class="o">&amp;</span><span class="w"> </span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="w">                         </span><span class="kt">long</span><span class="w"> </span><span class="n">h0</span><span class="p">,</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">h1</span><span class="p">,</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">h2</span><span class="p">,</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">h3</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cp">#pragma HLS pipeline II=1</span>
+
+<span class="w">    </span><span class="n">A_t</span><span class="w"> </span><span class="n">data_fanout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">;</span><span class="w">  </span><span class="c1">// Broadcast to all stages</span>
+
+<span class="w">    </span><span class="c1">// Chain via P-chain (each stage accumulates with previous)</span>
+<span class="w">    </span><span class="n">C_t</span><span class="w"> </span><span class="n">pc_01</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">one_stage</span><span class="p">(</span><span class="n">h0</span><span class="p">,</span><span class="w"> </span><span class="n">data_fanout</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">       </span><span class="c1">// h0×in + 0</span>
+<span class="w">    </span><span class="n">C_t</span><span class="w"> </span><span class="n">pc_12</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">one_stage</span><span class="p">(</span><span class="n">h1</span><span class="p">,</span><span class="w"> </span><span class="n">data_fanout</span><span class="p">,</span><span class="w"> </span><span class="n">pc_01</span><span class="p">);</span><span class="w">   </span><span class="c1">// h1×in + prev</span>
+<span class="w">    </span><span class="n">C_t</span><span class="w"> </span><span class="n">pc_23</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">one_stage</span><span class="p">(</span><span class="n">h2</span><span class="p">,</span><span class="w"> </span><span class="n">data_fanout</span><span class="p">,</span><span class="w"> </span><span class="n">pc_12</span><span class="p">);</span><span class="w">   </span><span class="c1">// h2×in + prev</span>
+<span class="w">    </span><span class="n">C_t</span><span class="w"> </span><span class="n">p_out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">one_stage</span><span class="p">(</span><span class="n">h3</span><span class="p">,</span><span class="w"> </span><span class="n">data_fanout</span><span class="p">,</span><span class="w"> </span><span class="n">pc_23</span><span class="p">);</span><span class="w">   </span><span class="c1">// h3×in + prev</span>
+
+<span class="w">    </span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p_out</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="systolic-fir-template">Systolic FIR Template</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_dsp_builtins.h&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">hls</span><span class="o">::</span><span class="nn">dsp58</span><span class="p">;</span>
+
+<span class="cp">#define TAPS 4</span>
+<span class="cp">#define N 10</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SystolicFIR</span><span class="w"> </span><span class="p">{</span>
+<span class="k">private</span><span class="o">:</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">long</span><span class="o">*</span><span class="w"> </span><span class="n">coeff_</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">long</span><span class="w"> </span><span class="n">bias_</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// First DSP: standard pipeline (receives fresh input, no B2 needed)</span>
+<span class="w">    </span><span class="n">cascade</span><span class="o">&lt;</span><span class="n">REG_A1</span><span class="o">|</span><span class="n">REG_B1</span><span class="o">|</span><span class="n">REG_M</span><span class="o">|</span><span class="n">REG_P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dsp0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Remaining DSPs: need REG_B2 for B-chain cascade</span>
+<span class="w">    </span><span class="n">cascade</span><span class="o">&lt;</span><span class="n">REG_A1</span><span class="o">|</span><span class="n">REG_B1</span><span class="o">|</span><span class="n">REG_B2</span><span class="o">|</span><span class="n">REG_M</span><span class="o">|</span><span class="n">REG_P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dsp_chain</span><span class="p">[</span><span class="n">size</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">];</span>
+
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">SystolicFIR</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">long</span><span class="o">*</span><span class="w"> </span><span class="n">coeff</span><span class="p">,</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">bias</span><span class="p">)</span>
+<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">coeff_</span><span class="p">(</span><span class="n">coeff</span><span class="p">),</span><span class="w"> </span><span class="n">bias_</span><span class="p">(</span><span class="n">bias</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// CRITICAL: Partition for parallel hardware</span>
+<span class="w">        </span><span class="cp">#pragma HLS ARRAY_PARTITION variable=dsp_chain complete dim=1</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kt">long</span><span class="w"> </span><span class="n">compute</span><span class="p">(</span><span class="n">B_t</span><span class="w"> </span><span class="n">input</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Stage 0: multiply + add bias</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dsp0</span><span class="p">.</span><span class="n">mul_add</span><span class="p">(</span><span class="n">coeff_</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="n">bias_</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// Stages 1 to size-1: cascade through B-chain and P-chain</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">size</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="cp">#pragma HLS UNROLL  </span><span class="c1">// CRITICAL: Create parallel DSPs</span>
+<span class="w">            </span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dsp_chain</span><span class="p">[</span><span class="n">j</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">].</span><span class="n">mul_add</span><span class="p">(</span>
+<span class="w">                </span><span class="n">coeff_</span><span class="p">[</span><span class="n">j</span><span class="p">],</span><span class="w">   </span><span class="c1">// This stage&#39;s coefficient</span>
+<span class="w">                </span><span class="n">out</span><span class="p">.</span><span class="n">bcout</span><span class="p">,</span><span class="w">   </span><span class="c1">// B-chain: data from previous DSP</span>
+<span class="w">                </span><span class="n">out</span><span class="p">.</span><span class="n">pcout</span><span class="w">    </span><span class="c1">// P-chain: accumulated result</span>
+<span class="w">            </span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">out</span><span class="p">.</span><span class="n">pcout</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">systolic_fir</span><span class="p">(</span><span class="kt">long</span><span class="w"> </span><span class="n">coeffs</span><span class="p">[</span><span class="n">TAPS</span><span class="p">],</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">data</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">bias</span><span class="p">,</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">out</span><span class="p">[</span><span class="n">N</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cp">#pragma HLS ARRAY_PARTITION variable=coeffs complete dim=1</span>
+
+<span class="w">    </span><span class="n">SystolicFIR</span><span class="o">&lt;</span><span class="n">TAPS</span><span class="o">&gt;</span><span class="w"> </span><span class="n">fir</span><span class="p">(</span><span class="n">coeffs</span><span class="p">,</span><span class="w"> </span><span class="n">bias</span><span class="p">);</span>
+
+<span class="w">    </span><span class="nl">LOOP_FIR</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fir</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="complex-valued-systolic-fir">Complex-Valued Systolic FIR</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_dsp_builtins.h&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">hls</span><span class="o">::</span><span class="nn">dspcplx</span><span class="p">;</span><span class="w">  </span><span class="c1">// Complex namespace</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ComplexFIR</span><span class="w"> </span><span class="p">{</span>
+<span class="k">private</span><span class="o">:</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">A_t</span><span class="o">*</span><span class="w"> </span><span class="n">coeff_</span><span class="p">;</span>
+<span class="w">    </span><span class="n">C_t</span><span class="w"> </span><span class="n">bias_</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Use convenience flags for complex DSP</span>
+<span class="w">    </span><span class="n">cascade</span><span class="o">&lt;</span><span class="n">BALANCED_PIPELINE</span><span class="o">|</span><span class="n">REG_M</span><span class="o">|</span><span class="n">REG_P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dsp0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">cascade</span><span class="o">&lt;</span><span class="n">FULL_PIPELINE</span><span class="o">|</span><span class="n">REG_M</span><span class="o">|</span><span class="n">REG_P</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dsp_chain</span><span class="p">[</span><span class="n">size</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">];</span>
+
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">ComplexFIR</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">A_t</span><span class="o">*</span><span class="w"> </span><span class="n">coeff</span><span class="p">,</span><span class="w"> </span><span class="n">C_t</span><span class="w"> </span><span class="n">bias</span><span class="p">)</span>
+<span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">coeff_</span><span class="p">(</span><span class="n">coeff</span><span class="p">),</span><span class="w"> </span><span class="n">bias_</span><span class="p">(</span><span class="n">bias</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="cp">#pragma HLS ARRAY_PARTITION variable=dsp_chain complete dim=1</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">C_t</span><span class="w"> </span><span class="n">compute</span><span class="p">(</span><span class="n">B_t</span><span class="w"> </span><span class="n">input</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dsp0</span><span class="p">.</span><span class="n">mul_add</span><span class="p">(</span><span class="n">coeff_</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="n">bias_</span><span class="p">);</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">size</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="cp">#pragma HLS UNROLL</span>
+<span class="w">            </span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dsp_chain</span><span class="p">[</span><span class="n">j</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">].</span><span class="n">mul_add</span><span class="p">(</span><span class="n">coeff_</span><span class="p">[</span><span class="n">j</span><span class="p">],</span><span class="w"> </span><span class="n">out</span><span class="p">.</span><span class="n">bcout</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">.</span><span class="n">pcout</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">out</span><span class="p">.</span><span class="n">pcout</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<hr />
+<h2 id="test-bench-generation-guidelines">Test Bench Generation Guidelines</h2>
+<h3 id="impulse-response-test">Impulse Response Test</h3>
+<p>The simplest test for a FIR filter is the impulse response test: apply an impulse (1 followed by zeros) and verify the output equals the filter coefficients.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;systolic_fir.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Test coefficients</span>
+<span class="w">    </span><span class="kt">long</span><span class="w"> </span><span class="n">coeffs</span><span class="p">[</span><span class="n">TAPS</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">};</span>
+
+<span class="w">    </span><span class="c1">// Impulse input: [1, 0, 0, 0, ...]</span>
+<span class="w">    </span><span class="kt">long</span><span class="w"> </span><span class="n">data</span><span class="p">[</span><span class="n">N</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">};</span>
+
+<span class="w">    </span><span class="kt">long</span><span class="w"> </span><span class="n">bias</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">long</span><span class="w"> </span><span class="n">out</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+
+<span class="w">    </span><span class="c1">// Run filter</span>
+<span class="w">    </span><span class="n">systolic_fir</span><span class="p">(</span><span class="n">coeffs</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">bias</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Verify impulse response</span>
+<span class="w">    </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Impulse response:&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">errors</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;out[&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;] = &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+
+<span class="w">        </span><span class="c1">// Expected: coefficients for i &lt; TAPS, 0 otherwise</span>
+<span class="w">        </span><span class="kt">long</span><span class="w"> </span><span class="n">expected</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">TAPS</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">coeffs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">expected</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; ERROR (expected &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">expected</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;)&quot;</span><span class="p">;</span>
+<span class="w">            </span><span class="n">errors</span><span class="o">++</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Expected output: 1, 2, 3, 4, 0, 0, 0, 0, 0, 0</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">errors</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="step-response-test">Step Response Test</h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// Step input: all ones</span>
+<span class="kt">long</span><span class="w"> </span><span class="n">step_data</span><span class="p">[</span><span class="n">N</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">};</span>
+
+<span class="n">systolic_fir</span><span class="p">(</span><span class="n">coeffs</span><span class="p">,</span><span class="w"> </span><span class="n">step_data</span><span class="p">,</span><span class="w"> </span><span class="n">bias</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">);</span>
+
+<span class="c1">// For coeffs = {1, 2, 3, 4}, cumulative sums:</span>
+<span class="c1">// out[0] = 1</span>
+<span class="c1">// out[1] = 1+2 = 3</span>
+<span class="c1">// out[2] = 1+2+3 = 6</span>
+<span class="c1">// out[3] = 1+2+3+4 = 10</span>
+<span class="c1">// out[4..9] = 10 (steady state)</span>
+</code></pre></div>
+
+<hr />
+<h2 id="optimization-guidance-for-agents">Optimization Guidance for Agents</h2>
+<h3 id="decision-tree-when-to-use-dsp-intrinsics">Decision Tree: When to Use DSP Intrinsics</h3>
+<div class="highlight"><pre><span></span><code>Need multiply-accumulate?
+├── Simple a*b+c operations?
+│   └── NO → Let HLS auto-infer DSP usage
+│
+├── Standard FIR filter?
+│   └── NO → Use hls::FIR IP instead
+│
+├── Need custom cascade architecture?
+│   ├── YES → Use DSP intrinsics
+│   │         ├── Transposed FIR? → P-chain only, broadcast data
+│   │         └── Systolic FIR? → B-chain + P-chain
+│   └── NO → Auto-inference should work
+│
+├── Auto-inference not meeting timing?
+│   └── YES → Use intrinsics with more register stages
+│
+└── Need portability across device families?
+    └── YES → Avoid intrinsics (device-specific)
+</code></pre></div>
+
+<h3 id="register-selection-guide">Register Selection Guide</h3>
+<table>
+<thead>
+<tr>
+<th>Goal</th>
+<th>Configuration</th>
+<th>Latency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Minimum latency</td>
+<td><code>REG_M \| REG_P</code></td>
+<td>2 cycles</td>
+</tr>
+<tr>
+<td>Balanced (default)</td>
+<td><code>REG_A1 \| REG_B1 \| REG_M \| REG_P</code></td>
+<td>4 cycles</td>
+</tr>
+<tr>
+<td>B-chain cascade</td>
+<td><code>REG_A1 \| REG_B1 \| REG_B2 \| REG_M \| REG_P</code></td>
+<td>5 cycles</td>
+</tr>
+<tr>
+<td>Maximum Fmax</td>
+<td><code>REG_A1 \| REG_A2 \| REG_B1 \| REG_B2 \| REG_M \| REG_P</code></td>
+<td>6 cycles</td>
+</tr>
+</tbody>
+</table>
+<h3 id="architecture-selection">Architecture Selection</h3>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Choose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Minimum latency</td>
+<td>Transposed FIR</td>
+</tr>
+<tr>
+<td>Fewer taps (&lt; 8)</td>
+<td>Transposed FIR</td>
+</tr>
+<tr>
+<td>Many taps (&gt; 8)</td>
+<td>Systolic FIR</td>
+</tr>
+<tr>
+<td>Fan-out is concern</td>
+<td>Systolic FIR</td>
+</tr>
+<tr>
+<td>Simpler implementation</td>
+<td>Transposed FIR</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="common-pitfalls">Common Pitfalls</h2>
+<h3 id="1-missing-array_partition">1. Missing ARRAY_PARTITION</h3>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>DSP array not partitioned</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Symptom</td>
+<td>Sequential hardware instead of parallel cascade</td>
+</tr>
+<tr>
+<td>Fix</td>
+<td><code>#pragma HLS ARRAY_PARTITION variable=dsp_chain complete dim=1</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-missing-unroll">2. Missing UNROLL</h3>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Cascade loop not unrolled</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Symptom</td>
+<td>Single DSP reused iteratively</td>
+</tr>
+<tr>
+<td>Fix</td>
+<td>Add <code>#pragma HLS UNROLL</code> inside loop</td>
+</tr>
+</tbody>
+</table>
+<h3 id="3-missing-reg_b2-for-b-chain">3. Missing REG_B2 for B-Chain</h3>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Using bcout without REG_B2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Symptom</td>
+<td>bcout not available or timing issues</td>
+</tr>
+<tr>
+<td>Fix</td>
+<td>Use <code>REG_A1\|REG_B1\|REG_B2\|REG_M\|REG_P</code> for DSPs receiving bcout</td>
+</tr>
+</tbody>
+</table>
+<h3 id="4-wrong-namespace">4. Wrong Namespace</h3>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Namespace mismatch with data type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Symptom</td>
+<td>Type errors, compilation failures</td>
+</tr>
+<tr>
+<td>Fix</td>
+<td><code>hls::dsp58</code> for real, <code>hls::dspcplx</code> for complex</td>
+</tr>
+</tbody>
+</table>
+<h3 id="5-insufficient-registers">5. Insufficient Registers</h3>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Not enough pipeline registers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Symptom</td>
+<td>Timing failures at high Fmax</td>
+</tr>
+<tr>
+<td>Fix</td>
+<td>Add more register flags</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="comparison-dsp-intrinsics-vs-alternatives">Comparison: DSP Intrinsics vs Alternatives</h2>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Code</th>
+<th>Control</th>
+<th>Complexity</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Auto-inference</td>
+<td><code>r = a*b+c;</code></td>
+<td>None</td>
+<td>Lowest</td>
+<td>Simple arithmetic</td>
+</tr>
+<tr>
+<td>hls::FIR IP</td>
+<td><code>fir.run(...)</code></td>
+<td>Medium</td>
+<td>Low</td>
+<td>Standard FIR filters</td>
+</tr>
+<tr>
+<td>DSP Intrinsics</td>
+<td><code>dsp.mul_add(...)</code></td>
+<td>Full</td>
+<td>High</td>
+<td>Custom architectures</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Choose intrinsics when:</strong>
+- Auto-inference produces suboptimal results
+- Need specific cascade architecture
+- Building systolic arrays
+- Fine-tuning pipeline for timing</p>
+<p><strong>Avoid intrinsics when:</strong>
+- Simple arithmetic suffices
+- Standard FIR filtering (use hls::FIR)
+- Portability across devices required
+- Complexity not justified</p>
+<hr />
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>Example</th>
+<th>Path</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Systolic FIR</td>
+<td><code>DSP/DSP_Intrinsic_Library/systolic_fir/</code></td>
+<td>Real-valued systolic FIR with B-chain and P-chain</td>
+</tr>
+<tr>
+<td>Transposed FIR</td>
+<td><code>DSP/DSP_Intrinsic_Library/transposed_fir/</code></td>
+<td>Transposed FIR with P-chain only</td>
+</tr>
+<tr>
+<td>Complex Systolic</td>
+<td><code>DSP/DSP_Intrinsic_Library/systolic_fir_using_complex/</code></td>
+<td>Complex-valued using hls::dspcplx</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related-patterns">Related Patterns</h2>
+<ul>
+<li><a href="fft-usage.md">fft-usage</a> - FFT IP (similar DSP IP pattern)</li>
+<li><a href="fir-usage.md">fir-usage</a> - FIR IP (simpler alternative for standard filters)</li>
+</ul>
+<h2 id="related-types">Related Types</h2>
+<ul>
+<li><a href="../types/hls-dsp-intrinsics.md">hls::dsp_intrinsics</a> - Full type documentation</li>
+<li><a href="../types/ap-fixed.md">ap_fixed</a> - Fixed-point types often used with DSP</li>
+</ul>
+<h2 id="related-pragmas">Related Pragmas</h2>
+<ul>
+<li><a href="../pragmas/index.md#array_partition">ARRAY_PARTITION</a> - Required for DSP arrays</li>
+<li><a href="../pragmas/index.md#unroll">UNROLL</a> - Required in cascade loops</li>
+<li><a href="../pragmas/index.md#pipeline">PIPELINE</a> - For II=1 throughput</li>
+</ul>
+    </main>
+</body>
+</html>

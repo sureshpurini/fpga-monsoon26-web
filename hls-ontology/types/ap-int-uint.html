@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ap_int and ap_uint - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="ap_int-and-ap_uint">ap_int and ap_uint</h1>
+<p>Arbitrary-precision integer types with exact bit-width control.</p>
+<h2 id="header">Header</h2>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;ap_int.h&gt;</span>
+</code></pre></div>
+
+<h2 id="syntax">Syntax</h2>
+<div class="highlight"><pre><span></span><code><span class="n">ap_int</span><span class="o">&lt;</span><span class="n">W</span><span class="o">&gt;</span><span class="w">  </span><span class="n">signed_val</span><span class="p">;</span><span class="w">    </span><span class="c1">// Signed integer, W bits</span>
+<span class="n">ap_uint</span><span class="o">&lt;</span><span class="n">W</span><span class="o">&gt;</span><span class="w"> </span><span class="n">unsigned_val</span><span class="p">;</span><span class="w">  </span><span class="c1">// Unsigned integer, W bits</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>W</code></td>
+<td>Bit width (1 to 32768)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="why-use-arbitrary-precision">Why Use Arbitrary Precision?</h2>
+<table>
+<thead>
+<tr>
+<th>Native C++</th>
+<th>Problem</th>
+<th>ap_int/ap_uint Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>int</code> (32 bits)</td>
+<td>Wastes resources if you need 12 bits</td>
+<td><code>ap_int&lt;12&gt;</code> - exact 12 bits</td>
+</tr>
+<tr>
+<td><code>char</code> (8 bits)</td>
+<td>Can't represent 10-bit value</td>
+<td><code>ap_uint&lt;10&gt;</code> - exact 10 bits</td>
+</tr>
+<tr>
+<td>Overflow</td>
+<td>Silent wraparound</td>
+<td>Controlled overflow modes</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="basic-operations">Basic Operations</h2>
+<p>All standard integer operations are supported:</p>
+<div class="highlight"><pre><span></span><code><span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span>
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">25</span><span class="p">;</span>
+
+<span class="c1">// Arithmetic</span>
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">9</span><span class="o">&gt;</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w">      </span><span class="c1">// 9 bits to prevent overflow</span>
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">16</span><span class="o">&gt;</span><span class="w"> </span><span class="n">prod</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w">    </span><span class="c1">// 16 bits for multiply</span>
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">diff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">b</span><span class="p">;</span>
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">quot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">b</span><span class="p">;</span>
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">rem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">b</span><span class="p">;</span>
+
+<span class="c1">// Comparison</span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">eq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">b</span><span class="p">);</span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">lt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">b</span><span class="p">);</span>
+
+<span class="c1">// Bitwise</span>
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">and_result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">b</span><span class="p">;</span>
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">or_result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">b</span><span class="p">;</span>
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">xor_result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">b</span><span class="p">;</span>
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">not_result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">~</span><span class="n">a</span><span class="p">;</span>
+
+<span class="c1">// Shift</span>
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">lshift</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">rshift</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+</code></pre></div>
+
+<hr />
+<h2 id="bit-manipulation">Bit Manipulation</h2>
+<h3 id="range-selection-slicing">Range Selection (Slicing)</h3>
+<div class="highlight"><pre><span></span><code><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xABCD1234</span><span class="p">;</span>
+
+<span class="c1">// Extract bits [15:8] (second byte)</span>
+<span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">byte1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">val</span><span class="p">.</span><span class="n">range</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">);</span><span class="w">  </span><span class="c1">// = 0x12</span>
+
+<span class="c1">// Extract bits [31:16] (upper half)</span>
+<span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">16</span><span class="o">&gt;</span><span class="w"> </span><span class="n">upper</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">val</span><span class="p">.</span><span class="n">range</span><span class="p">(</span><span class="mi">31</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">);</span><span class="w">  </span><span class="c1">// = 0xABCD</span>
+
+<span class="c1">// Modify a range</span>
+<span class="n">val</span><span class="p">.</span><span class="n">range</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xFF</span><span class="p">;</span><span class="w">  </span><span class="c1">// val = 0xABCD12FF</span>
+</code></pre></div>
+
+<h3 id="single-bit-access">Single Bit Access</h3>
+<div class="highlight"><pre><span></span><code><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">0b10101010</span><span class="p">;</span>
+
+<span class="kt">bool</span><span class="w"> </span><span class="n">bit3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">val</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span><span class="w">      </span><span class="c1">// Read bit 3 (= 1)</span>
+<span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">              </span><span class="c1">// Set bit 0</span>
+<span class="n">val</span><span class="p">.</span><span class="n">set_bit</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">       </span><span class="c1">// Clear bit 7</span>
+</code></pre></div>
+
+<h3 id="concatenation">Concatenation</h3>
+<div class="highlight"><pre><span></span><code><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">high</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xAB</span><span class="p">;</span>
+<span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">low</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xCD</span><span class="p">;</span>
+
+<span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">16</span><span class="o">&gt;</span><span class="w"> </span><span class="n">combined</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">high</span><span class="p">,</span><span class="w"> </span><span class="n">low</span><span class="p">);</span><span class="w">  </span><span class="c1">// = 0xABCD</span>
+</code></pre></div>
+
+<hr />
+<h2 id="type-conversion">Type Conversion</h2>
+<div class="highlight"><pre><span></span><code><span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">12</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ap_val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1000</span><span class="p">;</span>
+
+<span class="c1">// To native types</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">native_int</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ap_val</span><span class="p">.</span><span class="n">to_int</span><span class="p">();</span>
+<span class="kt">long</span><span class="w"> </span><span class="n">native_long</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ap_val</span><span class="p">.</span><span class="n">to_long</span><span class="p">();</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">native_double</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ap_val</span><span class="p">.</span><span class="n">to_double</span><span class="p">();</span>
+
+<span class="c1">// From native types</span>
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">16</span><span class="o">&gt;</span><span class="w"> </span><span class="n">from_int</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">12345</span><span class="p">;</span>
+<span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span><span class="w"> </span><span class="n">from_hex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xDEADBEEF</span><span class="p">;</span>
+
+<span class="c1">// String conversion</span>
+<span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">from_bin</span><span class="p">(</span><span class="s">&quot;10101010&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w">   </span><span class="c1">// Binary</span>
+<span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">from_hex_str</span><span class="p">(</span><span class="s">&quot;FF&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">);</span><span class="w">    </span><span class="c1">// Hex</span>
+</code></pre></div>
+
+<hr />
+<h2 id="useful-methods">Useful Methods</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>length()</code></td>
+<td>Get bit width (compile-time constant)</td>
+</tr>
+<tr>
+<td><code>to_int()</code></td>
+<td>Convert to native int</td>
+</tr>
+<tr>
+<td><code>to_uint()</code></td>
+<td>Convert to native unsigned int</td>
+</tr>
+<tr>
+<td><code>to_long()</code></td>
+<td>Convert to native long</td>
+</tr>
+<tr>
+<td><code>range(hi, lo)</code></td>
+<td>Extract bit slice</td>
+</tr>
+<tr>
+<td><code>test(i)</code></td>
+<td>Test if bit i is set</td>
+</tr>
+<tr>
+<td><code>set(i)</code></td>
+<td>Set bit i to 1</td>
+</tr>
+<tr>
+<td><code>clear(i)</code></td>
+<td>Set bit i to 0</td>
+</tr>
+<tr>
+<td><code>reverse()</code></td>
+<td>Reverse bit order</td>
+</tr>
+<tr>
+<td><code>and_reduce()</code></td>
+<td>AND all bits (returns 1 if all bits are 1)</td>
+</tr>
+<tr>
+<td><code>or_reduce()</code></td>
+<td>OR all bits (returns 1 if any bit is 1)</td>
+</tr>
+<tr>
+<td><code>xor_reduce()</code></td>
+<td>XOR all bits (returns parity)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="reduce-operations">Reduce Operations</h3>
+<p>Reduce operations combine all bits using a logic operation:</p>
+<div class="highlight"><pre><span></span><code><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xFF</span><span class="p">;</span><span class="w">  </span><span class="c1">// All ones</span>
+
+<span class="kt">bool</span><span class="w"> </span><span class="n">all_ones</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">val</span><span class="p">.</span><span class="n">and_reduce</span><span class="p">();</span><span class="w">   </span><span class="c1">// true (all bits are 1)</span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">non_zero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">val</span><span class="p">.</span><span class="n">or_reduce</span><span class="p">();</span><span class="w">    </span><span class="c1">// true (at least one bit is 1)</span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">parity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">val</span><span class="p">.</span><span class="n">xor_reduce</span><span class="p">();</span><span class="w">     </span><span class="c1">// false (even number of 1s)</span>
+
+<span class="c1">// Common use cases:</span>
+<span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">flags</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">0b10101010</span><span class="p">;</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">flags</span><span class="p">.</span><span class="n">or_reduce</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// At least one flag is set</span>
+<span class="p">}</span>
+
+<span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0xDEADBEEF</span><span class="p">;</span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">parity_bit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">xor_reduce</span><span class="p">();</span><span class="w">  </span><span class="c1">// For error detection</span>
+</code></pre></div>
+
+<hr />
+<h2 id="common-patterns">Common Patterns</h2>
+<h3 id="typedef-for-readability">Typedef for Readability</h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// Define meaningful type names</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">6</span><span class="o">&gt;</span><span class="w"> </span><span class="n">coeff_t</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">12</span><span class="o">&gt;</span><span class="w"> </span><span class="n">accum_t</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">10</span><span class="o">&gt;</span><span class="w"> </span><span class="n">addr_t</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">flag_t</span><span class="p">;</span>
+
+<span class="c1">// Use in code</span>
+<span class="n">coeff_t</span><span class="w"> </span><span class="n">coefficients</span><span class="p">[</span><span class="mi">64</span><span class="p">];</span>
+<span class="n">accum_t</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="n">addr_t</span><span class="w"> </span><span class="n">address</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">base</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">offset</span><span class="p">;</span>
+</code></pre></div>
+
+<h3 id="arithmetic-width-rules">Arithmetic Width Rules</h3>
+<p>To prevent overflow, size result types according to these formulas:</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Result Width Formula</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Multiply</td>
+<td>W1 + W2</td>
+<td><code>ap_int&lt;6&gt; * ap_int&lt;12&gt;</code> → <code>ap_int&lt;18&gt;</code></td>
+</tr>
+<tr>
+<td>Add/Subtract</td>
+<td>max(W1, W2) + 1</td>
+<td><code>ap_int&lt;6&gt; + ap_int&lt;12&gt;</code> → <code>ap_int&lt;13&gt;</code></td>
+</tr>
+<tr>
+<td>Divide</td>
+<td>W_dividend</td>
+<td><code>ap_int&lt;22&gt; / ap_int&lt;6&gt;</code> → <code>ap_int&lt;22&gt;</code></td>
+</tr>
+<tr>
+<td>Modulo</td>
+<td>W_divisor</td>
+<td><code>ap_int&lt;33&gt; % ap_int&lt;6&gt;</code> → <code>ap_int&lt;6&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">6</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">31</span><span class="p">;</span>
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">12</span><span class="o">&gt;</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2047</span><span class="p">;</span>
+
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">18</span><span class="o">&gt;</span><span class="w"> </span><span class="n">prod</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w">    </span><span class="c1">// 6 + 12 = 18 bits (safe)</span>
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">13</span><span class="o">&gt;</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w">     </span><span class="c1">// max(6,12) + 1 = 13 bits (safe)</span>
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">22</span><span class="o">&gt;</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1000000</span><span class="p">;</span>
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">22</span><span class="o">&gt;</span><span class="w"> </span><span class="n">quot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">a</span><span class="p">;</span><span class="w">    </span><span class="c1">// Dividend width preserved</span>
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">6</span><span class="o">&gt;</span><span class="w"> </span><span class="n">rem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">a</span><span class="p">;</span><span class="w">      </span><span class="c1">// Divisor width preserved</span>
+</code></pre></div>
+
+<h3 id="safe-casting-for-overflow-prevention">Safe Casting for Overflow Prevention</h3>
+<p>When the result type matches input type, cast to wider type <strong>before</strong> the operation:</p>
+<div class="highlight"><pre><span></span><code><span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">18</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100000</span><span class="p">;</span>
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">18</span><span class="o">&gt;</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100000</span><span class="p">;</span>
+
+<span class="c1">// WRONG: Overflow! 18-bit can&#39;t hold 18+18=36 bit result</span>
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">18</span><span class="o">&gt;</span><span class="w"> </span><span class="n">bad</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="p">;</span>
+
+<span class="c1">// CORRECT: Cast to wider type before multiply</span>
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">36</span><span class="o">&gt;</span><span class="w"> </span><span class="n">good</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">36</span><span class="o">&gt;</span><span class="p">)</span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">36</span><span class="o">&gt;</span><span class="p">)</span><span class="n">b</span><span class="p">;</span>
+</code></pre></div>
+
+<p>This pattern is essential when you need the full-precision result.</p>
+<h3 id="address-calculation">Address Calculation</h3>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span><span class="w"> </span><span class="n">addr_t</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">12</span><span class="o">&gt;</span><span class="w"> </span><span class="n">offset_t</span><span class="p">;</span>
+
+<span class="n">addr_t</span><span class="w"> </span><span class="n">base</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x1000</span><span class="p">;</span>
+<span class="n">offset_t</span><span class="w"> </span><span class="n">offset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x100</span><span class="p">;</span>
+<span class="n">addr_t</span><span class="w"> </span><span class="n">final_addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">base</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">offset</span><span class="p">;</span>
+</code></pre></div>
+
+<hr />
+<h2 id="when-to-use">When to Use</h2>
+<table>
+<thead>
+<tr>
+<th>Use Case</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exact bit-width control</td>
+<td>Yes - primary use case</td>
+</tr>
+<tr>
+<td>Resource optimization</td>
+<td>Yes - avoid wasted bits</td>
+</tr>
+<tr>
+<td>Bit manipulation</td>
+<td>Yes - range/concat support</td>
+</tr>
+<tr>
+<td>Interface matching</td>
+<td>Yes - match external signals</td>
+</tr>
+<tr>
+<td>Complex arithmetic</td>
+<td>Consider <code>ap_fixed</code> for fractional</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="ap_int-vs-ap_uint">ap_int vs ap_uint</h2>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Range for W bits</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ap_int&lt;W&gt;</code></td>
+<td>-2^(W-1) to 2^(W-1)-1</td>
+<td>Signed values</td>
+</tr>
+<tr>
+<td><code>ap_uint&lt;W&gt;</code></td>
+<td>0 to 2^W - 1</td>
+<td>Unsigned values, addresses</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">signed_val</span><span class="p">;</span><span class="w">   </span><span class="c1">// Range: -128 to 127</span>
+<span class="n">ap_uint</span><span class="o">&lt;</span><span class="mi">8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">unsigned_val</span><span class="p">;</span><span class="w"> </span><span class="c1">// Range: 0 to 255</span>
+</code></pre></div>
+
+<hr />
+<h2 id="related-types">Related Types</h2>
+<ul>
+<li><a href="ap-fixed.md">ap_fixed / ap_ufixed</a> - Fixed-point arithmetic</li>
+<li><a href="hls-vector.md">hls::vector</a> - SIMD vectors</li>
+</ul>
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Modeling/using_arbitrary_precision_arith/">Vitis-HLS-Introductory-Examples/.../using_arbitrary_precision_arith/</a></td>
+<td>Arbitrary precision examples</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Modeling/using_arbitrary_precision_casting/">Vitis-HLS-Introductory-Examples/.../using_arbitrary_precision_casting/</a></td>
+<td>Type casting examples</td>
+</tr>
+</tbody>
+</table>
+    </main>
+</body>
+</html>

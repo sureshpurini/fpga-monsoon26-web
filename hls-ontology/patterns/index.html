@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLS Implementation Patterns - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="hls-implementation-patterns">HLS Implementation Patterns</h1>
+<p>This index lists all implementation patterns available in the ontology. Each pattern answers <strong>"How do I implement X?"</strong></p>
+<h2 id="patterns-by-category">Patterns by Category</h2>
+<h3 id="dataflow-patterns">Dataflow Patterns</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Question</th>
+<th>Docs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="dataflow-diamond.md">dataflow-diamond</a></td>
+<td>How do I implement fork-join topology?</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><a href="dataflow-bypass.md">dataflow-bypass</a></td>
+<td>How do I fix feed-forward violations?</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><a href="merge-split.md">merge-split</a></td>
+<td>How do I implement fan-out/fan-in?</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><a href="autorestart.md">autorestart</a></td>
+<td>How do I run kernel continuously?</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h3 id="data-driven-task-patterns">Data-Driven Task Patterns</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Question</th>
+<th>Docs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="data-driven-splitter.md">data-driven-splitter</a></td>
+<td>How do I route data conditionally with hls::task?</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><a href="directio-with-tasks.md">directio-with-tasks</a></td>
+<td>How do I use DirectIO scalars with tasks?</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><a href="maxi-with-tasks.md">maxi-with-tasks</a></td>
+<td>How do I use M-AXI with data-driven tasks?</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h3 id="interface-patterns-m-axi">Interface Patterns (M-AXI)</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Question</th>
+<th>Reference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>struct-alignment</td>
+<td>How do I fix II violations from struct misalignment?</td>
+<td><a href="../interfaces/memory.md">memory.md</a></td>
+</tr>
+<tr>
+<td>manual-burst</td>
+<td>How do I use explicit burst control?</td>
+<td><a href="../interfaces/memory.md">memory.md</a></td>
+</tr>
+<tr>
+<td>port-aliasing</td>
+<td>How do I use two M-AXI ports for same memory?</td>
+<td><a href="../interfaces/memory.md">memory.md</a></td>
+</tr>
+<tr>
+<td>port-widening</td>
+<td>How do I widen M-AXI for higher bandwidth?</td>
+<td><a href="../interfaces/memory.md">memory.md</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="interface-patterns-axi-stream">Interface Patterns (AXI-Stream)</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Question</th>
+<th>Reference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>axis-to-maxi</td>
+<td>How do I receive stream and write to DDR?</td>
+<td><a href="../interfaces/streaming.md">streaming.md</a></td>
+</tr>
+<tr>
+<td>array-of-streams</td>
+<td>How do I create multiple parallel AXIS?</td>
+<td><a href="../interfaces/streaming.md">streaming.md</a></td>
+</tr>
+<tr>
+<td>axis-side-channels</td>
+<td>How do I use TLAST, TUSER, TID, TDEST?</td>
+<td><a href="../interfaces/streaming.md">streaming.md</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="interface-patterns-pointer-streaming">Interface Patterns (Pointer Streaming)</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Question</th>
+<th>Docs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="pointer-streaming.md">pointer-streaming</a></td>
+<td>How do I map pointers to streaming interfaces?</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h3 id="memory-optimization-patterns">Memory Optimization Patterns</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Question</th>
+<th>Docs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="array-partition.md">array-partition</a></td>
+<td>How do I enable parallel array access?</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><a href="stencil-optimization.md">stencil-optimization</a></td>
+<td>How do I optimize sliding window operations?</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>memory-bottleneck-fix</td>
+<td>How do I reduce memory reads per iteration?</td>
+<td><a href="../interfaces/memory.md">memory.md</a></td>
+</tr>
+<tr>
+<td>rom-inference</td>
+<td>How do I create ROM from computed values?</td>
+<td><a href="../interfaces/memory.md">memory.md</a></td>
+</tr>
+<tr>
+<td>bram-dual-port</td>
+<td>How do I use both BRAM ports?</td>
+<td><a href="../interfaces/memory.md">memory.md</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="loop-optimization-patterns">Loop Optimization Patterns</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Question</th>
+<th>Docs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="perfect-loop-restructuring.md">perfect-loop-restructuring</a></td>
+<td>How do I restructure imperfect loops for pipelining?</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><a href="free-running-pipeline.md">free-running-pipeline</a></td>
+<td>How do I create a continuously running streaming pipeline?</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h3 id="function-optimization-patterns">Function Optimization Patterns</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Question</th>
+<th>Docs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="function-instantiate.md">function-instantiate</a></td>
+<td>How do I create optimized instances for different constant arguments?</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h3 id="dsp-ip-patterns">DSP IP Patterns</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Question</th>
+<th>Docs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="fft-usage.md">fft-usage</a></td>
+<td>How do I use the FFT IP in Vitis HLS?</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><a href="fir-usage.md">fir-usage</a></td>
+<td>How do I use the FIR Filter IP in Vitis HLS?</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><a href="dsp-intrinsics.md">dsp-intrinsics</a></td>
+<td>How do I use DSP intrinsics for custom cascade architectures?</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ip-integration-patterns">IP Integration Patterns</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Question</th>
+<th>Reference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>rtl-blackbox</td>
+<td>How do I integrate existing RTL IP into HLS?</td>
+<td><a href="../../schema/patterns.yaml">patterns.yaml</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="quick-reference">Quick Reference</h2>
+<h3 id="when-to-use-each-pattern">When to Use Each Pattern</h3>
+<div class="highlight"><pre><span></span><code>Implementing parallel processing?
+├── Fork-join topology → dataflow-diamond
+├── Fan-out/fan-in → merge-split
+├── Conditional routing → data-driven-splitter
+└── Continuous execution → autorestart
+
+Working with M-AXI?
+├── Burst not inferred → manual-burst
+├── Struct causes II violation → struct-alignment
+├── Two ports same memory → port-aliasing
+├── Need more bandwidth → port-widening
+└── With hls::task → maxi-with-tasks
+
+Working with AXI-Stream?
+├── Stream to memory → axis-to-maxi
+├── Multiple channels → array-of-streams
+└── Need side channels → axis-side-channels
+
+Working with pointer parameters?
+├── Need streaming interface → pointer-streaming (ap_fifo or ap_hs)
+├── Buffered transfers → ap_fifo mode with depth
+└── Per-element handshake → ap_hs mode
+
+Optimizing memory access?
+├── Need parallel array access → array-partition (complete/cyclic/block)
+├── Sliding window operation → stencil-optimization (ARRAY_STENCIL)
+├── Multiple adjacent reads → memory-bottleneck-fix (shift register)
+├── Lookup table → rom-inference
+└── Want 2x throughput → bram-dual-port
+
+Optimizing loop pipelining?
+├── Code between loop levels → perfect-loop-restructuring
+├── Want to flatten nested loops → perfect loop + LOOP_FLATTEN
+├── Pipeline inner vs outer? → See when-to-pipeline decision guide
+└── Continuous streaming pipeline? → free-running-pipeline (FRP mode)
+
+Optimizing function calls?
+├── Function called with different constants → function-instantiate
+└── Want specialized hardware per call site → FUNCTION_INSTANTIATE + INLINE OFF
+
+Using DSP IP blocks?
+├── FFT/IFFT needed → fft-usage (hls::fft IP)
+├── FIR filter → fir-usage (hls::FIR IP)
+├── Decimation/interpolation → fir-usage with filter_type
+├── Custom cascade architecture? → dsp-intrinsics (systolic, transposed)
+└── Auto-inference sufficient? → Let HLS infer DSP usage automatically
+
+Integrating existing RTL IP?
+└── Have RTL module to integrate → rtl-blackbox (JSON config + C stub)
+</code></pre></div>
+
+<hr />
+<h2 id="pattern-documentation-structure">Pattern Documentation Structure</h2>
+<p>Each pattern in <code>schema/patterns.yaml</code> follows this structure:</p>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pattern-name</span>
+<span class="w">  </span><span class="nt">question</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;How</span><span class="nv"> </span><span class="s">do</span><span class="nv"> </span><span class="s">I...?&quot;</span>
+<span class="w">  </span><span class="nt">category</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dataflow|interface|memory-optimization</span>
+
+<span class="w">  </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">What this pattern does and when to use it.</span>
+
+<span class="w">  </span><span class="nt">detection</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">check</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Question</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">identify</span><span class="nv"> </span><span class="s">if</span><span class="nv"> </span><span class="s">pattern</span><span class="nv"> </span><span class="s">applies&quot;</span>
+<span class="w">    </span><span class="nt">indicators</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">...</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">anti_indicators</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">...</span><span class="p p-Indicator">]</span>
+
+<span class="w">  </span><span class="nt">design_guidance</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">principle</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Core</span><span class="nv"> </span><span class="s">rule&quot;</span>
+<span class="w">    </span><span class="nt">rules</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">...</span><span class="p p-Indicator">]</span>
+
+<span class="w">  </span><span class="nt">code_template</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">// Ready-to-use code template</span>
+
+<span class="w">  </span><span class="nt">violations</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">problem_name</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">problem_code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">        </span><span class="no">// Code with issue</span>
+<span class="w">      </span><span class="nt">solution_code</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">        </span><span class="no">// Fixed code</span>
+
+<span class="w">  </span><span class="nt">examples</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">example_name</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Vitis-HLS-Introductory-Examples/...</span>
+<span class="w">      </span><span class="nt">key_files</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">file1.cpp</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">file2.h</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;What</span><span class="nv"> </span><span class="s">this</span><span class="nv"> </span><span class="s">example</span><span class="nv"> </span><span class="s">shows&quot;</span>
+</code></pre></div>
+
+<hr />
+<h2 id="related-resources">Related Resources</h2>
+<ul>
+<li><a href="../decision-guides/">Decision Guides</a> - "Should I use X or Y?"</li>
+<li><a href="../pragmas/">Pragmas Reference</a> - Pragma syntax and parameters</li>
+<li><a href="../types/">Types Reference</a> - HLS type documentation</li>
+<li><a href="../interfaces/">Interface Guide</a> - Interface configuration</li>
+</ul>
+    </main>
+</body>
+</html>

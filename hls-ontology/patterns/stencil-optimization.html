@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stencil Optimization Pattern - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="stencil-optimization-pattern">Stencil Optimization Pattern</h1>
+<p>Optimize sliding window operations (stencils) for image and signal processing using the <code>#pragma HLS ARRAY_STENCIL</code> pragma to enable data reuse and reduce memory bandwidth.</p>
+<h2 id="overview">Overview</h2>
+<p>A <strong>stencil</strong> is a computation pattern where each output element depends on a fixed-size neighborhood of input elements. As the computation slides across the input, neighboring windows overlap, creating opportunities for data reuse.</p>
+<div class="highlight"><pre><span></span><code>1D Stencil (window size 3):
+┌─────────────────────────────────────────────────┐
+│ Input:   [0]  [1]  [2]  [3]  [4]  [5]  [6] ...  │
+│           └────┴────┘                            │
+│              Window j                            │
+│                └────┴────┘                       │
+│                   Window j+1                     │
+│                                                  │
+│ Overlap: Elements [1] and [2] are read by BOTH  │
+│          Window j and Window j+1                 │
+└─────────────────────────────────────────────────┘
+
+2D Stencil (3x3 window):
+┌─────────────────────────────────┐
+│     [0,0] [0,1] [0,2] [0,3]     │
+│     [1,0] [1,1] [1,2] [1,3]     │
+│     [2,0] [2,1] [2,2] [2,3]     │
+│     [3,0] [3,1] [3,2] [3,3]     │
+│                                  │
+│     ┌─────────┐                  │
+│     │ Window  │ moves right →    │
+│     │ (x,y)   │ then down ↓      │
+│     └─────────┘                  │
+└─────────────────────────────────┘
+</code></pre></div>
+
+<p><strong>Without optimization:</strong> Each output reads all window elements from memory.
+<strong>With ARRAY_STENCIL:</strong> HLS buffers overlapping elements, reducing memory reads.</p>
+<hr />
+<h2 id="key-constructs">Key Constructs</h2>
+<table>
+<thead>
+<tr>
+<th>Construct</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#pragma HLS ARRAY_STENCIL variable=arr</code></td>
+<td>Tell HLS about stencil access pattern</td>
+</tr>
+<tr>
+<td><code>#pragma HLS PIPELINE II=1</code></td>
+<td>Enable single-cycle throughput</td>
+</tr>
+<tr>
+<td>Line buffer (2D)</td>
+<td>Cache rows for vertical reuse</td>
+</tr>
+<tr>
+<td>Window buffer</td>
+<td>Cache current window elements</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="1d-stencil-pattern">1D Stencil Pattern</h2>
+<h3 id="use-cases">Use Cases</h3>
+<ul>
+<li>Moving average filters</li>
+<li>FIR filters</li>
+<li>1D convolution</li>
+<li>Signal smoothing</li>
+</ul>
+<h3 id="data-reuse-analysis">Data Reuse Analysis</h3>
+<p>For a window of size W, sliding by 1 element:
+- <strong>Elements read per window:</strong> W
+- <strong>New elements per slide:</strong> 1
+- <strong>Reused elements:</strong> W-1
+- <strong>Bandwidth reduction:</strong> (W-1)/W = 66% for W=3, 93% for W=15</p>
+<h3 id="complete-example">Complete Example</h3>
+<p>From <a href="../../Vitis-HLS-Introductory-Examples/Modeling/using_array_stencil_1d/">Vitis-HLS-Introductory-Examples/Modeling/using_array_stencil_1d/</a>:</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#define HS 100    </span><span class="c1">// Height</span>
+<span class="cp">#define WS 100    </span><span class="c1">// Width</span>
+<span class="cp">#define FW 3      </span><span class="c1">// Filter window size</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">stencil_1d</span><span class="p">(</span><span class="kt">float</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">HS</span><span class="p">][</span><span class="n">WS</span><span class="p">],</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">out</span><span class="p">[</span><span class="n">HS</span><span class="p">][</span><span class="n">WS</span><span class="o">-</span><span class="n">FW</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">bias</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=in offset=slave bundle=gmem</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=out offset=slave bundle=gmem</span>
+<span class="cp">#pragma HLS INTERFACE s_axilite port=bias bundle=control</span>
+<span class="cp">#pragma HLS INTERFACE s_axilite port=return bundle=control</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">HS</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">WS</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">FW</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="cp">#pragma HLS ARRAY_STENCIL variable=in</span>
+<span class="w">            </span><span class="c1">// 3-element sliding window sum</span>
+<span class="w">            </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">bias</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="how-it-works">How It Works</h3>
+<div class="highlight"><pre><span></span><code>Without ARRAY_STENCIL (naive):
+  Iteration j=0: Read in[0], in[1], in[2]  → 3 reads
+  Iteration j=1: Read in[1], in[2], in[3]  → 3 reads
+  Iteration j=2: Read in[2], in[3], in[4]  → 3 reads
+  Total: 3 reads per iteration
+
+With ARRAY_STENCIL (optimized):
+  Iteration j=0: Read in[0], in[1], in[2]  → 3 reads (cold start)
+  Iteration j=1: Shift buffer, Read in[3]  → 1 read (reuse in[1], in[2])
+  Iteration j=2: Shift buffer, Read in[4]  → 1 read (reuse in[2], in[3])
+  Total: 1 read per iteration (after warm-up)
+</code></pre></div>
+
+<p><strong>Internal buffer (shift register):</strong></p>
+<div class="highlight"><pre><span></span><code>┌──────┬──────┬──────┐
+│ [j]  │[j+1] │[j+2] │  ← Window buffer
+└──────┴──────┴──────┘
+   ↑       ↑       ↑
+   └───────┴───────┴── Shift left, new element enters from right
+</code></pre></div>
+
+<hr />
+<h2 id="2d-stencil-pattern">2D Stencil Pattern</h2>
+<h3 id="use-cases_1">Use Cases</h3>
+<ul>
+<li>Image convolution (blur, sharpen, edge detection)</li>
+<li>2D filtering</li>
+<li>Feature extraction</li>
+<li>Image processing pipelines</li>
+</ul>
+<h3 id="data-reuse-analysis_1">Data Reuse Analysis</h3>
+<p>For an HxW window on an image of width IMG_W:
+- <strong>Horizontal reuse:</strong> W-1 elements per pixel (same as 1D)
+- <strong>Vertical reuse:</strong> (H-1) × W elements from previous rows
+- <strong>Line buffers needed:</strong> H-1 rows cached</p>
+<h3 id="complete-example_1">Complete Example</h3>
+<p>From <a href="../../Vitis-HLS-Introductory-Examples/Modeling/using_array_stencil_2d/">Vitis-HLS-Introductory-Examples/Modeling/using_array_stencil_2d/</a>:</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#define FILTER_H_SIZE 15</span>
+<span class="cp">#define FILTER_V_SIZE 15</span>
+<span class="cp">#define MAX_IMAGE_WIDTH 1000</span>
+<span class="cp">#define MAX_IMAGE_HEIGHT 30</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">filter2d</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">coeff</span><span class="p">[</span><span class="mi">256</span><span class="p">],</span>
+<span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">src</span><span class="p">[</span><span class="n">MAX_IMAGE_HEIGHT</span><span class="p">][</span><span class="n">MAX_IMAGE_WIDTH</span><span class="p">],</span>
+<span class="w">              </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">dst</span><span class="p">[</span><span class="n">MAX_IMAGE_HEIGHT</span><span class="p">][</span><span class="n">MAX_IMAGE_WIDTH</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=src bundle=gmem1 depth=MAX_IMAGE_WIDTH*MAX_IMAGE_HEIGHT</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=dst bundle=gmem1 depth=MAX_IMAGE_WIDTH*MAX_IMAGE_HEIGHT</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=coeff bundle=gmem1</span>
+<span class="cp">#pragma HLS INTERFACE s_axilite port=return bundle=control</span>
+
+<span class="w">    </span><span class="c1">// Load coefficients to local BRAM (accessed repeatedly)</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">coeffs</span><span class="p">[</span><span class="n">FILTER_V_SIZE</span><span class="p">][</span><span class="n">FILTER_H_SIZE</span><span class="p">];</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">FILTER_V_SIZE</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">FILTER_H_SIZE</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="w">            </span><span class="n">coeffs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">coeff</span><span class="p">[</span><span class="n">i</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">FILTER_H_SIZE</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">j</span><span class="p">];</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Main processing loop</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">MAX_IMAGE_HEIGHT</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">MAX_IMAGE_WIDTH</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="cp">#pragma HLS ARRAY_STENCIL variable=src</span>
+
+<span class="w">            </span><span class="kt">int</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">            </span><span class="c1">// Apply filter kernel</span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">row</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">row</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">FILTER_V_SIZE</span><span class="p">;</span><span class="w"> </span><span class="n">row</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">col</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">col</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">FILTER_H_SIZE</span><span class="p">;</span><span class="w"> </span><span class="n">col</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="kt">int</span><span class="w"> </span><span class="n">xoff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">col</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="n">FILTER_H_SIZE</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="w">                    </span><span class="kt">int</span><span class="w"> </span><span class="n">yoff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">row</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="n">FILTER_V_SIZE</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+
+<span class="w">                    </span><span class="c1">// Boundary handling: zero-padding</span>
+<span class="w">                    </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">pixel</span><span class="p">;</span>
+<span class="w">                    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">xoff</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">xoff</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">MAX_IMAGE_WIDTH</span><span class="w"> </span><span class="o">||</span>
+<span class="w">                        </span><span class="n">yoff</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">yoff</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">MAX_IMAGE_HEIGHT</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="n">pixel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">                    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="n">pixel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">src</span><span class="p">[</span><span class="n">yoff</span><span class="p">][</span><span class="n">xoff</span><span class="p">];</span>
+<span class="w">                    </span><span class="p">}</span>
+
+<span class="w">                    </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">pixel</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">coeffs</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">col</span><span class="p">];</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">            </span><span class="p">}</span>
+
+<span class="w">            </span><span class="c1">// Normalize and saturate to 8-bit</span>
+<span class="w">            </span><span class="kt">int</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">sum</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">128</span><span class="p">;</span><span class="w">  </span><span class="c1">// Example normalization</span>
+<span class="w">            </span><span class="n">dst</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">result</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="n">result</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">255</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">255</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">result</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="2d-buffer-architecture">2D Buffer Architecture</h3>
+<div class="highlight"><pre><span></span><code>Line Buffers (H-1 rows cached):
+┌────────────────────────────────────────────────┐
+│ Line Buffer 0: [row y-14] ─────────────────────│
+│ Line Buffer 1: [row y-13] ─────────────────────│
+│ ...                                            │
+│ Line Buffer 13: [row y-1] ─────────────────────│
+│ Current Row:    [row y]   ─────────────────────│
+└────────────────────────────────────────────────┘
+         ↓
+Window Buffer (15x15):
+┌───┬───┬───┬───┬───┐
+│   │   │   │   │   │  ← From line buffer 0
+├───┼───┼───┼───┼───┤
+│   │   │ * │   │   │  ← Current pixel at center
+├───┼───┼───┼───┼───┤
+│   │   │   │   │   │  ← From current row
+└───┴───┴───┴───┴───┘
+</code></pre></div>
+
+<hr />
+<h2 id="boundary-handling-strategies">Boundary Handling Strategies</h2>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Description</th>
+<th>When to Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Zero-padding</td>
+<td>Treat out-of-bounds as 0</td>
+<td>Most common, simple</td>
+</tr>
+<tr>
+<td>Clamp/Replicate</td>
+<td>Use nearest edge pixel</td>
+<td>Avoid dark borders</td>
+</tr>
+<tr>
+<td>Mirror</td>
+<td>Reflect at boundaries</td>
+<td>Symmetric filters</td>
+</tr>
+<tr>
+<td>Wrap</td>
+<td>Circular indexing</td>
+<td>Periodic signals</td>
+</tr>
+</tbody>
+</table>
+<h3 id="zero-padding-example">Zero-Padding Example</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">pixel</span><span class="p">;</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">WIDTH</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">HEIGHT</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pixel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">  </span><span class="c1">// Zero for out-of-bounds</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pixel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">src</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">];</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="clampreplicate-example">Clamp/Replicate Example</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">cx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">WIDTH</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">WIDTH</span><span class="mi">-1</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">x</span><span class="p">;</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">cy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="n">y</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">HEIGHT</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">HEIGHT</span><span class="mi">-1</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">y</span><span class="p">;</span>
+<span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">pixel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">src</span><span class="p">[</span><span class="n">cy</span><span class="p">][</span><span class="n">cx</span><span class="p">];</span>
+</code></pre></div>
+
+<hr />
+<h2 id="code-generation-guidelines">Code Generation Guidelines</h2>
+<h3 id="1d-stencil-template">1D Stencil Template</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define N 1024      </span><span class="c1">// Input size</span>
+<span class="cp">#define W 5         </span><span class="c1">// Window size</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">stencil_1d</span><span class="p">(</span><span class="n">data_t</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">data_t</span><span class="w"> </span><span class="n">out</span><span class="p">[</span><span class="n">N</span><span class="o">-</span><span class="n">W</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">coeff_t</span><span class="w"> </span><span class="n">coeffs</span><span class="p">[</span><span class="n">W</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=in bundle=gmem</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=out bundle=gmem</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">W</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="cp">#pragma HLS ARRAY_STENCIL variable=in</span>
+
+<span class="w">        </span><span class="n">acc_t</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">W</span><span class="p">;</span><span class="w"> </span><span class="n">k</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">k</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">coeffs</span><span class="p">[</span><span class="n">k</span><span class="p">];</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sum</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="2d-stencil-template">2D Stencil Template</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#define IMG_H 480</span>
+<span class="cp">#define IMG_W 640</span>
+<span class="cp">#define KH 3        </span><span class="c1">// Kernel height</span>
+<span class="cp">#define KW 3        </span><span class="c1">// Kernel width</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">stencil_2d</span><span class="p">(</span><span class="n">pixel_t</span><span class="w"> </span><span class="n">src</span><span class="p">[</span><span class="n">IMG_H</span><span class="p">][</span><span class="n">IMG_W</span><span class="p">],</span>
+<span class="w">                </span><span class="n">pixel_t</span><span class="w"> </span><span class="n">dst</span><span class="p">[</span><span class="n">IMG_H</span><span class="p">][</span><span class="n">IMG_W</span><span class="p">],</span>
+<span class="w">                </span><span class="n">coeff_t</span><span class="w"> </span><span class="n">kernel</span><span class="p">[</span><span class="n">KH</span><span class="p">][</span><span class="n">KW</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=src bundle=gmem</span>
+<span class="cp">#pragma HLS INTERFACE m_axi port=dst bundle=gmem</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">IMG_H</span><span class="p">;</span><span class="w"> </span><span class="n">y</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">IMG_W</span><span class="p">;</span><span class="w"> </span><span class="n">x</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="cp">#pragma HLS ARRAY_STENCIL variable=src</span>
+
+<span class="w">            </span><span class="n">acc_t</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">ky</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">ky</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">KH</span><span class="p">;</span><span class="w"> </span><span class="n">ky</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">kx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">kx</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">KW</span><span class="p">;</span><span class="w"> </span><span class="n">kx</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="kt">int</span><span class="w"> </span><span class="n">yy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">ky</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">KH</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span>
+<span class="w">                    </span><span class="kt">int</span><span class="w"> </span><span class="n">xx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">kx</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">KW</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span>
+
+<span class="w">                    </span><span class="c1">// Boundary handling (zero-pad)</span>
+<span class="w">                    </span><span class="n">pixel_t</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">yy</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">yy</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">IMG_H</span><span class="w"> </span><span class="o">||</span>
+<span class="w">                                 </span><span class="n">xx</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">xx</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">IMG_W</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">src</span><span class="p">[</span><span class="n">yy</span><span class="p">][</span><span class="n">xx</span><span class="p">];</span>
+<span class="w">                    </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">kernel</span><span class="p">[</span><span class="n">ky</span><span class="p">][</span><span class="n">kx</span><span class="p">];</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="n">dst</span><span class="p">[</span><span class="n">y</span><span class="p">][</span><span class="n">x</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="p">(</span><span class="n">sum</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="key-constraints">Key Constraints</h3>
+<table>
+<thead>
+<tr>
+<th>Constraint</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Regular access pattern</td>
+<td>Stencil offsets must be compile-time constants</td>
+</tr>
+<tr>
+<td>Inner loops fully unrolled</td>
+<td>Kernel loops must unroll for II=1</td>
+</tr>
+<tr>
+<td>Coefficient caching</td>
+<td>Pre-load coefficients to BRAM</td>
+</tr>
+<tr>
+<td>Output size</td>
+<td><code>N - W + 1</code> for 1D, or handle boundaries</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="test-bench-generation-guidelines">Test Bench Generation Guidelines</h2>
+<h3 id="test-bench-template">Test Bench Template</h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;stencil.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cmath&gt;</span>
+
+<span class="c1">// Software reference</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">stencil_ref</span><span class="p">(</span><span class="n">data_t</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">data_t</span><span class="w"> </span><span class="n">out</span><span class="p">[</span><span class="n">N</span><span class="o">-</span><span class="n">W</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">coeff_t</span><span class="w"> </span><span class="n">coeffs</span><span class="p">[</span><span class="n">W</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">W</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">data_t</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">W</span><span class="p">;</span><span class="w"> </span><span class="n">k</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">k</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">coeffs</span><span class="p">[</span><span class="n">k</span><span class="p">];</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sum</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">data_t</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">out_hw</span><span class="p">[</span><span class="n">N</span><span class="o">-</span><span class="n">W</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">out_ref</span><span class="p">[</span><span class="n">N</span><span class="o">-</span><span class="n">W</span><span class="o">+</span><span class="mi">1</span><span class="p">];</span>
+<span class="w">    </span><span class="n">coeff_t</span><span class="w"> </span><span class="n">coeffs</span><span class="p">[</span><span class="n">W</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">};</span><span class="w">  </span><span class="c1">// Example: smoothing kernel</span>
+
+<span class="w">    </span><span class="c1">// Initialize input</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">256</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Run HW and reference</span>
+<span class="w">    </span><span class="n">stencil_1d</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">out_hw</span><span class="p">,</span><span class="w"> </span><span class="n">coeffs</span><span class="p">);</span>
+<span class="w">    </span><span class="n">stencil_ref</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">out_ref</span><span class="p">,</span><span class="w"> </span><span class="n">coeffs</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Compare</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">errors</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">W</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">out_hw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">out_ref</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Mismatch at &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;: &quot;</span>
+<span class="w">                      </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">out_hw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; vs &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">out_ref</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">            </span><span class="n">errors</span><span class="o">++</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">errors</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="optimization-guidance-for-agents">Optimization Guidance for Agents</h2>
+<h3 id="when-to-apply-this-pattern">When to Apply This Pattern</h3>
+<div class="highlight"><pre><span></span><code>Processing array/image data?
+├── Fixed-size sliding window?
+│   ├── Yes → Use ARRAY_STENCIL
+│   └── No → Not a stencil pattern
+├── Regular access offsets (compile-time)?
+│   ├── Yes → ARRAY_STENCIL will work
+│   └── No → Manual buffering needed
+└── Need II=1 throughput?
+    └── Yes → Combine with PIPELINE pragma
+</code></pre></div>
+
+<h3 id="performance-impact">Performance Impact</h3>
+<table>
+<thead>
+<tr>
+<th>Optimization</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ARRAY_STENCIL</td>
+<td>Enables automatic line/window buffering</td>
+</tr>
+<tr>
+<td>PIPELINE II=1</td>
+<td>One output per cycle</td>
+</tr>
+<tr>
+<td>Coefficient caching</td>
+<td>Avoid repeated memory reads</td>
+</tr>
+<tr>
+<td>Unroll kernel loops</td>
+<td>Enable parallel multiplies</td>
+</tr>
+</tbody>
+</table>
+<h3 id="resource-vs-performance-trade-offs">Resource vs Performance Trade-offs</h3>
+<table>
+<thead>
+<tr>
+<th>Choice</th>
+<th>Performance</th>
+<th>Resources</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Larger window</td>
+<td>More computation/output</td>
+<td>More BRAM for buffers</td>
+</tr>
+<tr>
+<td>Full kernel unroll</td>
+<td>II=1 possible</td>
+<td>More DSPs, LUTs</td>
+</tr>
+<tr>
+<td>Partial unroll</td>
+<td>Higher II</td>
+<td>Fewer resources</td>
+</tr>
+</tbody>
+</table>
+<h3 id="common-pitfalls">Common Pitfalls</h3>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Symptom</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Variable window size</td>
+<td>ARRAY_STENCIL ignored</td>
+<td>Use compile-time constants</td>
+</tr>
+<tr>
+<td>Missing PIPELINE</td>
+<td>High II, low throughput</td>
+<td>Add <code>#pragma HLS PIPELINE II=1</code></td>
+</tr>
+<tr>
+<td>Coefficients in DDR</td>
+<td>Memory bottleneck</td>
+<td>Pre-load to local BRAM array</td>
+</tr>
+<tr>
+<td>Kernel loops not unrolled</td>
+<td>II &gt; 1</td>
+<td>Unroll inner loops or let HLS do it</td>
+</tr>
+<tr>
+<td>Wrong output size</td>
+<td>Array overflow</td>
+<td>Output is <code>N - W + 1</code> elements</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related-patterns">Related Patterns</h2>
+<ul>
+<li><a href="array-partition.md">array-partition</a> - May be needed for coefficient arrays</li>
+<li><a href="free-running-pipeline.md">free-running-pipeline</a> - For streaming stencil pipelines</li>
+</ul>
+<h2 id="related-pragmas">Related Pragmas</h2>
+<ul>
+<li><a href="../pragmas/index.md#array_stencil">ARRAY_STENCIL</a> - Core pragma for stencil optimization</li>
+<li><a href="../pragmas/index.md#pipeline">PIPELINE</a> - Required for II=1 throughput</li>
+<li><a href="../pragmas/index.md#array_partition">ARRAY_PARTITION</a> - For coefficient parallelism</li>
+</ul>
+<h2 id="example-files">Example Files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Modeling/using_array_stencil_1d/">using_array_stencil_1d/</a></td>
+<td>1D stencil with 3-element window</td>
+</tr>
+<tr>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Modeling/using_array_stencil_2d/">using_array_stencil_2d/</a></td>
+<td>2D convolution with 15x15 kernel</td>
+</tr>
+</tbody>
+</table>
+    </main>
+</body>
+</html>

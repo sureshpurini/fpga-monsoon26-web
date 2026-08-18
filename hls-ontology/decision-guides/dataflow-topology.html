@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dataflow Topology - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="dataflow-topology">Dataflow Topology</h1>
+<p><strong>Question:</strong> What dataflow topology should I use?</p>
+<p><strong>Category:</strong> Dataflow</p>
+<blockquote>
+<p><strong>Source:</strong> <a href="../../schema/decision-guides.yaml">decision-guides.yaml → dataflow-topology</a></p>
+</blockquote>
+<hr />
+<h2 id="available-topologies">Available Topologies</h2>
+<table>
+<thead>
+<tr>
+<th>Topology</th>
+<th>Pattern</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Linear</strong></td>
+<td>A → B → C → D</td>
+<td>Simple pipeline processing</td>
+</tr>
+<tr>
+<td><strong>Diamond</strong></td>
+<td>Fork and join</td>
+<td>Parallel independent paths</td>
+</tr>
+<tr>
+<td><strong>Multi-consumer</strong></td>
+<td>One to many</td>
+<td>Broadcast to processors</td>
+</tr>
+<tr>
+<td><strong>Multi-producer</strong></td>
+<td>Many to one</td>
+<td>Collect from processors</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="linear-sequential-chain">Linear (Sequential Chain)</h2>
+<div class="highlight"><pre><span></span><code>A → B → C → D
+</code></pre></div>
+
+<h3 id="when-to-use">When to Use</h3>
+<ul>
+<li>Simple pipeline processing</li>
+<li>Each stage has single input/output</li>
+<li>No parallel processing needed</li>
+</ul>
+<h3 id="example">Example</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">top</span><span class="p">(</span><span class="n">data_t</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">data_t</span><span class="w"> </span><span class="n">out</span><span class="p">[</span><span class="n">N</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="w">    </span><span class="n">data_t</span><span class="w"> </span><span class="n">c1</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">c2</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">c3</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+
+<span class="w">    </span><span class="n">stageA</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">c1</span><span class="p">);</span><span class="w">   </span><span class="c1">// Read input</span>
+<span class="w">    </span><span class="n">stageB</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">);</span><span class="w">   </span><span class="c1">// Process</span>
+<span class="w">    </span><span class="n">stageC</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">c3</span><span class="p">);</span><span class="w">   </span><span class="c1">// Transform</span>
+<span class="w">    </span><span class="n">stageD</span><span class="p">(</span><span class="n">c3</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">);</span><span class="w">  </span><span class="c1">// Write output</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="diamond-fork-join">Diamond (Fork-Join)</h2>
+<div class="highlight"><pre><span></span><code>    ┌─→ B ─→┐
+A ─→│       │─→ D
+    └─→ C ─→┘
+</code></pre></div>
+
+<h3 id="when-to-use_1">When to Use</h3>
+<ul>
+<li>Parallel independent processing paths</li>
+<li>Input needs different transformations</li>
+<li>Results combined at end</li>
+</ul>
+<h3 id="example_1">Example</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">top</span><span class="p">(</span><span class="n">data_t</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">data_t</span><span class="w"> </span><span class="n">out</span><span class="p">[</span><span class="n">N</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="w">    </span><span class="n">data_t</span><span class="w"> </span><span class="n">c1</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">c2</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">c3</span><span class="p">[</span><span class="n">N</span><span class="p">],</span><span class="w"> </span><span class="n">c4</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+
+<span class="w">    </span><span class="n">funcA</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">);</span><span class="w">     </span><span class="c1">// Fork: split to two paths</span>
+<span class="w">    </span><span class="n">funcB</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c3</span><span class="p">);</span><span class="w">         </span><span class="c1">// Path 1</span>
+<span class="w">    </span><span class="n">funcC</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">c4</span><span class="p">);</span><span class="w">         </span><span class="c1">// Path 2 (parallel with B)</span>
+<span class="w">    </span><span class="n">funcD</span><span class="p">(</span><span class="n">c3</span><span class="p">,</span><span class="w"> </span><span class="n">c4</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">);</span><span class="w">    </span><span class="c1">// Join: combine results</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="related-pattern">Related Pattern</h3>
+<p>See <a href="../patterns/dataflow-diamond.html">Dataflow Diamond Pattern</a> for implementation details.</p>
+<hr />
+<h2 id="multi-consumer-one-to-many">Multi-Consumer (One to Many)</h2>
+<div class="highlight"><pre><span></span><code>    ┌─→ B
+A ─→├─→ C
+    └─→ D
+</code></pre></div>
+
+<h3 id="when-to-use_2">When to Use</h3>
+<ul>
+<li>Broadcast data to multiple processors</li>
+<li>Same input, different processing</li>
+<li>Parallel analysis paths</li>
+</ul>
+<h3 id="implementation-options">Implementation Options</h3>
+<p><strong>Option 1: Explicit duplication in A</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">funcA</span><span class="p">(</span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">out1</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">out2</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">out3</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">data_t</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">        </span><span class="n">out1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">val</span><span class="p">;</span><span class="w">  </span><span class="c1">// Copy to all outputs</span>
+<span class="w">        </span><span class="n">out2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">val</span><span class="p">;</span>
+<span class="w">        </span><span class="n">out3</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">val</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Option 2: Use hls::split</strong></p>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_np_channel.h&quot;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">top</span><span class="p">(...)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">split</span><span class="o">::</span><span class="n">round_robin</span><span class="o">&lt;</span><span class="n">data_t</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">DEPTH</span><span class="o">&gt;</span><span class="w"> </span><span class="n">s</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">producer</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">input</span><span class="p">);</span>
+<span class="w">    </span><span class="n">consumer1</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">out1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">consumer2</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">out</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">out2</span><span class="p">);</span>
+<span class="w">    </span><span class="n">consumer3</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">out</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="n">out3</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="multi-producer-many-to-one">Multi-Producer (Many to One)</h2>
+<div class="highlight"><pre><span></span><code>A ─→┐
+B ─→├─→ D
+C ─→┘
+</code></pre></div>
+
+<h3 id="when-to-use_3">When to Use</h3>
+<ul>
+<li>Collect results from parallel processors</li>
+<li>Multiple inputs, single output</li>
+<li>Aggregation patterns</li>
+</ul>
+<h3 id="implementation-options_1">Implementation Options</h3>
+<p><strong>Option 1: Explicit collection in D</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">funcD</span><span class="p">(</span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">in1</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">in2</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">in3</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">combine</span><span class="p">(</span><span class="n">in1</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="w"> </span><span class="n">in2</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="w"> </span><span class="n">in3</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Option 2: Use hls::merge</strong></p>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;hls_np_channel.h&quot;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">top</span><span class="p">(...)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">merge</span><span class="o">::</span><span class="n">round_robin</span><span class="o">&lt;</span><span class="n">data_t</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">DEPTH</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">producer1</span><span class="p">(</span><span class="n">m</span><span class="p">.</span><span class="n">in</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">in1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">producer2</span><span class="p">(</span><span class="n">m</span><span class="p">.</span><span class="n">in</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">in2</span><span class="p">);</span>
+<span class="w">    </span><span class="n">producer3</span><span class="p">(</span><span class="n">m</span><span class="p">.</span><span class="n">in</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="n">in3</span><span class="p">);</span>
+<span class="w">    </span><span class="n">consumer</span><span class="p">(</span><span class="n">m</span><span class="p">.</span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="n">output</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="splitmerge-strategies">Split/Merge Strategies</h2>
+<p>For multi-consumer and multi-producer topologies:</p>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Description</th>
+<th>Use When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>round_robin</strong></td>
+<td>Fixed rotation</td>
+<td>Equal processing time, predictable order</td>
+</tr>
+<tr>
+<td><strong>load_balance</strong></td>
+<td>Dynamic assignment</td>
+<td>Variable processing time, max throughput</td>
+</tr>
+</tbody>
+</table>
+<p>See <a href="../patterns/merge-split.html">Merge-Split Pattern</a> for details.</p>
+<hr />
+<h2 id="topology-selection-guide">Topology Selection Guide</h2>
+<div class="highlight"><pre><span></span><code>How does data flow?
+├── Single path through stages?
+│   └── Linear topology
+├── Input splits to parallel paths?
+│   ├── Paths rejoin later?
+│   │   └── Diamond topology
+│   └── Paths stay separate?
+│       └── Multi-consumer (split)
+├── Multiple inputs combine?
+│   └── Multi-producer (merge)
+└── Complex mix?
+    └── Combine topologies as needed
+</code></pre></div>
+
+<hr />
+<h2 id="combining-topologies">Combining Topologies</h2>
+<p>You can combine patterns for complex dataflows:</p>
+<div class="highlight"><pre><span></span><code>        ┌─→ B ─→┐
+In → A ─│       │─→ E → Out
+        └─→ C ─→ D ─┘
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">top</span><span class="p">(...)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS DATAFLOW</span>
+<span class="w">    </span><span class="n">funcA</span><span class="p">(</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c2</span><span class="p">);</span><span class="w">      </span><span class="c1">// Fork</span>
+<span class="w">    </span><span class="n">funcB</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span><span class="w"> </span><span class="n">c3</span><span class="p">);</span><span class="w">          </span><span class="c1">// Path 1</span>
+<span class="w">    </span><span class="n">funcC</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="w"> </span><span class="n">c4</span><span class="p">);</span><span class="w">          </span><span class="c1">// Path 2 start</span>
+<span class="w">    </span><span class="n">funcD</span><span class="p">(</span><span class="n">c4</span><span class="p">,</span><span class="w"> </span><span class="n">c5</span><span class="p">);</span><span class="w">          </span><span class="c1">// Path 2 continue</span>
+<span class="w">    </span><span class="n">funcE</span><span class="p">(</span><span class="n">c3</span><span class="p">,</span><span class="w"> </span><span class="n">c5</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">);</span><span class="w">     </span><span class="c1">// Join</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="examples">Examples</h2>
+<table>
+<thead>
+<tr>
+<th>Topology</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Diamond</td>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Channels/simple_fifos/">simple_fifos</a></td>
+</tr>
+<tr>
+<td>Split</td>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Channels/merge_split/split_round_robin/">split_round_robin</a></td>
+</tr>
+<tr>
+<td>Merge</td>
+<td><a href="../../Vitis-HLS-Introductory-Examples/Task_level_Parallelism/Control_driven/Channels/merge_split/merge_round_robin/">merge_round_robin</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related">Related</h2>
+<ul>
+<li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond Pattern</a> - Fork-join implementation</li>
+<li><a href="../patterns/merge-split.html">Merge-Split Pattern</a> - Fan-out/fan-in implementation</li>
+<li><a href="fifo-vs-pipo.html">FIFO vs PIPO</a> - Channel type selection</li>
+</ul>
+    </main>
+</body>
+</html>

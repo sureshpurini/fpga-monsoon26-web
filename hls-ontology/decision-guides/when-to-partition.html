@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>When to Partition - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="when-to-partition">When to Partition</h1>
+<p><strong>Question:</strong> Should I partition this array?</p>
+<p><strong>Category:</strong> Memory Optimization</p>
+<blockquote>
+<p><strong>Source:</strong> <a href="../../schema/decision-guides.yaml">decision-guides.yaml → when-to-partition</a></p>
+</blockquote>
+<hr />
+<h2 id="quick-decision">Quick Decision</h2>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Loop is unrolled</td>
+<td><strong>Partition</strong> (match unroll factor)</td>
+</tr>
+<tr>
+<td>Need parallel access</td>
+<td><strong>Partition</strong></td>
+</tr>
+<tr>
+<td>Sequential access only</td>
+<td><strong>Don't partition</strong></td>
+</tr>
+<tr>
+<td>Array is large</td>
+<td><strong>Don't partition</strong> (or partial)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="when-to-partition_1">When to Partition</h2>
+<p>Partition your array when:</p>
+<ul>
+<li><strong>Loop accessing array is unrolled</strong> - Need parallel ports</li>
+<li><strong>Need parallel read/write access</strong> - Multiple elements per cycle</li>
+<li><strong>Memory ports are the bottleneck</strong> - Synthesis reports memory conflicts</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=arr cyclic factor=4</span>
+
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1024</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS UNROLL factor=4  </span><span class="c1">// Matches partition!</span>
+<span class="w">    </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">process</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="when-not-to-partition">When NOT to Partition</h2>
+<p>Don't partition when:</p>
+<ul>
+<li><strong>Sequential access only</strong> - One element per cycle is enough</li>
+<li><strong>Array is large</strong> - Resource explosion</li>
+<li><strong>Bandwidth is sufficient</strong> - No memory bottleneck</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1">// Sequential access - no partition needed</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="w">    </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">  </span><span class="c1">// One element per cycle</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="partition-types">Partition Types</h2>
+<h3 id="complete">Complete</h3>
+<p>All elements become individual registers.</p>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="mi">16</span><span class="p">];</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=arr complete</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Maximum parallelism</td>
+<td>Only for small arrays</td>
+</tr>
+<tr>
+<td>Any access pattern</td>
+<td>High register usage</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Use for:</strong> Small arrays (&lt; 32 elements), full parallel access</p>
+<h3 id="cyclic">Cyclic</h3>
+<p>Interleaved distribution across banks.</p>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=arr cyclic factor=4</span>
+<span class="c1">// arr[0],arr[4],arr[8]... → bank 0</span>
+<span class="c1">// arr[1],arr[5],arr[9]... → bank 1</span>
+<span class="c1">// ...</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Good for strided access</td>
+<td>Fixed interleaving</td>
+</tr>
+<tr>
+<td>Scales to large arrays</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Use for:</strong> Loop unrolling, strided access patterns</p>
+<h3 id="block">Block</h3>
+<p>Contiguous chunks in separate banks.</p>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=arr block factor=4</span>
+<span class="c1">// arr[0-255]   → bank 0</span>
+<span class="c1">// arr[256-511] → bank 1</span>
+<span class="c1">// ...</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Good for block access</td>
+<td>Not for interleaved access</td>
+</tr>
+<tr>
+<td>Cache-friendly</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Use for:</strong> Block processing, contiguous access patterns</p>
+<hr />
+<h2 id="match-partition-to-unroll">Match Partition to Unroll</h2>
+<p><strong>Critical rule:</strong> Partition factor should match unroll factor!</p>
+<table>
+<thead>
+<tr>
+<th>Unroll</th>
+<th>Partition</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>factor=4</td>
+<td>factor=4</td>
+<td>✓ Optimal</td>
+</tr>
+<tr>
+<td>factor=4</td>
+<td>factor=2</td>
+<td>⚠ Memory bottleneck</td>
+</tr>
+<tr>
+<td>factor=4</td>
+<td>complete</td>
+<td>✓ Works (may be overkill)</td>
+</tr>
+<tr>
+<td>factor=4</td>
+<td>none</td>
+<td>✗ Sequential bottleneck</td>
+</tr>
+</tbody>
+</table>
+<h3 id="example">Example</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">data</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=data cyclic factor=8</span>
+
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">256</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS UNROLL factor=8  </span><span class="c1">// Matches partition</span>
+<span class="w">    </span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">process</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="p">}</span>
+<span class="c1">// Result: 8 elements processed per cycle</span>
+</code></pre></div>
+
+<hr />
+<h2 id="multi-dimensional-arrays">Multi-Dimensional Arrays</h2>
+<p>Specify dimension to partition:</p>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">matrix</span><span class="p">[</span><span class="mi">64</span><span class="p">][</span><span class="mi">64</span><span class="p">];</span>
+
+<span class="c1">// Partition columns (dim=2)</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=matrix cyclic factor=4 dim=2</span>
+
+<span class="c1">// Partition rows (dim=1)</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=matrix cyclic factor=4 dim=1</span>
+
+<span class="c1">// Partition both dimensions</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=matrix cyclic factor=4 dim=0</span>
+</code></pre></div>
+
+<hr />
+<h2 id="resource-impact">Resource Impact</h2>
+<table>
+<thead>
+<tr>
+<th>Partition Type</th>
+<th>Memory Resources</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>None</td>
+<td>1 BRAM (2 ports)</td>
+</tr>
+<tr>
+<td>factor=4</td>
+<td>4 BRAMs (8 ports)</td>
+</tr>
+<tr>
+<td>complete (N=64)</td>
+<td>64 registers</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Warning:</strong> Complete partition of large arrays causes resource explosion!</p>
+</blockquote>
+<hr />
+<h2 id="decision-flowchart">Decision Flowchart</h2>
+<div class="highlight"><pre><span></span><code>Is the loop unrolled?
+├── Yes → Partition with matching factor
+│         └── cyclic for interleaved, block for contiguous
+├── No, but need parallel access?
+│   └── Yes → Add partition + unroll together
+└── No, sequential access?
+    └── Don&#39;t partition (waste of resources)
+
+Is array small (&lt; 32)?
+├── Yes → Consider complete partition
+└── No → Use cyclic or block with factor
+</code></pre></div>
+
+<hr />
+<h2 id="related-pragmas">Related Pragmas</h2>
+<ul>
+<li><code>#pragma HLS ARRAY_PARTITION</code> - Partition arrays</li>
+<li><code>#pragma HLS ARRAY_RESHAPE</code> - Partition + merge into wider word</li>
+<li><code>#pragma HLS UNROLL</code> - Should match partition factor</li>
+<li><code>#pragma HLS BIND_STORAGE</code> - Control storage type</li>
+</ul>
+<hr />
+<h2 id="related">Related</h2>
+<ul>
+<li><a href="storage-selection.html">Storage Selection</a> - BRAM vs URAM vs LUTRAM</li>
+<li><a href="when-to-unroll.html">When to Unroll</a> - Loop unrolling guide</li>
+<li><a href="pipeline-vs-unroll.html">Pipeline vs Unroll</a> - Optimization strategies</li>
+</ul>
+    </main>
+</body>
+</html>

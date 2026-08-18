@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>When to Pipeline - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="when-to-pipeline">When to Pipeline</h1>
+<p><strong>Question:</strong> Should I pipeline this loop?</p>
+<p><strong>Category:</strong> Loop Optimization</p>
+<blockquote>
+<p><strong>Source:</strong> <a href="../../schema/decision-guides.yaml">decision-guides.yaml → when-to-pipeline</a></p>
+</blockquote>
+<hr />
+<h2 id="quick-decision">Quick Decision</h2>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No loop-carried dependencies</td>
+<td><strong>Pipeline</strong> with II=1</td>
+</tr>
+<tr>
+<td>Simple dependencies</td>
+<td><strong>Pipeline</strong> with II&gt;1</td>
+</tr>
+<tr>
+<td>Heavy dependencies</td>
+<td><strong>Don't pipeline</strong></td>
+</tr>
+<tr>
+<td>Memory bandwidth limited</td>
+<td><strong>Don't pipeline</strong> (won't help)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="when-to-pipeline_1">When to Pipeline</h2>
+<p>Pipeline your loop when:</p>
+<ul>
+<li><strong>Loop body has no/minimal loop-carried dependencies</strong></li>
+<li><strong>Want high throughput</strong> - Process elements continuously</li>
+<li><strong>Iteration latency &gt; 1 cycle</strong> - Overlap provides benefit</li>
+<li><strong>Sequential data access</strong> - Streaming patterns</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="w">    </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">process</span><span class="p">(</span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span><span class="w">  </span><span class="c1">// Independent iterations</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="when-not-to-pipeline">When NOT to Pipeline</h2>
+<p>Don't pipeline when:</p>
+<ul>
+<li><strong>Heavy loop-carried dependencies</strong> - Each iteration depends on previous</li>
+<li><strong>Very small loop body</strong> - Already executes in ~1 cycle</li>
+<li><strong>Memory bandwidth is bottleneck</strong> - Pipelining won't help</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1">// BAD: Loop-carried dependency prevents pipelining benefit</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">acc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">acc</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w">  </span><span class="c1">// Depends on previous iteration</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="initiation-interval-ii-guidance">Initiation Interval (II) Guidance</h2>
+<table>
+<thead>
+<tr>
+<th>Target II</th>
+<th>When to Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>II=1</strong></td>
+<td>No dependencies, maximum throughput</td>
+</tr>
+<tr>
+<td><strong>II=N</strong></td>
+<td>When dependencies force higher II</td>
+</tr>
+<tr>
+<td><strong>II=auto</strong></td>
+<td>Let HLS find achievable II</td>
+</tr>
+</tbody>
+</table>
+<h3 id="always-check-reports">Always Check Reports!</h3>
+<p>After synthesis, verify achieved II in reports:
+- If achieved II &gt; target II, check for dependencies
+- Use <code>#pragma HLS DEPENDENCE</code> if you know access is safe</p>
+<hr />
+<h2 id="pipelining-with-dependencies">Pipelining with Dependencies</h2>
+<h3 id="acceptable-dependencies">Acceptable Dependencies</h3>
+<p>Some dependencies allow pipelining with higher II:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Accumulator with II=1 using ap_int operations</span>
+<span class="n">ap_int</span><span class="o">&lt;</span><span class="mi">32</span><span class="o">&gt;</span><span class="w"> </span><span class="n">acc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="w">    </span><span class="n">acc</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w">  </span><span class="c1">// HLS can schedule this with II=1</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="breaking-false-dependencies">Breaking False Dependencies</h3>
+<p>If HLS reports a dependency that doesn't exist:</p>
+<div class="highlight"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="cp">#pragma HLS DEPENDENCE variable=arr type=inter false</span>
+<span class="w">    </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">process</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="mi">-1</span><span class="p">]);</span><span class="w">  </span><span class="c1">// Tell HLS there&#39;s no real dependency</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>Caution:</strong> Only use <code>DEPENDENCE false</code> when you're certain the access pattern is safe!</p>
+</blockquote>
+<hr />
+<h2 id="pipeline-rewind">Pipeline Rewind</h2>
+<p>For continuous streaming with autorestart kernels:</p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">stage</span><span class="p">(</span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">data_t</span><span class="o">*</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INLINE OFF</span>
+<span class="nl">Loop</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">N</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE rewind  </span><span class="c1">// No flush between invocations</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">process</span><span class="p">(</span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Without <code>rewind</code></td>
+<td>Pipeline drains between invocations</td>
+</tr>
+<tr>
+<td>With <code>rewind</code></td>
+<td>Pipeline immediately restarts</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="decision-flowchart">Decision Flowchart</h2>
+<div class="highlight"><pre><span></span><code>Does loop have dependencies?
+├── No dependencies
+│   └── Pipeline with II=1 ✓
+├── Simple dependencies (e.g., accumulator)
+│   └── Pipeline, accept higher II ✓
+├── Complex dependencies
+│   └── Consider restructuring code
+└── Memory bandwidth limited?
+    ├── Yes → Pipelining won&#39;t help much
+    └── No → Pipeline for compute throughput
+</code></pre></div>
+
+<hr />
+<h2 id="related-pragmas">Related Pragmas</h2>
+<ul>
+<li><code>#pragma HLS PIPELINE</code> - Enable pipelining</li>
+<li><code>#pragma HLS DEPENDENCE</code> - Override dependency analysis</li>
+<li><code>#pragma HLS UNROLL</code> - Alternative: spatial parallelism</li>
+</ul>
+<hr />
+<h2 id="related">Related</h2>
+<ul>
+<li><a href="pipeline-vs-unroll.html">Pipeline vs Unroll</a> - Choosing between approaches</li>
+<li><a href="when-to-unroll.html">When to Unroll</a> - Unrolling decision guide</li>
+<li><a href="../pragmas/index.html#pipeline">PIPELINE Pragma</a> - Full pragma reference</li>
+</ul>
+    </main>
+</body>
+</html>
