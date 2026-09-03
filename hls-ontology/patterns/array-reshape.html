@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Array Reshape - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/array-reshape.html">Array Reshape</a></li>
+        <li><a href="../patterns/array-stencil-pragma.html">Array Stencil Pragma</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/streaming-image-stencil.html">Streaming Image Stencil</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="array-reshape">Array Reshape</h1>
+<p>Recombine an array's elements into <strong>fewer, wider words in a single memory</strong>, so several elements are delivered per access through one port. The sibling of <code>ARRAY_PARTITION</code>: partition buys ports by making <em>more memories</em>; reshape buys width by making <em>wider words</em> — using fewer block RAMs.</p>
+<h2 id="overview">Overview</h2>
+<p><code>ARRAY_PARTITION</code> increases bandwidth by splitting one array into <strong>N separate memories</strong> (N ports). <code>ARRAY_RESHAPE</code> instead keeps <strong>one memory</strong> and makes each <strong>word wider</strong>, packing <code>factor</code> elements side-by-side so a single read returns all of them. UG1399: the directive <em>"combines array partitioning with vertical array mapping to create a single new array with fewer elements but wider words,"</em> which <em>"reduces the number of block RAM consumed while providing parallel access to the data."</em></p>
+<div class="highlight"><pre><span></span><code>ARRAY_PARTITION (more ports)          ARRAY_RESHAPE (wider word)
+A[8] → 2 banks, 1 elem each           A[8] → 1 memory, 2 elems per word
+┌──────┐ ┌──────┐                     ┌───────────────┐
+│bank0 │ │bank1 │                     │  A1 │ A0       │  ← one wide word
+│ A0   │ │ A1   │                     │  A3 │ A2       │
+│ A2   │ │ A3   │                     │  A5 │ A4       │
+│ ...  │ │ ...  │                     │  A7 │ A6       │
+└──────┘ └──────┘                     └───────────────┘
+ 2 independent ports                   1 port, 2 elements/access
+ (any address per bank)                (the pair is a fixed group)
+</code></pre></div>
+
+<h2 id="key-constructs">Key Constructs</h2>
+<table>
+<thead>
+<tr>
+<th>Construct</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#pragma HLS ARRAY_RESHAPE variable=A type=complete</code></td>
+<td>Collapse the whole (named) dimension into <strong>one wide word</strong></td>
+</tr>
+<tr>
+<td><code>#pragma HLS ARRAY_RESHAPE variable=A type=cyclic factor=N</code></td>
+<td>Pack <strong>consecutive</strong> elements <code>factor</code> at a time into each word</td>
+</tr>
+<tr>
+<td><code>#pragma HLS ARRAY_RESHAPE variable=A type=block factor=N</code></td>
+<td>Pack <strong>strided</strong> elements (stride = size/N) into each word</td>
+</tr>
+<tr>
+<td><code>dim=N</code></td>
+<td>Which dimension to reshape (<code>0</code> = all dimensions)</td>
+</tr>
+<tr>
+<td><code>off=true</code></td>
+<td>Disable an inherited reshape directive</td>
+</tr>
+</tbody>
+</table>
+<h2 id="syntax">Syntax</h2>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS ARRAY_RESHAPE variable=&lt;name&gt; type=&lt;cyclic|block|complete&gt; [factor=&lt;N&gt;] [dim=&lt;N&gt;]</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>variable</code></td>
+<td>Array to reshape</td>
+</tr>
+<tr>
+<td><code>type=complete</code></td>
+<td>Recombine all elements of the dimension into one very wide word (default type; no <code>factor</code>)</td>
+</tr>
+<tr>
+<td><code>type=cyclic</code></td>
+<td>Interleave, then concatenate → <strong>consecutive</strong> elements share a word</td>
+</tr>
+<tr>
+<td><code>type=block</code></td>
+<td>Split into contiguous blocks, then concatenate → <strong>strided</strong> elements share a word</td>
+</tr>
+<tr>
+<td><code>factor</code></td>
+<td>Number of elements packed per word (block/cyclic)</td>
+</tr>
+<tr>
+<td><code>dim</code></td>
+<td>Dimension to reshape (1, 2, … or 0 for all)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>The word width becomes <code>factor × element_width</code> and the depth drops to <code>size/factor</code>. The total bit count is unchanged — the array is <em>reshaped</em>, not enlarged.</p>
+</blockquote>
+<hr />
+<h2 id="reshape-types">Reshape Types</h2>
+<p>Reshape performs the <strong>same grouping step as partition</strong> (cyclic interleave / block chunks / complete), then <strong>vertically concatenates</strong> the resulting sub-arrays into one memory: <code>word[k] = { sub0[k], sub1[k], …, sub(factor-1)[k] }</code>. That concatenation is why the per-word contents are the <strong>mirror</strong> of partition's per-bank contents.</p>
+<h3 id="cyclic-reshape-consecutive-elements-per-word">Cyclic Reshape — consecutive elements per word</h3>
+<p><code>type=cyclic factor=N</code>: interleave (like cyclic partition), then concatenate. The elements that end up together in one word are <strong>consecutive</strong> in the original array.</p>
+<p><strong>Word layout:</strong> <code>word[k] = { A[N·k], A[N·k+1], …, A[N·k+N-1] }</code></p>
+<div class="highlight"><pre><span></span><code>A[16], reshape cyclic factor=4  →  4 words × 4-wide:
+
+word 0: [ A0  | A1  | A2  | A3  ]
+word 1: [ A4  | A5  | A6  | A7  ]
+word 2: [ A8  | A9  | A10 | A11 ]
+word 3: [ A12 | A13 | A14 | A15 ]
+</code></pre></div>
+
+<p><strong>Use when:</strong> you read a <strong>consecutive run</strong> every cycle — a sliding window <code>A[i..i+N-1]</code>, or an unrolled inner loop over adjacent elements.</p>
+<blockquote>
+<p>Note the mirror: cyclic <strong>partition</strong> <em>scatters</em> consecutive elements across banks; cyclic <strong>reshape</strong> <em>packs</em> them into one word. Both serve consecutive-access, by opposite mechanisms.</p>
+</blockquote>
+<h3 id="block-reshape-strided-elements-per-word">Block Reshape — strided elements per word</h3>
+<p><code>type=block factor=N</code>: split into <code>N</code> contiguous blocks, then concatenate. The paired elements are <strong>one stride apart</strong> (stride = <code>size/N</code>).</p>
+<p><strong>Word layout:</strong> <code>word[k] = { A[k], A[k + size/N], A[k + 2·size/N], … }</code></p>
+<div class="highlight"><pre><span></span><code>A[16], reshape block factor=4  →  4 words × 4-wide:
+
+word 0: [ A0  | A4  | A8  | A12 ]
+word 1: [ A1  | A5  | A9  | A13 ]
+word 2: [ A2  | A6  | A10 | A14 ]
+word 3: [ A3  | A7  | A11 | A15 ]
+</code></pre></div>
+
+<p><strong>Use when:</strong> you co-access elements that are a fixed stride (= <code>size/factor</code>) apart.</p>
+<h3 id="complete-reshape-one-very-wide-word">Complete Reshape — one very wide word</h3>
+<p><code>type=complete</code> (the default): recombine the entire named dimension into a single word. For a 1-D array this is one register of <code>N × element_width</code> bits — every element available at once, widest possible.</p>
+<div class="highlight"><pre><span></span><code>A[16], reshape complete  →  1 word × 16-wide:
+word 0: [ A0 | A1 | A2 | … | A15 ]
+</code></pre></div>
+
+<hr />
+<h2 id="partition-vs-reshape">Partition vs Reshape</h2>
+<p>Both deliver <code>N</code> elements per cycle. They differ in <strong>how</strong>, and in <strong>cost and freedom</strong>.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>ARRAY_PARTITION</strong></th>
+<th><strong>ARRAY_RESHAPE</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Result</td>
+<td>N separate memories (banks)</td>
+<td>1 memory, word × N wide</td>
+</tr>
+<tr>
+<td>Ports</td>
+<td><strong>N independent</strong></td>
+<td><strong>1</strong> (wide)</td>
+</tr>
+<tr>
+<td>Address freedom</td>
+<td>any element per bank</td>
+<td>the N are a <strong>fixed group</strong></td>
+</tr>
+<tr>
+<td>Resource cost</td>
+<td>N BRAM/register instances</td>
+<td>~1 wide BRAM (fewer BRAMs)</td>
+</tr>
+<tr>
+<td>Delivers N when</td>
+<td>lanes need <strong>arbitrary</strong> access</td>
+<td>you read a <strong>regular group</strong> each cycle</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decision:</strong> need <code>N</code> accesses to <strong>unrelated / arbitrary</strong> addresses in one cycle (e.g. <code>N</code> accumulators independently read-modify-written) → <strong>partition</strong>. Co-access a <strong>regular, known group</strong> each cycle (consecutive window, unrolled-over-consecutive) → <strong>reshape</strong> — it is cheaper because it uses one wide memory instead of <code>N</code> banks.</p>
+<blockquote>
+<p><strong>Hard ceiling worth remembering.</strong> A dual-port BRAM serves at most <strong>2 accesses per cycle regardless of word width</strong>. If you need more than 2 reads/cycle to <em>independent addresses</em>, reshape alone cannot deliver them — you need partitioning (separate banks). Reshape widens the <em>word</em>, not the <em>number of addresses</em>.</p>
+</blockquote>
+<hr />
+<h2 id="code-generation-guidelines">Code Generation Guidelines</h2>
+<h3 id="sliding-window-cyclic-template">Sliding-window (cyclic) template</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">window_sum</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="mi">16</span><span class="p">],</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">out</span><span class="p">[</span><span class="mi">13</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS ARRAY_RESHAPE variable=A type=cyclic factor=4 dim=1</span>
+<span class="w">    </span><span class="c1">// each word holds A[i..i+3] — a 4-wide read feeds one tap group</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">13</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">3</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="wide-register-complete-template">Wide-register (complete) template</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">reduce_all</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="mi">16</span><span class="p">],</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="o">*</span><span class="n">sum</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS ARRAY_RESHAPE variable=A type=complete dim=0   </span><span class="c1">// one 128-bit register</span>
+<span class="w">    </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">16</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS UNROLL           </span><span class="c1">// all 16 available the same cycle</span>
+<span class="w">        </span><span class="n">s</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="o">*</span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="2-d-reshape-pick-the-dimension-the-inner-loop-sweeps">2-D reshape (pick the dimension the inner loop sweeps)</h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// Inner loop over columns of each row → reshape dim=2 so a row-word is wide</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">row_op</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">M</span><span class="p">[</span><span class="n">ROWS</span><span class="p">][</span><span class="n">COLS</span><span class="p">],</span><span class="w"> </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">out</span><span class="p">[</span><span class="n">ROWS</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS ARRAY_RESHAPE variable=M type=complete dim=2</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">ROWS</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">uint16_t</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">COLS</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS UNROLL</span>
+<span class="w">            </span><span class="n">s</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">];</span><span class="w">      </span><span class="c1">// whole row delivered in one wide word</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="key-constraints">Key Constraints</h3>
+<table>
+<thead>
+<tr>
+<th>Constraint</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Match width to consumption</td>
+<td><code>factor</code> = elements consumed per cycle (often = the unroll factor)</td>
+</tr>
+<tr>
+<td>Grouping must fit the access</td>
+<td>cyclic for a <strong>consecutive</strong> group; block for a <strong>stride = size/factor</strong> group</td>
+</tr>
+<tr>
+<td>Not for arbitrary N-address reads</td>
+<td>Use <code>ARRAY_PARTITION</code> — reshape gives 1 (wide) port, not N ports</td>
+</tr>
+<tr>
+<td>Interface arrays</td>
+<td>Reshape widens an on-chip (<code>ap_memory</code>/BRAM) port; <strong>not supported on <code>M_AXI</code></strong> top-level ports (use <code>hls::vector</code>)</td>
+</tr>
+<tr>
+<td>Mutually exclusive</td>
+<td><code>AGGREGATE</code>, <code>ARRAY_PARTITION</code>, and <code>ARRAY_RESHAPE</code> cannot all apply to the same array</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="optimization-guidance-for-agents">Optimization Guidance for Agents</h2>
+<h3 id="when-to-apply-this-pattern">When to Apply This Pattern</h3>
+<div class="highlight"><pre><span></span><code>Pipeline/unroll needs several elements of ONE array each cycle?
+├── The elements are a regular, fixed group (consecutive run, or stride=size/F)?
+│   ├── Yes → ARRAY_RESHAPE   (one wide memory — cheaper than N banks)
+│   │         ├── consecutive group      → type=cyclic factor=F
+│   │         ├── strided (size/F) group → type=block  factor=F
+│   │         └── the whole (small) array → type=complete
+│   └── No → the addresses are arbitrary/independent
+│            → ARRAY_PARTITION (N banks = N independent ports)
+└── Only need ≤2 accesses/cycle → neither may be required (dual-port BRAM suffices)
+</code></pre></div>
+
+<h3 id="performance-trade-offs">Performance Trade-offs</h3>
+<table>
+<thead>
+<tr>
+<th>Choice</th>
+<th>Benefit</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>reshape cyclic/block factor=N</code></td>
+<td>N elements/access, <strong>fewer BRAMs</strong> than partition</td>
+<td>one wide port only; the N move as a fixed group</td>
+</tr>
+<tr>
+<td><code>reshape complete</code></td>
+<td>Whole array in one cycle</td>
+<td>very wide word; only for small arrays</td>
+</tr>
+<tr>
+<td><code>partition factor=N</code></td>
+<td>N <strong>independent</strong> ports (any address)</td>
+<td>N memory instances</td>
+</tr>
+</tbody>
+</table>
+<h3 id="common-pitfalls">Common Pitfalls</h3>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Symptom</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Used reshape but need independent addresses</td>
+<td>II still limited — one wide port ≠ N ports</td>
+<td>Switch to <code>ARRAY_PARTITION</code></td>
+</tr>
+<tr>
+<td>Wrong grouping mode</td>
+<td>Reshaped, but the pair you need isn't in one word</td>
+<td>cyclic ↔ consecutive, block ↔ stride=size/factor</td>
+</tr>
+<tr>
+<td>Reshaped an <code>M_AXI</code> top-level array</td>
+<td>Pragma ignored / unsupported</td>
+<td>Reshape a <strong>local</strong> buffer, or pass <code>hls::vector</code></td>
+</tr>
+<tr>
+<td><code>complete</code> on a large array</td>
+<td>Enormous word / routing pressure</td>
+<td>Use <code>cyclic</code>/<code>block</code> with a modest <code>factor</code></td>
+</tr>
+<tr>
+<td>Expecting more than 2 independent reads from one reshaped BRAM</td>
+<td>Port conflict remains</td>
+<td>Dual-port BRAM caps at 2 addresses/cycle — partition for more</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="related-patterns">Related Patterns</h2>
+<ul>
+<li><a href="array-partition.md">array-partition</a> - The sibling directive: <strong>N separate memories</strong> (N independent ports) instead of one wide word. Use when co-accessed addresses are arbitrary.</li>
+<li><a href="perfect-loop-restructuring.md">perfect-loop-restructuring</a> - Loop shaping that exposes the per-cycle access pattern reshape/partition must match.</li>
+</ul>
+<h2 id="reference">Reference</h2>
+<ul>
+<li>AMD <strong>UG1399</strong>, <em>Vitis HLS User Guide</em> — <em>Array Reshaping</em> (Figure "Array Reshaping": cyclic → consecutive per word, block → strided per word, complete → one wide word) and the <code>pragma HLS array_reshape</code> reference.</li>
+</ul>
+    </main>
+</body>
+</html>

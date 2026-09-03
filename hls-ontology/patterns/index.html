@@ -56,6 +56,8 @@
         <h3>Patterns</h3>
         <ul>
         <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/array-reshape.html">Array Reshape</a></li>
+        <li><a href="../patterns/array-stencil-pragma.html">Array Stencil Pragma</a></li>
         <li><a href="../patterns/autorestart.html">Autorestart</a></li>
         <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
         <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
@@ -71,7 +73,7 @@
         <li><a href="../patterns/merge-split.html">Merge Split</a></li>
         <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
         <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
-        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        <li><a href="../patterns/streaming-image-stencil.html">Streaming Image Stencil</a></li>
         </ul>
         </div>
         <div class="nav-section">
@@ -256,8 +258,13 @@
 <td>✅</td>
 </tr>
 <tr>
-<td><a href="stencil-optimization.md">stencil-optimization</a></td>
-<td>How do I optimize sliding window operations?</td>
+<td><a href="streaming-image-stencil.md">streaming-image-stencil</a></td>
+<td>How do I write a 2D image kernel as a streaming dataflow pipeline (line buffer + window + DATAFLOW)?</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><a href="array-stencil-pragma.md">array-stencil-pragma</a></td>
+<td>How does the niche <code>#pragma HLS ARRAY_STENCIL</code> work on non-streaming nested-loop code?</td>
 <td>✅</td>
 </tr>
 <tr>
@@ -388,7 +395,8 @@ Working with pointer parameters?
 
 Optimizing memory access?
 ├── Need parallel array access → array-partition (complete/cyclic/block)
-├── Sliding window operation → stencil-optimization (ARRAY_STENCIL)
+├── 2D image stencil with II=1 throughput → streaming-image-stencil (DATAFLOW + line buffer + hls::stream)
+├── Sliding window on non-streaming nested-loop code → array-stencil-pragma (ARRAY_STENCIL)
 ├── Multiple adjacent reads → memory-bottleneck-fix (shift register)
 ├── Lookup table → rom-inference
 └── Want 2x throughput → bram-dual-port

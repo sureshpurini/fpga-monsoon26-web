@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streaming Image Stencil Pattern - HLS Ontology</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2><a href="../index.html">HLS Ontology</a></h2>
+        <div class="nav-section">
+        <h3>Overview</h3>
+        <ul>
+        <li><a href="../overview.html">Introduction</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Pragmas</h3>
+        <ul>
+        <li><a href="../pragmas/index.html">Index</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Types</h3>
+        <ul>
+        <li><a href="../types/ap-axis.html">Ap Axis</a></li>
+        <li><a href="../types/ap-fixed.html">Ap Fixed</a></li>
+        <li><a href="../types/ap-float.html">Ap Float</a></li>
+        <li><a href="../types/ap-int-uint.html">Ap Int Uint</a></li>
+        <li><a href="../types/hls-ap-hs.html">Hls Ap Hs</a></li>
+        <li><a href="../types/hls-ap-none.html">Hls Ap None</a></li>
+        <li><a href="../types/hls-axis.html">Hls Axis</a></li>
+        <li><a href="../types/hls-burst-maxi.html">Hls Burst Maxi</a></li>
+        <li><a href="../types/hls-dsp-intrinsics.html">Hls Dsp Intrinsics</a></li>
+        <li><a href="../types/hls-fft.html">Hls Fft</a></li>
+        <li><a href="../types/hls-fir.html">Hls Fir</a></li>
+        <li><a href="../types/hls-read-write-lock.html">Hls Read Write Lock</a></li>
+        <li><a href="../types/hls-split-merge.html">Hls Split Merge</a></li>
+        <li><a href="../types/hls-stream-of-blocks.html">Hls Stream Of Blocks</a></li>
+        <li><a href="../types/hls-stream.html">Hls Stream</a></li>
+        <li><a href="../types/hls-task.html">Hls Task</a></li>
+        <li><a href="../types/hls-vector.html">Hls Vector</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Interfaces</h3>
+        <ul>
+        <li><a href="../interfaces/aggregation.html">Aggregation</a></li>
+        <li><a href="../interfaces/index.html">Index</a></li>
+        <li><a href="../interfaces/memory.html">Memory</a></li>
+        <li><a href="../interfaces/streaming.html">Streaming</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Patterns</h3>
+        <ul>
+        <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/array-reshape.html">Array Reshape</a></li>
+        <li><a href="../patterns/array-stencil-pragma.html">Array Stencil Pragma</a></li>
+        <li><a href="../patterns/autorestart.html">Autorestart</a></li>
+        <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
+        <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
+        <li><a href="../patterns/dataflow-diamond.html">Dataflow Diamond</a></li>
+        <li><a href="../patterns/directio-with-tasks.html">Directio With Tasks</a></li>
+        <li><a href="../patterns/dsp-intrinsics.html">Dsp Intrinsics</a></li>
+        <li><a href="../patterns/fft-usage.html">Fft Usage</a></li>
+        <li><a href="../patterns/fir-usage.html">Fir Usage</a></li>
+        <li><a href="../patterns/free-running-pipeline.html">Free Running Pipeline</a></li>
+        <li><a href="../patterns/function-instantiate.html">Function Instantiate</a></li>
+        <li><a href="../patterns/index.html">Index</a></li>
+        <li><a href="../patterns/maxi-with-tasks.html">Maxi With Tasks</a></li>
+        <li><a href="../patterns/merge-split.html">Merge Split</a></li>
+        <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
+        <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
+        <li><a href="../patterns/streaming-image-stencil.html">Streaming Image Stencil</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Decision Guides</h3>
+        <ul>
+        <li><a href="../decision-guides/dataflow-topology.html">Dataflow Topology</a></li>
+        <li><a href="../decision-guides/explicit-vs-implicit-streams.html">Explicit Vs Implicit Streams</a></li>
+        <li><a href="../decision-guides/fifo-vs-pipo.html">Fifo Vs Pipo</a></li>
+        <li><a href="../decision-guides/index.html">Index</a></li>
+        <li><a href="../decision-guides/interface-selection.html">Interface Selection</a></li>
+        <li><a href="../decision-guides/memory-bank-selection.html">Memory Bank Selection</a></li>
+        <li><a href="../decision-guides/optimization-priority.html">Optimization Priority</a></li>
+        <li><a href="../decision-guides/pipeline-vs-unroll.html">Pipeline Vs Unroll</a></li>
+        <li><a href="../decision-guides/storage-selection.html">Storage Selection</a></li>
+        <li><a href="../decision-guides/when-to-partition.html">When To Partition</a></li>
+        <li><a href="../decision-guides/when-to-pipeline.html">When To Pipeline</a></li>
+        <li><a href="../decision-guides/when-to-unroll.html">When To Unroll</a></li>
+        </ul>
+        </div>
+        <div class="nav-section">
+        <h3>Schema (YAML)</h3>
+        <ul>
+        <li><a href="../../schema/pragmas.yaml">pragmas.yaml</a></li>
+        <li><a href="../../schema/types.yaml">types.yaml</a></li>
+        <li><a href="../../schema/patterns.yaml">patterns.yaml</a></li>
+        <li><a href="../../schema/decision-guides.yaml">decision-guides.yaml</a></li>
+        </ul>
+        </div>
+    </nav>
+    <main class="content">
+        <h1 id="streaming-image-stencil-pattern">Streaming Image Stencil Pattern</h1>
+<p>Process a 2D image with a sliding K×K window as a true streaming dataflow pipeline: each pixel flows through stages connected by <code>hls::stream</code> FIFOs, with on-chip line buffers caching the rows needed for the window. This is the canonical HLS pattern for image-processing kernels that target <strong>one pixel per cycle (II=1)</strong> with minimal BRAM footprint.</p>
+<p>Use this whenever a kernel reads a 2D image, applies a fixed-radius neighborhood operation, and writes a 2D image — regardless of whether the operation is smoothing, gradient, non-maximum suppression, thresholding, or anything else.</p>
+<h2 id="overview">Overview</h2>
+<p>The streaming-stencil architecture has three distinct concerns, each isolated in its own function:</p>
+<div class="highlight"><pre><span></span><code>img_inp ─► read_padded ─stream─► stencil_stage ─stream─► write_cropped ─► img_out
+   (m_axi)      │                      │                      │             (m_axi)
+                │                      │                      │
+            raster read           K-tap window               raster write
+            with padding          + line buffer              with cropping
+</code></pre></div>
+
+<p>For multi-pass pipelines (e.g., smoothing → gradient → suppression → thresholding), <strong>chain N stencil_stage functions</strong> through additional <code>hls::stream</code> channels under one top-level <code>#pragma HLS DATAFLOW</code>. Each stage has its own line buffer and window — none of them materialize a full intermediate image.</p>
+<h2 id="key-constructs">Key Constructs</h2>
+<table>
+<thead>
+<tr>
+<th>Construct</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#pragma HLS DATAFLOW</code></td>
+<td>Run all stages concurrently with FIFO connections</td>
+</tr>
+<tr>
+<td><code>hls::stream&lt;T&gt;</code></td>
+<td>Inter-stage FIFO channels — never materialize full images between stages</td>
+</tr>
+<tr>
+<td>Line buffer <code>lb[K-1][MAX_W]</code></td>
+<td>Cache the <strong>K−1</strong> most-recently-read rows on chip</td>
+</tr>
+<tr>
+<td>Window <code>w[K][K]</code></td>
+<td>Hold the current K×K neighborhood as scalar registers</td>
+</tr>
+<tr>
+<td><code>#pragma HLS ARRAY_PARTITION variable=lb complete dim=1</code></td>
+<td>All line buffer rows readable in the same cycle</td>
+</tr>
+<tr>
+<td><code>#pragma HLS ARRAY_PARTITION variable=w complete dim=0</code></td>
+<td>All K² window cells live in registers, not BRAM</td>
+</tr>
+<tr>
+<td><code>#pragma HLS DEPENDENCE variable=lb inter false</code></td>
+<td>Tell HLS that line-buffer reads/writes across iterations don't alias</td>
+</tr>
+<tr>
+<td><code>#pragma HLS PIPELINE II=1</code></td>
+<td>One pixel per cycle on the inner loop</td>
+</tr>
+<tr>
+<td><code>#pragma HLS LOOP_TRIPCOUNT min=A max=B</code></td>
+<td>Required on every parametric loop so the latency report shows numbers, not <code>?</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="why-streaming-not-nested-loops-over-full-intermediate-arrays">Why streaming, not nested loops over full intermediate arrays</h2>
+<p>A common anti-pattern is to write each stage as a nested loop over the whole image, materialize the output in a <code>static T buf[H*W]</code> array, and have the next stage loop over that array. For a 2160×3840 image with <code>unsigned short</code> intermediates this is <strong>~16 MB per buffer</strong> — far larger than on-chip BRAM. Vitis HLS either spills to off-chip memory or refuses to optimize, and the final design is sequential (no inter-stage overlap), reports unknown latency (<code>?</code> in the csynth report because II analysis fails across the inferred shared memory), and consumes 5–10× more LUT/FF for the same functionality.</p>
+<p>The streaming pattern below uses ~<code>2 * MAX_W</code> line-buffer elements per stage (tiny) and runs all stages concurrently.</p>
+<h2 id="padded-raster-iteration-with-readwrite-gating">Padded-raster iteration with read/write gating</h2>
+<p>The window center at iteration <code>(r, c)</code> looks at pixels <code>(r−1..r+1, c−1..c+1)</code> for K=3. Naively this fails at the image boundary. The canonical fix is to <strong>iterate over a (rows+K−1) × (cols+K−1) extended raster</strong> and gate reads and writes:</p>
+<ul>
+<li><strong>Read gate</strong>: read the next input pixel from the upstream stream <strong>only when</strong> <code>r &lt; rows &amp;&amp; c &lt; cols</code> — i.e., on real-image coordinates. Off-image positions get a zero (or border-policy) pad value.</li>
+<li><strong>Write gate</strong>: emit the current window's output <strong>only when</strong> the window center maps to a real image pixel — typically when <code>r &gt;= K-1 &amp;&amp; c &gt;= K-1</code>, so the very first valid output is the (K−1, K−1) iteration, corresponding to image pixel (0, 0).</li>
+</ul>
+<p>This produces exactly <code>rows × cols</code> input reads and <code>rows × cols</code> output writes per stage, matches downstream token counts perfectly, and handles the K/2 startup latency of the line buffer naturally.</p>
+<h2 id="complete-example-single-stage-33-box-blur-scaffold">Complete Example (single-stage 3×3 box-blur scaffold)</h2>
+<p>The placeholder algorithm here is a 3×3 mean — the absolute simplest stencil. Replace the body of <code>apply_kernel</code> with the algorithm you actually want; the surrounding scaffold is what carries the streaming-stencil pattern.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// box3x3_stream.h</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;hls_stream.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;ap_int.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cstdint&gt;</span>
+
+<span class="k">using</span><span class="w"> </span><span class="n">u8</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">uint8_t</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">MAX_H</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2160</span><span class="p">;</span>
+<span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">MAX_W</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3840</span><span class="p">;</span>
+
+<span class="k">extern</span><span class="w"> </span><span class="s">&quot;C&quot;</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">box3x3</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">img_inp</span><span class="p">,</span><span class="w"> </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">img_out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">rows</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">cols</span><span class="p">);</span>
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code><span class="c1">// box3x3_stream.cpp</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;box3x3_stream.h&quot;</span>
+
+<span class="c1">// ---- Stage 1: raster-read input from m_axi into a stream ----</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">read_padded</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">img_inp</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">rows</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">cols</span><span class="p">,</span>
+<span class="w">                        </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">u8</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">rows</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">r</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS LOOP_TRIPCOUNT min=1 max=MAX_H</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">cols</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS LOOP_TRIPCOUNT min=1 max=MAX_W</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="w">            </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">img_inp</span><span class="p">[</span><span class="n">r</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">cols</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">c</span><span class="p">]);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// ---- Stage 2: K=3 sliding-window stencil over the stream ----</span>
+<span class="c1">//</span>
+<span class="c1">// Iterates the extended raster (rows+2) x (cols+2). Reads input only on</span>
+<span class="c1">// real-image positions; emits output only when the window center maps to</span>
+<span class="c1">// a real image pixel. Line buffer caches the two most-recent rows; window</span>
+<span class="c1">// holds the current 3x3 neighborhood as scalar registers.</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">stencil3x3</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">rows</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">cols</span><span class="p">,</span>
+<span class="w">                       </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">u8</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">in</span><span class="p">,</span><span class="w"> </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">u8</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="n">lb</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="n">MAX_W</span><span class="p">];</span><span class="w">        </span><span class="c1">// 2 line buffers, one element per column</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=lb complete dim=1</span>
+<span class="cp">#pragma HLS DEPENDENCE variable=lb inter false</span>
+
+<span class="w">    </span><span class="n">u8</span><span class="w"> </span><span class="n">w</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">3</span><span class="p">];</span><span class="w">             </span><span class="c1">// 3x3 window as scalar registers</span>
+<span class="cp">#pragma HLS ARRAY_PARTITION variable=w complete dim=0</span>
+
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">ER</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rows</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">   </span><span class="c1">// extended-raster row count</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">EC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cols</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">   </span><span class="c1">// extended-raster col count</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">er</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">er</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">ER</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">er</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS LOOP_TRIPCOUNT min=3 max=MAX_H+2</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">ec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">ec</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">EC</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">ec</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS LOOP_TRIPCOUNT min=3 max=MAX_W+2</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="w">            </span><span class="c1">// ---- read gate: only on real-image coordinates ----</span>
+<span class="w">            </span><span class="n">u8</span><span class="w"> </span><span class="n">pix</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">er</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">rows</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">ec</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">cols</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">pix</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">            </span><span class="p">}</span>
+
+<span class="w">            </span><span class="c1">// ---- shift window left by one column ----</span>
+<span class="w">            </span><span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">];</span><span class="w"> </span><span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">];</span>
+<span class="w">            </span><span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">];</span><span class="w"> </span><span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">];</span>
+<span class="w">            </span><span class="n">w</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">w</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">];</span><span class="w"> </span><span class="n">w</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">w</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">];</span>
+
+<span class="w">            </span><span class="c1">// ---- fetch new column from line buffer ----</span>
+<span class="w">            </span><span class="c1">//   w[0][2] = pixel from row (er-2) at col ec  (lb row 0)</span>
+<span class="w">            </span><span class="c1">//   w[1][2] = pixel from row (er-1) at col ec  (lb row 1)</span>
+<span class="w">            </span><span class="c1">//   w[2][2] = pixel from row  er    at col ec  (the new one)</span>
+<span class="w">            </span><span class="n">u8</span><span class="w"> </span><span class="n">lb0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lb</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">ec</span><span class="p">];</span>
+<span class="w">            </span><span class="n">u8</span><span class="w"> </span><span class="n">lb1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lb</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">ec</span><span class="p">];</span>
+<span class="w">            </span><span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lb0</span><span class="p">;</span>
+<span class="w">            </span><span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lb1</span><span class="p">;</span>
+<span class="w">            </span><span class="n">w</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pix</span><span class="p">;</span>
+
+<span class="w">            </span><span class="c1">// ---- shift line buffer up ----</span>
+<span class="w">            </span><span class="n">lb</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">ec</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lb1</span><span class="p">;</span>
+<span class="w">            </span><span class="n">lb</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">ec</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pix</span><span class="p">;</span>
+
+<span class="w">            </span><span class="c1">// ---- apply the stencil kernel (REPLACE with your algorithm) ----</span>
+<span class="w">            </span><span class="c1">//   Placeholder: 3x3 mean (sum / 9 ≈ (sum * 7281) &gt;&gt; 16)</span>
+<span class="w">            </span><span class="kt">int</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+<span class="w">                    </span><span class="o">+</span><span class="w"> </span><span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+<span class="w">                    </span><span class="o">+</span><span class="w"> </span><span class="n">w</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">w</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">w</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">];</span>
+<span class="w">            </span><span class="n">u8</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">u8</span><span class="p">)((</span><span class="n">sum</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">7281</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="mi">16</span><span class="p">);</span>
+
+<span class="w">            </span><span class="c1">// ---- write gate: only when window center is in-image ----</span>
+<span class="w">            </span><span class="c1">//   The center of the window at (er, ec) corresponds to image</span>
+<span class="w">            </span><span class="c1">//   pixel (er-1, ec-1). Emit iff that pixel is a real one.</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">er</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">ec</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">out</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// ---- Stage 3: raster-write output stream back to m_axi ----</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">write_cropped</span><span class="p">(</span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">img_out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">rows</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">cols</span><span class="p">,</span>
+<span class="w">                          </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">u8</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">rows</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">r</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS LOOP_TRIPCOUNT min=1 max=MAX_H</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">cols</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS LOOP_TRIPCOUNT min=1 max=MAX_W</span>
+<span class="cp">#pragma HLS PIPELINE II=1</span>
+<span class="w">            </span><span class="n">img_out</span><span class="p">[</span><span class="n">r</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">cols</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">c</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">in</span><span class="p">.</span><span class="n">read</span><span class="p">();</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// ---- Top function: connect stages via streams under DATAFLOW ----</span>
+<span class="k">extern</span><span class="w"> </span><span class="s">&quot;C&quot;</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">box3x3</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">img_inp</span><span class="p">,</span><span class="w"> </span><span class="n">u8</span><span class="w"> </span><span class="o">*</span><span class="n">img_out</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">rows</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">cols</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="cp">#pragma HLS INTERFACE m_axi  port=img_inp bundle=gmem0 depth=16384</span>
+<span class="cp">#pragma HLS INTERFACE m_axi  port=img_out bundle=gmem1 depth=16384</span>
+<span class="cp">#pragma HLS INTERFACE s_axilite port=rows    bundle=control</span>
+<span class="cp">#pragma HLS INTERFACE s_axilite port=cols    bundle=control</span>
+<span class="cp">#pragma HLS INTERFACE s_axilite port=return  bundle=control</span>
+
+<span class="cp">#pragma HLS DATAFLOW</span>
+
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">u8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">s_read</span><span class="p">(</span><span class="s">&quot;s_read&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">u8</span><span class="o">&gt;</span><span class="w"> </span><span class="n">s_filt</span><span class="p">(</span><span class="s">&quot;s_filt&quot;</span><span class="p">);</span>
+<span class="cp">#pragma HLS STREAM variable=s_read depth=64</span>
+<span class="cp">#pragma HLS STREAM variable=s_filt depth=64</span>
+
+<span class="w">    </span><span class="n">read_padded</span><span class="p">(</span><span class="n">img_inp</span><span class="p">,</span><span class="w"> </span><span class="n">rows</span><span class="p">,</span><span class="w"> </span><span class="n">cols</span><span class="p">,</span><span class="w"> </span><span class="n">s_read</span><span class="p">);</span>
+<span class="w">    </span><span class="n">stencil3x3</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span><span class="w"> </span><span class="n">cols</span><span class="p">,</span><span class="w"> </span><span class="n">s_read</span><span class="p">,</span><span class="w"> </span><span class="n">s_filt</span><span class="p">);</span>
+<span class="w">    </span><span class="n">write_cropped</span><span class="p">(</span><span class="n">img_out</span><span class="p">,</span><span class="w"> </span><span class="n">rows</span><span class="p">,</span><span class="w"> </span><span class="n">cols</span><span class="p">,</span><span class="w"> </span><span class="n">s_filt</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h2 id="extending-to-multi-pass-pipelines">Extending to multi-pass pipelines</h2>
+<p>For a pipeline of N stencil stages (e.g., smoothing followed by gradient followed by suppression), declare N+1 streams under one <code>#pragma HLS DATAFLOW</code> and chain them. Each stage keeps its own private line buffer and window; <strong>do not</strong> share buffers across stages, and <strong>do not</strong> materialize a full intermediate image.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS DATAFLOW</span>
+<span class="n">hls</span><span class="o">::</span><span class="n">stream</span><span class="o">&lt;</span><span class="n">u8</span><span class="o">&gt;</span><span class="w">  </span><span class="n">s0</span><span class="p">,</span><span class="w"> </span><span class="n">s1</span><span class="p">,</span><span class="w"> </span><span class="n">s2</span><span class="p">,</span><span class="w"> </span><span class="n">s3</span><span class="p">;</span>
+<span class="n">read_padded</span><span class="w"> </span><span class="p">(</span><span class="n">img_inp</span><span class="p">,</span><span class="w"> </span><span class="n">rows</span><span class="p">,</span><span class="w"> </span><span class="n">cols</span><span class="p">,</span><span class="w"> </span><span class="n">s0</span><span class="p">);</span>
+<span class="n">stage_A</span><span class="w">     </span><span class="p">(</span><span class="n">rows</span><span class="p">,</span><span class="w"> </span><span class="n">cols</span><span class="p">,</span><span class="w"> </span><span class="n">s0</span><span class="p">,</span><span class="w"> </span><span class="n">s1</span><span class="p">);</span><span class="w">   </span><span class="c1">// own lb/window for stage A</span>
+<span class="n">stage_B</span><span class="w">     </span><span class="p">(</span><span class="n">rows</span><span class="p">,</span><span class="w"> </span><span class="n">cols</span><span class="p">,</span><span class="w"> </span><span class="n">s1</span><span class="p">,</span><span class="w"> </span><span class="n">s2</span><span class="p">);</span><span class="w">   </span><span class="c1">// own lb/window for stage B</span>
+<span class="n">stage_C</span><span class="w">     </span><span class="p">(</span><span class="n">rows</span><span class="p">,</span><span class="w"> </span><span class="n">cols</span><span class="p">,</span><span class="w"> </span><span class="n">s2</span><span class="p">,</span><span class="w"> </span><span class="n">s3</span><span class="p">);</span><span class="w">   </span><span class="c1">// own lb/window for stage C</span>
+<span class="n">write_cropped</span><span class="p">(</span><span class="n">img_out</span><span class="p">,</span><span class="w"> </span><span class="n">rows</span><span class="p">,</span><span class="w"> </span><span class="n">cols</span><span class="p">,</span><span class="w"> </span><span class="n">s3</span><span class="p">);</span>
+</code></pre></div>
+
+<p>Each stage's read-gate / write-gate is identical to the single-stage version. Token counts match across stages because every stage produces exactly <code>rows × cols</code> outputs from <code>rows × cols</code> inputs.</p>
+<h2 id="required-pragmas">Required Pragmas</h2>
+<table>
+<thead>
+<tr>
+<th>Pragma</th>
+<th>Required?</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#pragma HLS DATAFLOW</code> on top function</td>
+<td>Yes</td>
+<td>Stages run concurrently, not sequentially</td>
+</tr>
+<tr>
+<td><code>#pragma HLS PIPELINE II=1</code> on inner stencil loop</td>
+<td>Yes</td>
+<td>One pixel per cycle throughput</td>
+</tr>
+<tr>
+<td><code>#pragma HLS ARRAY_PARTITION variable=lb complete dim=1</code></td>
+<td>Yes</td>
+<td>Allow K parallel line-buffer row reads per cycle</td>
+</tr>
+<tr>
+<td><code>#pragma HLS ARRAY_PARTITION variable=w complete dim=0</code></td>
+<td>Yes</td>
+<td>Keep window cells in registers</td>
+</tr>
+<tr>
+<td><code>#pragma HLS DEPENDENCE variable=lb inter false</code></td>
+<td>Yes</td>
+<td>Without this II=1 fails — HLS can't prove safe reuse</td>
+</tr>
+<tr>
+<td><code>#pragma HLS LOOP_TRIPCOUNT min=A max=B</code></td>
+<td>Yes</td>
+<td>csynth report needs it to compute concrete latency</td>
+</tr>
+<tr>
+<td><code>#pragma HLS STREAM variable=s_xx depth=N</code></td>
+<td>Optional</td>
+<td>Default FIFO depth (2) is fine for matched producer/consumer rates</td>
+</tr>
+<tr>
+<td><code>#pragma HLS INTERFACE m_axi port=... depth=N</code></td>
+<td>Yes</td>
+<td><code>depth</code> must match the testbench buffer size</td>
+</tr>
+</tbody>
+</table>
+<h2 id="when-to-apply-this-pattern">When to Apply This Pattern</h2>
+<div class="highlight"><pre><span></span><code>Is the kernel a 2D sliding-window operation on an image?
+├── Yes → Streaming Image Stencil (this pattern)
+└── No
+    ├── 1D sliding window on a stream? → FIR / DSP-intrinsics pattern
+    ├── Per-pixel point operation? → Simple PIPELINE II=1, no line buffer needed
+    └── Random-access image traversal? → Cannot stream; consider tiling
+</code></pre></div>
+
+<h2 id="common-pitfalls">Common Pitfalls</h2>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Symptom</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No <code>#pragma HLS DATAFLOW</code></td>
+<td>Sequential execution, latency report = <code>?</code>, util 5–10× too high</td>
+<td>Add <code>DATAFLOW</code> on the top function and connect stages with <code>hls::stream</code> channels</td>
+</tr>
+<tr>
+<td><code>static T buf[H*W]</code> intermediate</td>
+<td>BRAM blowup or off-chip spill, II=1 unmet</td>
+<td>Replace with <code>hls::stream&lt;T&gt;</code> between stages</td>
+</tr>
+<tr>
+<td>Missing <code>DEPENDENCE inter false</code> on <code>lb</code></td>
+<td>csynth warns "II=1 not met, II=2 used" or similar</td>
+<td>Add the pragma — the read+write on the same column happens in the same iteration, so cross-iteration dependence is safe</td>
+</tr>
+<tr>
+<td><code>ARRAY_PARTITION variable=lb cyclic factor=1</code> instead of <code>complete dim=1</code></td>
+<td>Sometimes works but verbose; on wide line buffers can generate excess MUXes</td>
+<td>Prefer <code>complete dim=1</code> to partition by row</td>
+</tr>
+<tr>
+<td><code>LOOP_TRIPCOUNT max=H*W</code> (product expression)</td>
+<td>Vitis HLS sometimes can't resolve symbolic products → latency reports <code>?</code></td>
+<td>Use simple sums: <code>max=MAX_H</code> and <code>max=MAX_W</code> on the two separate loops</td>
+</tr>
+<tr>
+<td>Read without gating</td>
+<td>Token mismatch — agent reads off-image and the upstream stream blocks</td>
+<td>Read only when <code>r &lt; rows &amp;&amp; c &lt; cols</code></td>
+</tr>
+<tr>
+<td>Write without gating</td>
+<td>Output count != <code>rows*cols</code>, downstream blocks</td>
+<td>Emit only when window center is in-image (typically <code>er &gt;= K-1 &amp;&amp; ec &gt;= K-1</code>)</td>
+</tr>
+<tr>
+<td>Sharing one line buffer across stages</td>
+<td>Logically wrong (stages run concurrently with different row offsets)</td>
+<td>Each stage gets its own private line buffer and window</td>
+</tr>
+<tr>
+<td><code>m_axi depth</code> mismatch with testbench buffer</td>
+<td>cosim deadlocks or fails</td>
+<td>Set <code>depth=</code> to exactly the testbench buffer size (e.g. 16384 for a 128×128 testbench)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="resource-vs-performance-trade-offs">Resource vs Performance Trade-offs</h2>
+<table>
+<thead>
+<tr>
+<th>Choice</th>
+<th>Performance</th>
+<th>Resource</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PIPELINE II=1</code> + line buffer + DATAFLOW</td>
+<td>1 pixel/cycle, ~rows×cols latency</td>
+<td>~2 line buffers of MAX_W per stage in BRAM</td>
+</tr>
+<tr>
+<td><code>PIPELINE II=2</code> (relaxed)</td>
+<td>0.5 pixel/cycle</td>
+<td>Less aggressive partitioning, smaller LUT/FF</td>
+</tr>
+<tr>
+<td>No DATAFLOW (sequential stages)</td>
+<td>N× slower for N stages, no overlap</td>
+<td>Often <strong>larger</strong> due to materialized intermediates</td>
+</tr>
+<tr>
+<td>Wider word type (e.g. <code>unsigned short</code> for mag+dir packed)</td>
+<td>Same throughput</td>
+<td>Wider line buffers, larger BRAM</td>
+</tr>
+</tbody>
+</table>
+<h2 id="related-patterns">Related Patterns</h2>
+<ul>
+<li><a href="dataflow-diamond.md">Dataflow Diamond</a> — for fork/join topologies (e.g., when one stage feeds two parallel paths that later merge)</li>
+<li><a href="free-running-pipeline.md">Free Running Pipeline</a> — for stages that consume/produce at different rates</li>
+<li><a href="pointer-streaming.md">Pointer Streaming</a> — for m_axi → stream conversion patterns</li>
+<li><a href="array-stencil-pragma.md">Array Stencil Pragma</a> — for the niche <code>#pragma HLS ARRAY_STENCIL</code> mechanism (different from this pattern; uses non-streaming nested loops on bounded arrays)</li>
+</ul>
+<h2 id="example-files">Example Files</h2>
+<p>The Vitis HLS Introductory Examples corpus does <strong>not</strong> ship a streaming-image-stencil example — its <code>using_array_stencil_*</code> examples use a different, non-streaming pattern. The scaffold in this document is self-contained and applies the streaming-stencil mechanics directly.</p>
+    </main>
+</body>
+</html>

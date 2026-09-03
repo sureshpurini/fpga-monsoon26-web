@@ -56,6 +56,8 @@
         <h3>Patterns</h3>
         <ul>
         <li><a href="../patterns/array-partition.html">Array Partition</a></li>
+        <li><a href="../patterns/array-reshape.html">Array Reshape</a></li>
+        <li><a href="../patterns/array-stencil-pragma.html">Array Stencil Pragma</a></li>
         <li><a href="../patterns/autorestart.html">Autorestart</a></li>
         <li><a href="../patterns/data-driven-splitter.html">Data Driven Splitter</a></li>
         <li><a href="../patterns/dataflow-bypass.html">Dataflow Bypass</a></li>
@@ -71,7 +73,7 @@
         <li><a href="../patterns/merge-split.html">Merge Split</a></li>
         <li><a href="../patterns/perfect-loop-restructuring.html">Perfect Loop Restructuring</a></li>
         <li><a href="../patterns/pointer-streaming.html">Pointer Streaming</a></li>
-        <li><a href="../patterns/stencil-optimization.html">Stencil Optimization</a></li>
+        <li><a href="../patterns/streaming-image-stencil.html">Streaming Image Stencil</a></li>
         </ul>
         </div>
         <div class="nav-section">
@@ -105,7 +107,7 @@
         <h1 id="array-partition">Array Partition</h1>
 <p>Partition arrays into smaller arrays or individual elements to enable parallel access. Critical for achieving high throughput when loops access multiple array elements per iteration.</p>
 <h2 id="overview">Overview</h2>
-<p>Arrays in HLS default to BRAM (Block RAM) with limited ports (typically 2). When a loop is unrolled or pipelined with multiple accesses per cycle, memory bandwidth becomes the bottleneck. ARRAY_PARTITION splits arrays into multiple banks or registers, enabling parallel access.</p>
+<p>Arrays in HLS default to BRAM (Block RAM), which has a maximum of two data ports (small arrays may instead map to LUTRAM or registers). When a loop is unrolled or pipelined with multiple accesses per cycle, that two-port limit becomes the bottleneck. ARRAY_PARTITION splits an array into multiple smaller memories (banks) — or into registers — effectively increasing the number of ports and enabling parallel access.</p>
 <div class="highlight"><pre><span></span><code>WITHOUT PARTITION:                    WITH PARTITION:
 ┌─────────────────────┐              ┌─────────────────────┐
 │  A[16] - Single BRAM │              │  A[16] → 4 banks    │
@@ -155,6 +157,13 @@
 <div class="highlight"><pre><span></span><code><span class="cp">#pragma HLS ARRAY_PARTITION variable=&lt;name&gt; [type] [factor=&lt;N&gt;] [dim=&lt;N&gt;]</span>
 </code></pre></div>
 
+<blockquote>
+<p><strong>Syntax note.</strong> UG1399 (2025.x) writes the mode with an explicit keyword,
+<code>type=cyclic | type=block | type=complete</code> — e.g.
+<code>#pragma HLS ARRAY_PARTITION variable=A type=cyclic factor=4 dim=1</code>. The bare
+forms (<code>cyclic</code>, <code>block</code>, <code>complete</code>) used below are the classic spelling and
+remain accepted.</p>
+</blockquote>
 <table>
 <thead>
 <tr>
@@ -192,13 +201,20 @@
 <hr />
 <h2 id="partition-types">Partition Types</h2>
 <h3 id="complete-partitioning">Complete Partitioning</h3>
-<p>Fully partition into individual elements. Each element becomes a separate register, enabling simultaneous access to ALL elements.</p>
+<p>Decompose into individual elements, enabling simultaneous access to ALL of them. For a <strong>one-dimensional</strong> array this resolves the memory into individual <strong>registers</strong> (flip-flops / LUT fabric, <em>not</em> BRAM).</p>
 <div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="mi">16</span><span class="p">];</span>
 <span class="cp">#pragma HLS ARRAY_PARTITION variable=A complete</span>
 <span class="c1">// Creates 16 separate registers: A_0, A_1, ..., A_15</span>
 <span class="c1">// Can access all 16 in same cycle</span>
 </code></pre></div>
 
+<blockquote>
+<p><strong><code>complete</code> decomposes only the dimension you name.</strong> <code>complete</code> takes no
+<code>factor</code>. On a multi-dimensional array, <code>complete dim=2</code> fully splits the <em>second</em>
+subscript and leaves a <strong>set of smaller memories</strong>, not one register per scalar.
+Only <code>complete dim=0</code> (all dimensions) turns every element into its own register —
+e.g. <code>M[10][6][4] complete dim=0</code> → 240 registers.</p>
+</blockquote>
 <p><strong>When to Use:</strong>
 - Small arrays (&lt; ~64 elements)
 - Need access to any element at any time
@@ -250,16 +266,23 @@ Bank 3: [12][13][14][15]    (indices 12-15)
 </code></pre></div>
 
 <p><strong>When to Use:</strong>
-- Access pattern is <strong>strided</strong>: <code>A[0], A[4], A[8], A[12]</code>
-- Processing different regions of array in parallel
-- UNROLL with strided access</p>
+- Processing <strong>contiguous regions in parallel</strong> — each bank owns one chunk (the canonical use: N engines, each sweeping its own slice of the array).
+- Parallel accesses that fall <strong>one-per-chunk</strong>, i.e. spaced by <code>chunk_size = N/factor</code>: <code>A[0], A[N/4], A[N/2], A[3N/4]</code>.</p>
+<blockquote>
+<p><strong>Caveat.</strong> Block only removes a port conflict when the indices you touch in one
+cycle land in <strong>different chunks</strong>. For <em>neighbouring</em> elements
+<code>A[i], A[i+1], …</code> — which fall in the <strong>same</strong> chunk — block is wrong; use
+<strong>cyclic</strong>. Block is not a general "strided access" tool; it helps only when the
+stride equals <code>chunk_size</code>.</p>
+</blockquote>
 <p><strong>Example Use Case:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="cp">#pragma HLS UNROLL</span>
-<span class="w">    </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="mi">4</span><span class="p">];</span><span class="w">  </span><span class="c1">// Strided access: A[0], A[4], A[8], A[12]</span>
+<span class="w">    </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="mi">4</span><span class="p">];</span><span class="w">  </span><span class="c1">// one element per chunk: A[0], A[4], A[8], A[12]</span>
 <span class="p">}</span>
 <span class="cp">#pragma HLS ARRAY_PARTITION variable=A block factor=4</span>
-<span class="c1">// A[0], A[4], A[8], A[12] go to banks 0,1,2,3 → no conflict!</span>
+<span class="c1">// works BECAUSE the stride (4) equals chunk_size = 16/4 = 4:</span>
+<span class="c1">// A[0], A[4], A[8], A[12] land in banks 0,1,2,3 → no conflict.</span>
 </code></pre></div>
 
 <hr />
@@ -494,7 +517,7 @@ Can access M[i][0], M[i][1], M[i][2], M[i][3] in parallel
 </tr>
 <tr>
 <td>Access pattern</td>
-<td>Cyclic for consecutive, Block for strided</td>
+<td>Cyclic for consecutive neighbours; block for one-access-per-contiguous-region</td>
 </tr>
 <tr>
 <td>Complete partition</td>
@@ -572,7 +595,7 @@ Can access M[i][0], M[i][1], M[i][2], M[i][3] in parallel
 <td>Sliding window, sequential processing</td>
 </tr>
 <tr>
-<td>Strided: <code>A[0], A[N/4], A[N/2]...</code></td>
+<td>One per contiguous region: <code>A[0], A[N/4], A[N/2]...</code> (stride = chunk)</td>
 <td><code>block</code></td>
 <td>Parallel region processing</td>
 </tr>
@@ -641,9 +664,9 @@ Can access M[i][0], M[i][1], M[i][2], M[i][3] in parallel
 <td>Check which index varies; partition that dimension</td>
 </tr>
 <tr>
-<td>Partitioning M-AXI array</td>
-<td>No effect</td>
-<td>External memory can't be partitioned; use local buffer</td>
+<td>Partitioning an M-AXI pointer</td>
+<td>No parallel banks appear</td>
+<td>Partition reshapes on-chip memories, not off-chip DRAM. Copy the data into a local on-chip buffer, then partition <em>that</em>.</td>
 </tr>
 <tr>
 <td>Complete on large array</td>
@@ -655,6 +678,7 @@ Can access M[i][0], M[i][1], M[i][2], M[i][3] in parallel
 <hr />
 <h2 id="related-patterns">Related Patterns</h2>
 <ul>
+<li><a href="array-reshape.md">array-reshape</a> - The sibling directive: <strong>one</strong> memory with <strong>wider words</strong> (vs partition's N separate memories). Use when the co-accessed elements are a fixed regular group.</li>
 <li><a href="perfect-loop-restructuring.md">perfect-loop-restructuring</a> - Loop optimization for pipelining</li>
 <li><a href="free-running-pipeline.md">free-running-pipeline</a> - Function-level pipeline needs ARRAY_PARTITION</li>
 </ul>
