@@ -147,11 +147,6 @@
                             <td class="ltopic">Dataflow &amp; streaming: composing kernels
                                 <span class="lblock">DATAFLOW · FIFOs · interfaces across kernels</span></td>
                         </tr>
-                        <tr>
-                            <td class="lnum">L7</td>
-                            <td class="ltopic">Systolic arrays
-                                <span class="lblock">processing elements · wavefront parallelism · building one from a vanilla kernel</span></td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -164,9 +159,30 @@
                     </thead>
                     <tbody>
                         <tr>
+                            <td class="lnum">L7</td>
+                            <td class="ltopic">Allo: algorithm vs schedule, and how HLS compilers work
+                                <span class="lblock">decoupling algorithm vs schedule · schedule primitives · MLIR &amp; modern HLS compilers</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <span class="block-label">Applications &amp; architectures</span>
+            <div class="table-wrap">
+                <table class="schedule">
+                    <thead>
+                        <tr><th>#</th><th>Topic</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
                             <td class="lnum">L8</td>
-                            <td class="ltopic">Under the hood: MLIR &amp; schedule languages
-                                <span class="lblock">decoupling algorithm vs schedule · how modern HLS compilers work</span></td>
+                            <td class="ltopic">Line-rate packet inspection
+                                <span class="lblock">AXI-Stream dataflow · header parsing · shift-register matching at wire speed</span></td>
+                        </tr>
+                        <tr>
+                            <td class="lnum">L9</td>
+                            <td class="ltopic">Systolic arrays
+                                <span class="lblock">processing elements · wavefront parallelism · forcing 2-D PEs on the fabric (DSP cascade, floorplan)</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -180,17 +196,17 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="lnum">L9</td>
+                            <td class="lnum">L10</td>
                             <td class="ltopic">The 2-D dynamic-programming paradigm
                                 <span class="lblock">recurrences · traceback · mapping DP onto a linear systolic array</span></td>
                         </tr>
                         <tr>
-                            <td class="lnum">L10</td>
+                            <td class="lnum">L11</td>
                             <td class="ltopic">Dynamic-programming kernel internals
                                 <span class="lblock">PE function · arbitrary-precision types · traceback FSM · parallelism knobs</span></td>
                         </tr>
                         <tr>
-                            <td class="lnum">L11</td>
+                            <td class="lnum">L12</td>
                             <td class="ltopic">Variations, performance, wrap-up
                                 <span class="lblock">affine gaps · banding · vs RTL/GPU/CPU baselines</span></td>
                         </tr>
