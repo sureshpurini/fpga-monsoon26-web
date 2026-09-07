@@ -150,18 +150,18 @@ checks correctness (<code>1e-2</code> tolerance), and reports GFLOP/s:</p>
 ./scripts/test_gemm.sh                   # tests the reference impl
 GEMM_SRC=path/to/your_gemm.c ./scripts/test_gemm.sh    # tests YOURS
 </code></pre>
-<p>Verified with the reference impl (<code>N = 1</code>):</p>
+<p>The tester prints PASS/FAIL and a GFLOP/s figure per shape — the format is:</p>
 <pre><code>=== testing student_gemm against 4 GEMM case(s) ===
-  synth_288_to_288_N1.bin    M=288    K=288   N=1   PASS   0.81 GFLOP/s
-  synth_288_to_32000_N1.bin  M=32000  K=288   N=1   PASS   1.54 GFLOP/s
-  synth_288_to_768_N1.bin    M=768    K=288   N=1   PASS   1.66 GFLOP/s
-  synth_768_to_288_N1.bin    M=288    K=768   N=1   PASS   1.61 GFLOP/s
+  synth_288_to_288_N1.bin    M=288    K=288   N=1   PASS   … GFLOP/s
+  synth_288_to_32000_N1.bin  M=32000  K=288   N=1   PASS   … GFLOP/s
+  synth_288_to_768_N1.bin    M=768    K=288   N=1   PASS   … GFLOP/s
+  synth_768_to_288_N1.bin    M=288    K=768   N=1   PASS   … GFLOP/s
 === ALL PASS (4/4 passed) ===
 </code></pre>
-<p>The reference is a naive triple loop — ~1.6 GFLOP/s, single-threaded. <strong>That is your
-floor.</strong> Beat it. Re-run with <code>NS="1 8 32 64" ./scripts/synth_cases.sh</code> to see how your
-GFLOP/s changes as <code>N</code> grows — a good implementation climbs steeply with <code>N</code>, a naive
-one stays flat.</p>
+<p>The reference <code>student_gemm</code> is a naive, single-threaded triple loop — <strong>run it once
+and record its GFLOP/s as your floor</strong>, then beat it. Re-run with
+<code>NS="1 8 32 64" ./scripts/synth_cases.sh</code> to see how your GFLOP/s changes as <code>N</code> grows:
+a good implementation climbs steeply with <code>N</code>, a naive one stays flat.</p>
 <h2>1.4 The int8 half</h2>
 <p>Real accelerators don't do this in float; they do it in <strong>int8</strong> — 4× less data to
 move and far more multiply-adds per unit of hardware. Part 1 asks you to build the
@@ -185,11 +185,12 @@ Per-group scales keep precision local — the standard trick in real int8 infere
 N=32 ./scripts/test_gemm_int8.sh         # batched
 GEMM_INT8_SRC=path/to/your_int8.c ./scripts/test_gemm_int8.sh
 </code></pre>
-<p>Verified (reference impl):</p>
+<p>The int8 tester prints PASS/FAIL and GOP/s per shape — the format is:</p>
 <pre><code>=== int8 GEMM test (N=1, GS=32) ===
-  attn-proj    M=288    K=288  N=1  GS=32  PASS  2.4 GOP/s
-  ffn-up       M=768    K=288  N=1  GS=32  PASS  ...
-  classifier   M=32000  K=288  N=1  GS=32  PASS  2.4 GOP/s
+  attn-proj    M=288    K=288  N=1  GS=32  PASS  … GOP/s
+  ffn-up       M=768    K=288  N=1  GS=32  PASS  … GOP/s
+  ffn-down     M=288    K=768  N=1  GS=32  PASS  … GOP/s
+  classifier   M=32000  K=288  N=1  GS=32  PASS  … GOP/s
 === ALL PASS ===
 </code></pre>
 <p>(<code>GS</code> must divide <code>K</code>; 32 divides both 288 and 768.)</p>
@@ -209,7 +210,7 @@ faster — turn to <strong><a href="part2-integrate-slm.html">Part 2</a></strong
 <h3>Checkpoint</h3>
 <ul>
 <li>[ ] <code>test_gemm.sh</code> with your float kernel: all shapes PASS, GFLOP/s well above the
-      ~1.6 reference, and rising with <code>N</code>.</li>
+      naive reference floor you recorded, and rising with <code>N</code>.</li>
 <li>[ ] <code>test_gemm_int8.sh</code> with your int8 kernel: all shapes PASS.</li>
 <li>[ ] Your "what made it fast" note (tiling, reuse, the <code>N=1</code> vs <code>N&gt;1</code> gap).</li>
 </ul>
