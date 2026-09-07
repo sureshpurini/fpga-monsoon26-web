@@ -405,6 +405,7 @@ physical word 0: { b0, b1, b2, b3 }
 <header>FPGA — High-Performance Kernels · Monsoon 2026</header>
 
 <h2 id="persistent-stages--block-stream-implementation">Persistent stages — block-stream implementation</h2>
+<p><em>A <code>write_lock</code>/<code>read_lock</code> is <strong>not a mutex</strong> — no threads, no races. It <strong>reserves one tile slot</strong> for the block's duration (RAII): the ping-pong swap, written as object lifetime.</em></p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;hls_streamofblocks.h&quot;</span></span>
 <span class="hljs-keyword">using</span> BBlock = <span class="hljs-type">data_t</span>[K][T];  <span class="hljs-keyword">using</span> CBlock = <span class="hljs-type">data_t</span>[M][T];
 
@@ -432,7 +433,7 @@ physical word 0: { b0, b1, b2, b3 }
 }
 </code></pre>
 <blockquote>
-<p>Locks transfer <strong>ownership of a whole random-access tile</strong>; leaving scope releases it to the next stage.</p>
+<p>Construct = <strong>acquire</strong> a slot (empty for write, filled for read); in scope = the tile is <strong>yours to index freely</strong>; leave scope = <strong>hand the slot to the next stage</strong>. Two slots ⇒ producer fills one while consumer drains the other — the ping-pong of the previous slides, now named.</p>
 </blockquote>
 <footer>IIIT · Suresh Purini</footer>
 </section>
