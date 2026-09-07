@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini-Project 1 · Part 1 · GEMM</title>
+<meta name="description" content="A three-part FPGA mini-project: build a fast GEMM (float and int8), then plug it into a TinyStories language model and measure the tokens-per-second climb.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#4f46e5;--brand-2:#06b6d4;--ink:#1d2330;--ink-soft:#5a6477;
+--line:#e6e9f2;--bg:#f4f6fb;--surface:#fff;--code-bg:#f1f3fb;--accent:#f59e0b;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+line-height:1.7;-webkit-font-smoothing:antialiased;}
+.topbar{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.85);
+backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line);}
+.topbar .in{max-width:860px;margin:0 auto;padding:.7rem 24px;display:flex;gap:1rem;
+justify-content:space-between;align-items:center;flex-wrap:wrap;}
+.topbar a{text-decoration:none;font-weight:600;font-size:.86rem;color:var(--brand);}
+.topbar .home{color:var(--ink-soft);}
+nav.proj{display:flex;gap:.9rem;flex-wrap:wrap;}
+nav.proj a.cur{color:var(--ink);border-bottom:2px solid var(--accent);}
+main{max-width:860px;margin:2rem auto 4rem;padding:2.5rem;background:var(--surface);
+border:1px solid var(--line);border-radius:16px;
+box-shadow:0 10px 30px -12px rgba(20,25,50,.15);}
+h1{font-family:'Fraunces',serif;font-size:2rem;line-height:1.15;letter-spacing:-.01em;margin:0 0 .4rem;}
+h2{font-family:'Fraunces',serif;font-size:1.45rem;letter-spacing:-.01em;
+margin:2.6rem 0 .9rem;padding-top:1.2rem;border-top:1px solid var(--line);color:#161b28;}
+h3{font-size:1.12rem;margin:1.8rem 0 .5rem;color:#232a3a;}
+p{margin:.9rem 0;color:#28303f;}
+a{color:var(--brand);}
+em{color:var(--ink-soft);}
+ul,ol{padding-left:1.3rem;} li{margin:.3rem 0;}
+code{font-family:'SFMono-Regular',Menlo,Consolas,monospace;font-size:.87em;
+background:var(--code-bg);padding:.12em .4em;border-radius:5px;color:#1c2540;}
+pre{background:#0f1729;border:1px solid #1e293b;border-radius:10px;
+padding:1rem 1.15rem;overflow-x:auto;line-height:1.45;}
+pre code{background:none;padding:0;font-size:.82rem;color:#d7e0f4;
+font-family:'SFMono-Regular',Menlo,Consolas,monospace;white-space:pre;}
+table{border-collapse:collapse;width:100%;margin:1.2rem 0;font-size:.9rem;
+display:block;overflow-x:auto;}
+th{background:var(--brand);color:#fff;text-align:left;padding:.55rem .8rem;font-weight:600;font-size:.8rem;}
+td{padding:.55rem .8rem;border-bottom:1px solid var(--line);vertical-align:top;color:#333c4d;}
+tr:nth-child(even) td{background:#fafbff;}
+blockquote{margin:1.4rem 0;padding:1rem 1.3rem;background:
+linear-gradient(135deg,rgba(79,70,229,.06),rgba(6,182,212,.05));
+border-left:4px solid var(--accent);border-radius:10px;color:#2b3343;}
+blockquote p{margin:.35rem 0;}
+hr{border:0;border-top:1px solid var(--line);margin:2rem 0;}
+@media(max-width:640px){main{padding:1.5rem 1.2rem;margin:1rem;border-radius:12px;}
+h1{font-size:1.6rem}h2{font-size:1.25rem}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="in"><a class="home" href="../../index.html">← Course home</a><nav class="proj"><a href="index.html">Overview</a><a class="cur">Part 1 · GEMM</a><a href="part2-integrate-slm.html">Part 2 · Integrate</a><a href="part3-quantized-slm.html">Part 3 · int8</a><a href="transformer-from-scratch.html">Background</a></nav></div></div>
+<main>
+<h1>Part 1 — Pure GEMM: make these shapes fast (float and int8)</h1>
+<p><strong>This part is just GEMM.</strong> No language model, no story, nothing to install. You are
+given an interface and a set of matrix shapes; your job is to implement matrix
+multiply behind that interface and make it <strong>correct first, then fast</strong> — in
+<strong>float32</strong> and in <strong>int8</strong>. Everything you need to develop and test runs offline on
+one CPU core.</p>
+<blockquote>
+<p><strong>The glimpse (why you're doing this).</strong> These particular shapes are the matrix
+multiplies inside a small language model that writes children's stories. In
+<strong>Part 2</strong> you will drop this exact GEMM into that model and watch it generate text
+faster; in <strong>Part 3</strong> you will do it in int8. But you do <strong>not</strong> need any of that
+now. Nail the GEMM here, in isolation — the model is the payoff, not the
+prerequisite.</p>
+</blockquote>
+<hr />
+<h2>1.1 The interface — one function</h2>
+<p>You implement a single function (<code>src/student_gemm.h</code>):</p>
+<pre><code class="language-c">// C[M*N] = A[M*K] · B[K*N]   — all row-major, float32, contiguous
+void student_gemm(const float *A, const float *B, float *C, int M, int K, int N);
+</code></pre>
+<p>Standard GEMM: <code>C = A·B</code>. Row-major means element <code>(r,c)</code> of an <code>R×Cols</code> matrix is at
+<code>r*Cols + c</code>. The dimensions arrive <strong>at runtime</strong> — your one implementation must
+handle every shape below (and every <code>N</code>), not a single hard-coded size.</p>
+<ul>
+<li><strong>M</strong> — rows of <code>A</code> and <code>C</code> (the output dimension)</li>
+<li><strong>K</strong> — the shared/reduction dimension (cols of <code>A</code>, rows of <code>B</code>)</li>
+<li><strong>N</strong> — cols of <code>B</code> and <code>C</code> (<strong>how many vectors</strong> you multiply at once)</li>
+</ul>
+<p>A reference implementation ships in <code>src/student_gemm_ref.c</code> so the tester runs on day
+one. Replace it with your optimized version — same signature, nothing else changes.</p>
+<h2>1.2 The target workload</h2>
+<p>Your kernel must handle these four <code>(M, K)</code> shapes — every dimension is a multiple of
+32, which you can lean on for tiling:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th style="text-align: center;">M (out)</th>
+<th style="text-align: center;">K (in)</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>attn-proj</td>
+<td style="text-align: center;">288</td>
+<td style="text-align: center;">288</td>
+<td>square</td>
+</tr>
+<tr>
+<td>ffn-up</td>
+<td style="text-align: center;">768</td>
+<td style="text-align: center;">288</td>
+<td>tall (widen)</td>
+</tr>
+<tr>
+<td>ffn-down</td>
+<td style="text-align: center;">288</td>
+<td style="text-align: center;">768</td>
+<td>wide (shrink)</td>
+</tr>
+<tr>
+<td>classifier</td>
+<td style="text-align: center;">32000</td>
+<td style="text-align: center;">288</td>
+<td>very tall — the FLOP monster</td>
+</tr>
+</tbody>
+</table>
+<p>And two regimes of <code>N</code>:</p>
+<ul>
+<li><strong><code>N = 1</code></strong> — a single vector. This is a matrix-<strong>vector</strong> product (a <em>GEMV</em>). It is
+  <strong>memory-bound</strong>: you read the entire <code>M×K</code> matrix to produce only <code>M</code> numbers, so
+  every weight is used exactly once. There is little to exploit; you are limited by how
+  fast you can stream the matrix.</li>
+<li><strong><code>N &gt; 1</code></strong> — several vectors stacked as columns. Now it is a true matrix-<strong>matrix</strong>
+  product (a <em>GEMM</em>), and each element of <code>A</code> is reused across all <code>N</code> columns. This is
+  where tiling, blocking, and on-chip reuse pay off, and where a good implementation
+  pulls far ahead of the reference. <strong>Optimizing the <code>N &gt; 1</code> case is the heart of this
+  part.</strong></li>
+</ul>
+<p>Why both? Because in Part 2 the model uses <code>N = 1</code> when it generates one token at a
+time, and <code>N &gt; 1</code> when it processes many at once — and you will discover that the <code>N</code>
+you feed the kernel decides everything about throughput. Design for both now.</p>
+<h2>1.3 Test it — offline, against a golden</h2>
+<p><code>scripts/synth_cases.sh</code> generates random test matrices of the four shapes (with a
+double-precision golden), and <code>scripts/test_gemm.sh</code> runs your <code>student_gemm</code> on them,
+checks correctness (<code>1e-2</code> tolerance), and reports GFLOP/s:</p>
+<pre><code class="language-bash">cd labs/tinystories
+./scripts/synth_cases.sh                 # makes cases/synth_*  (N = 1 and 32 by default)
+./scripts/test_gemm.sh                   # tests the reference impl
+GEMM_SRC=path/to/your_gemm.c ./scripts/test_gemm.sh    # tests YOURS
+</code></pre>
+<p>Verified with the reference impl (<code>N = 1</code>):</p>
+<pre><code>=== testing student_gemm against 4 GEMM case(s) ===
+  synth_288_to_288_N1.bin    M=288    K=288   N=1   PASS   0.81 GFLOP/s
+  synth_288_to_32000_N1.bin  M=32000  K=288   N=1   PASS   1.54 GFLOP/s
+  synth_288_to_768_N1.bin    M=768    K=288   N=1   PASS   1.66 GFLOP/s
+  synth_768_to_288_N1.bin    M=288    K=768   N=1   PASS   1.61 GFLOP/s
+=== ALL PASS (4/4 passed) ===
+</code></pre>
+<p>The reference is a naive triple loop — ~1.6 GFLOP/s, single-threaded. <strong>That is your
+floor.</strong> Beat it. Re-run with <code>NS="1 8 32 64" ./scripts/synth_cases.sh</code> to see how your
+GFLOP/s changes as <code>N</code> grows — a good implementation climbs steeply with <code>N</code>, a naive
+one stays flat.</p>
+<h2>1.4 The int8 half</h2>
+<p>Real accelerators don't do this in float; they do it in <strong>int8</strong> — 4× less data to
+move and far more multiply-adds per unit of hardware. Part 1 asks you to build the
+integer version too (<code>src/student_gemm_int8.h</code>):</p>
+<pre><code class="language-c">// C[M*N] fp32 = grouped-int8 product of Aq[M*K] and Bq[K*N]
+void student_gemm_int8(const int8_t *Aq, const float *As,   // values + per-group fp32 scales
+                       const int8_t *Bq, const float *Bs,
+                       float *C, int M, int K, int N, int GS);
+</code></pre>
+<p><strong>Group quantization (Q8_0):</strong> the reduction dimension <code>K</code> is cut into groups of <code>GS</code>
+elements; each group stores int8 values plus one fp32 <strong>scale</strong> per operand. You
+accumulate the inner product in <strong>int32</strong> within a group (this is the integer speed you
+want), then convert back to fp32 with the two scales at the group boundary:</p>
+<pre><code>C[i,j] = Σ_groups g ( As[i,g] · Bs[g,j] · Σ_{k in group g} (int32) Aq[i,k]·Bq[k,j] )
+</code></pre>
+<p>Why groups instead of one scale for the whole matrix? A single scale would have to
+cover the largest magnitude in thousands of numbers, crushing the small ones to zero.
+Per-group scales keep precision local — the standard trick in real int8 inference.</p>
+<p>Test it the same way (self-contained, built-in golden, four shapes):</p>
+<pre><code class="language-bash">./scripts/test_gemm_int8.sh              # reference int8 impl, N=1, GS=32
+N=32 ./scripts/test_gemm_int8.sh         # batched
+GEMM_INT8_SRC=path/to/your_int8.c ./scripts/test_gemm_int8.sh
+</code></pre>
+<p>Verified (reference impl):</p>
+<pre><code>=== int8 GEMM test (N=1, GS=32) ===
+  attn-proj    M=288    K=288  N=1  GS=32  PASS  2.4 GOP/s
+  ffn-up       M=768    K=288  N=1  GS=32  PASS  ...
+  classifier   M=32000  K=288  N=1  GS=32  PASS  2.4 GOP/s
+=== ALL PASS ===
+</code></pre>
+<p>(<code>GS</code> must divide <code>K</code>; 32 divides both 288 and 768.)</p>
+<h2>1.5 What Part 1 asks you to deliver</h2>
+<ol>
+<li>A <code>student_gemm</code> (float) that passes all four shapes and is <strong>substantially faster
+   than the reference</strong>, especially as <code>N</code> grows. Report your GFLOP/s per shape at a
+   couple of <code>N</code> values.</li>
+<li>A <code>student_gemm_int8</code> that passes all four shapes. Report your GOP/s.</li>
+<li>A short note on <strong>what made it fast</strong> — how you tiled/blocked, where the reuse came
+   from, why <code>N &gt; 1</code> helped, and what limited you at <code>N = 1</code>.</li>
+</ol>
+<p>That is the whole mini-project core, and it stands on its own. When you're ready to see
+what it powers — a real model writing stories, and your kernel making it write them
+faster — turn to <strong><a href="part2-integrate-slm.html">Part 2</a></strong>.</p>
+<hr />
+<h3>Checkpoint</h3>
+<ul>
+<li>[ ] <code>test_gemm.sh</code> with your float kernel: all shapes PASS, GFLOP/s well above the
+      ~1.6 reference, and rising with <code>N</code>.</li>
+<li>[ ] <code>test_gemm_int8.sh</code> with your int8 kernel: all shapes PASS.</li>
+<li>[ ] Your "what made it fast" note (tiling, reuse, the <code>N=1</code> vs <code>N&gt;1</code> gap).</li>
+</ul>
+</main>
+</body>
+</html>

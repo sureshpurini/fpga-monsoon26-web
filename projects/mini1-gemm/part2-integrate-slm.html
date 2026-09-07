@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini-Project 1 · Part 2 · Integrate</title>
+<meta name="description" content="A three-part FPGA mini-project: build a fast GEMM (float and int8), then plug it into a TinyStories language model and measure the tokens-per-second climb.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#4f46e5;--brand-2:#06b6d4;--ink:#1d2330;--ink-soft:#5a6477;
+--line:#e6e9f2;--bg:#f4f6fb;--surface:#fff;--code-bg:#f1f3fb;--accent:#f59e0b;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+line-height:1.7;-webkit-font-smoothing:antialiased;}
+.topbar{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.85);
+backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line);}
+.topbar .in{max-width:860px;margin:0 auto;padding:.7rem 24px;display:flex;gap:1rem;
+justify-content:space-between;align-items:center;flex-wrap:wrap;}
+.topbar a{text-decoration:none;font-weight:600;font-size:.86rem;color:var(--brand);}
+.topbar .home{color:var(--ink-soft);}
+nav.proj{display:flex;gap:.9rem;flex-wrap:wrap;}
+nav.proj a.cur{color:var(--ink);border-bottom:2px solid var(--accent);}
+main{max-width:860px;margin:2rem auto 4rem;padding:2.5rem;background:var(--surface);
+border:1px solid var(--line);border-radius:16px;
+box-shadow:0 10px 30px -12px rgba(20,25,50,.15);}
+h1{font-family:'Fraunces',serif;font-size:2rem;line-height:1.15;letter-spacing:-.01em;margin:0 0 .4rem;}
+h2{font-family:'Fraunces',serif;font-size:1.45rem;letter-spacing:-.01em;
+margin:2.6rem 0 .9rem;padding-top:1.2rem;border-top:1px solid var(--line);color:#161b28;}
+h3{font-size:1.12rem;margin:1.8rem 0 .5rem;color:#232a3a;}
+p{margin:.9rem 0;color:#28303f;}
+a{color:var(--brand);}
+em{color:var(--ink-soft);}
+ul,ol{padding-left:1.3rem;} li{margin:.3rem 0;}
+code{font-family:'SFMono-Regular',Menlo,Consolas,monospace;font-size:.87em;
+background:var(--code-bg);padding:.12em .4em;border-radius:5px;color:#1c2540;}
+pre{background:#0f1729;border:1px solid #1e293b;border-radius:10px;
+padding:1rem 1.15rem;overflow-x:auto;line-height:1.45;}
+pre code{background:none;padding:0;font-size:.82rem;color:#d7e0f4;
+font-family:'SFMono-Regular',Menlo,Consolas,monospace;white-space:pre;}
+table{border-collapse:collapse;width:100%;margin:1.2rem 0;font-size:.9rem;
+display:block;overflow-x:auto;}
+th{background:var(--brand);color:#fff;text-align:left;padding:.55rem .8rem;font-weight:600;font-size:.8rem;}
+td{padding:.55rem .8rem;border-bottom:1px solid var(--line);vertical-align:top;color:#333c4d;}
+tr:nth-child(even) td{background:#fafbff;}
+blockquote{margin:1.4rem 0;padding:1rem 1.3rem;background:
+linear-gradient(135deg,rgba(79,70,229,.06),rgba(6,182,212,.05));
+border-left:4px solid var(--accent);border-radius:10px;color:#2b3343;}
+blockquote p{margin:.35rem 0;}
+hr{border:0;border-top:1px solid var(--line);margin:2rem 0;}
+@media(max-width:640px){main{padding:1.5rem 1.2rem;margin:1rem;border-radius:12px;}
+h1{font-size:1.6rem}h2{font-size:1.25rem}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="in"><a class="home" href="../../index.html">← Course home</a><nav class="proj"><a href="index.html">Overview</a><a href="part1-pure-gemm.html">Part 1 · GEMM</a><a class="cur">Part 2 · Integrate</a><a href="part3-quantized-slm.html">Part 3 · int8</a><a href="transformer-from-scratch.html">Background</a></nav></div></div>
+<main>
+<h1>Part 2 — Challenge 1: put your GEMM inside a language model</h1>
+<p>In Part 1 you built a fast GEMM for four shapes. Now the reveal: <strong>those four shapes
+are the matrix multiplies inside a real language model</strong> — a 15-million-number network
+that writes children's stories. In this challenge you drop your GEMM into that model,
+run it, and measure the thing that actually matters to a user: <strong>tokens per second.</strong></p>
+<p>This part is the detailed story. If you want the full from-scratch explanation of how
+a transformer computes, read <strong><a href="transformer-from-scratch.html">transformer-from-scratch.md</a></strong>
+first — it assumes no machine-learning background and builds the whole picture up from
+"text is a list of integers." The short version is below.</p>
+<hr />
+<h2>2.1 The model in one screen</h2>
+<p>Here is a story the model wrote:</p>
+<blockquote>
+<p><em>Once upon a time, there was a little girl named Lily. She loved to play outside in
+the sunshine. One day, she saw a big, red ball in the sky. It was the sun!</em> …
+<code>achieved tok/s: 71.6</code></p>
+</blockquote>
+<p>It writes <strong>one token (≈ one word-piece) at a time</strong>: look at all the text so far,
+score every possible next token, pick one, append, repeat. Each step runs the whole
+network forward once, and that forward pass is — almost entirely — a sequence of
+matrix–vector products <code>y = W·x</code>, where <code>x</code> is the current 288-number hidden state and
+<code>W</code> is a learned matrix. Per token:</p>
+<table>
+<thead>
+<tr>
+<th>Where</th>
+<th>Matrix</th>
+<th style="text-align: center;">Shape (<code>out ← in</code>)</th>
+<th style="text-align: center;">Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>attention</td>
+<td><code>Wq, Wk, Wv, Wo</code></td>
+<td style="text-align: center;">288 ← 288</td>
+<td style="text-align: center;">4 / layer</td>
+</tr>
+<tr>
+<td>FFN</td>
+<td><code>W1, W3</code></td>
+<td style="text-align: center;">768 ← 288</td>
+<td style="text-align: center;">2 / layer</td>
+</tr>
+<tr>
+<td>FFN</td>
+<td><code>W2</code></td>
+<td style="text-align: center;">288 ← 768</td>
+<td style="text-align: center;">1 / layer</td>
+</tr>
+<tr>
+<td>classifier</td>
+<td><code>Wcls</code></td>
+<td style="text-align: center;">32000 ← 288</td>
+<td style="text-align: center;">1 total</td>
+</tr>
+</tbody>
+</table>
+<p>Six layers × 7 + 1 classifier = <strong>43 matrix–vector products per token</strong> — the exact
+shapes from Part 1. Because the model runs one token at a time, each is a GEMV: <strong>your
+<code>student_gemm</code> with <code>N = 1</code>.</strong></p>
+<h2>2.2 Meet the storyteller — and measure where its time goes</h2>
+<p>Get the model and run it (no internet on your node? see the script header for the
+offline path):</p>
+<pre><code class="language-bash">cd labs/tinystories
+./scripts/setup.sh          # clones the engine, fetches the 60 MB checkpoint, prints a story
+</code></pre>
+<p>Now the important part — don't guess where the time goes, <strong>measure</strong> it. <code>profile.sh</code>
+times every matrix multiply by shape:</p>
+<pre><code class="language-bash">./scripts/profile.sh
+</code></pre>
+<p>Verified (256 tokens, one core):</p>
+<pre><code>=== matmul profile (by shape n-&gt;d) ===
+total matmul time: 2.98 s     (out of 3.53 s total → 84% of all runtime)
+    288 -&gt; 32000   60.2%   classifier / output head
+    288 -&gt;   768   17.4%   FFN w1, w3
+    288 -&gt;   288   13.2%   attn wq/wk/wv/wo
+    768 -&gt;   288    9.2%   FFN w2
+</code></pre>
+<p>Two facts to carry forward:</p>
+<ol>
+<li><strong>Matrix multiply is 84% of the entire runtime.</strong> The model <em>is</em> your GEMM. Make
+   GEMM faster and you make the model faster — nothing else is worth touching.</li>
+<li><strong>The classifier (60%) is the single biggest slice</strong>, not the FFN. That surprises
+   people — the usual saying is "the FFN dominates transformers." For a model this
+   small with a 32000-word vocabulary, the output head is the monster. <em>Profile, don't
+   assume</em> — the same discipline decides what's worth offloading.</li>
+</ol>
+<h2>2.3 The seam — plug your GEMM in with one link choice</h2>
+<p>The model's matrix-multiply routine has this signature (it computes <code>xout = W·x</code>):</p>
+<pre><code class="language-c">void matmul(float* xout, float* x, float* w, int n, int d);   // xout[d] = W[d×n]·x[n]
+</code></pre>
+<p>That is exactly your <code>student_gemm</code> with <code>A = W</code> (M=d, K=n), <code>B = x</code> (N=1), <code>C = xout</code>.
+<code>src/slm_backend.c</code> is the entire seam:</p>
+<pre><code class="language-c">void matmul(float *xout, float *x, float *w, int n, int d) {
+    student_gemm(w, x, xout, /*M=*/d, /*K=*/n, /*N=*/1);
+}
+</code></pre>
+<p><code>scripts/build_slm.sh</code> compiles the model with its built-in <code>matmul</code> routed to your
+<code>student_gemm</code>, and checks that the story is unchanged:</p>
+<pre><code class="language-bash">./scripts/build_slm.sh                                  # reference GEMM → &quot;IDENTICAL&quot;
+GEMM_SRC=path/to/your_gemm.c ./scripts/build_slm.sh     # YOUR GEMM
+</code></pre>
+<p>With a correct GEMM the output is byte-for-byte the model's own story — only the speed
+differs. <strong>A correct kernel is now a working language model.</strong></p>
+<h2>2.4 Run it on the accelerator</h2>
+<p><code>build_slm.sh</code> proved the plumbing on the CPU. To measure tokens/sec on the real
+accelerator, implement <code>student_gemm</code> as an offload to your hardware kernel —
+<code>src/student_gemm_fpga.cpp</code> is a template with the same contract. Two rules decide
+whether tokens/sec actually goes up:</p>
+<ol>
+<li><strong>Load each weight matrix onto the device once</strong> (the template caches it by
+   pointer). The weights never change during generation; re-sending the 37 MB
+   classifier every token would drown everything else.</li>
+<li><strong>Only the activation and result cross the bus per call</strong> — <code>K×N</code> in, <code>M×N</code> out,
+   tens of KB — plus the runtime <code>M, K, N</code>.</li>
+</ol>
+<p>Open the card correctly: if the host has more than one accelerator, open the U50 by its
+PCIe address (BDF), not device index 0 — the wrong device fails to load the bitstream.
+(Your course starter kit lists the exact address for the lab machine.) Build your
+kernel's bitstream with your HLS flow, then run the model through it on the U50 host:</p>
+<pre><code class="language-bash"># build your kernel's bitstream with your HLS flow  (≈ 1 h place &amp; route)
+GEMM_XCLBIN=path/to/your.xclbin ./scripts/run_hw.sh    # builds run_fpga, runs on the U50
+</code></pre>
+<p><code>run_hw.sh</code> links <code>run_slm.c</code> + <code>slm_backend.c</code> + <code>student_gemm_fpga.cpp</code> against the
+runtime and runs on the card. Read the <code>achieved tok/s</code> — that is your real number.</p>
+<h2>2.5 The challenge: make it write faster (tokens/sec)</h2>
+<p>Run your plugged-in model and read the <code>achieved tok/s</code>. Here is where the systems
+lesson lives, and it is not the one you expect.</p>
+<p><strong>First result — it may get <em>slower</em>.</strong> The model calls <code>matmul</code> 43 times per token,
+each a GEMV (<code>N = 1</code>). Two forces work against you:</p>
+<ul>
+<li><strong>Amdahl's law.</strong> Matrix multiply is 84% of runtime, so even an <em>infinitely</em> fast
+  GEMM caps the speedup at <code>1 / (1 − 0.84) ≈ 6.25×</code> — the other 16% (norms, softmax,
+  the sampling loop) never goes away.</li>
+<li><strong><code>N = 1</code> is memory-bound.</strong> A GEMV reads the whole weight matrix to make one output
+  vector — no reuse to exploit. This is exactly the case Part 1 warned you is hard.</li>
+</ul>
+<p><strong>The fix — raise <code>N</code>.</strong> Hand the kernel <strong>many</strong> vectors against the same weights per
+call, turning each GEMV back into a GEMM with reuse. Two honest sources of extra
+vectors:</p>
+<ul>
+<li><strong>Prefill</strong> — a prompt of <code>L</code> tokens is all known up front, so push all <code>L</code> through
+  each matrix at once (<code>N = L</code>).</li>
+<li><strong>Batching</strong> — generate <code>B</code> independent stories simultaneously; each step has <code>B</code>
+  current vectors (<code>N = B</code>), producing <code>B</code> tokens per step.</li>
+</ul>
+<p>Extend the generation loop to carry <code>N &gt; 1</code> vectors and re-measure. <strong>Plot tokens/sec
+vs <code>N</code></strong> — the curve rising as <code>N</code> grows (your Part 1 <code>N &gt; 1</code> optimizations finally
+paying off, launch/overhead amortized across <code>N</code> tokens) is the headline result of
+this challenge. It will flatten eventually — when you're bounded by how fast the
+weights can be read, no matter how many vectors share them — and naming that ceiling is
+part of the write-up.</p>
+<blockquote>
+<p><strong>The lesson.</strong> A faster kernel is necessary but not sufficient. <em>How you feed it</em> —
+the value of <code>N</code> — decides whether your fast GEMM makes the model faster. That is why
+real inference systems batch, and why Part 1 made you care about the <code>N &gt; 1</code> case.</p>
+</blockquote>
+<h2>2.6 What to report</h2>
+<ol>
+<li>Your model generating a story through <strong>your</strong> <code>student_gemm</code> (build_slm shows
+   <code>IDENTICAL</code>), and running on the accelerator via <code>run_hw.sh</code>.</li>
+<li><strong>tokens/sec vs <code>N</code></strong> — the single-stream number (possibly below baseline, with your
+   explanation) and the curve as batching/prefill raise <code>N</code>.</li>
+<li>Which matmuls you accelerated (you can offload just the top of the profile — the
+   classifier and FFN are 87% of matmul time) and the tok/s step from each.</li>
+<li>Your throughput ceiling and what it would take to raise it — which leads straight
+   into <strong><a href="part3-quantized-slm.html">Part 3</a></strong>.</li>
+</ol>
+<hr />
+<h3>Checkpoint</h3>
+<ul>
+<li>[ ] <code>build_slm.sh</code> → <strong>IDENTICAL</strong> with your GEMM.</li>
+<li>[ ] Single-stream tok/s, explained honestly (Amdahl + <code>N=1</code>).</li>
+<li>[ ] The <strong>tok/s vs N</strong> curve crossing the CPU baseline, with its flat ceiling.</li>
+</ul>
+</main>
+</body>
+</html>

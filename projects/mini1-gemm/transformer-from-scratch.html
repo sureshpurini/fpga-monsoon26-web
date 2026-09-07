@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini-Project 1 · Background</title>
+<meta name="description" content="A three-part FPGA mini-project: build a fast GEMM (float and int8), then plug it into a TinyStories language model and measure the tokens-per-second climb.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#4f46e5;--brand-2:#06b6d4;--ink:#1d2330;--ink-soft:#5a6477;
+--line:#e6e9f2;--bg:#f4f6fb;--surface:#fff;--code-bg:#f1f3fb;--accent:#f59e0b;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+line-height:1.7;-webkit-font-smoothing:antialiased;}
+.topbar{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.85);
+backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line);}
+.topbar .in{max-width:860px;margin:0 auto;padding:.7rem 24px;display:flex;gap:1rem;
+justify-content:space-between;align-items:center;flex-wrap:wrap;}
+.topbar a{text-decoration:none;font-weight:600;font-size:.86rem;color:var(--brand);}
+.topbar .home{color:var(--ink-soft);}
+nav.proj{display:flex;gap:.9rem;flex-wrap:wrap;}
+nav.proj a.cur{color:var(--ink);border-bottom:2px solid var(--accent);}
+main{max-width:860px;margin:2rem auto 4rem;padding:2.5rem;background:var(--surface);
+border:1px solid var(--line);border-radius:16px;
+box-shadow:0 10px 30px -12px rgba(20,25,50,.15);}
+h1{font-family:'Fraunces',serif;font-size:2rem;line-height:1.15;letter-spacing:-.01em;margin:0 0 .4rem;}
+h2{font-family:'Fraunces',serif;font-size:1.45rem;letter-spacing:-.01em;
+margin:2.6rem 0 .9rem;padding-top:1.2rem;border-top:1px solid var(--line);color:#161b28;}
+h3{font-size:1.12rem;margin:1.8rem 0 .5rem;color:#232a3a;}
+p{margin:.9rem 0;color:#28303f;}
+a{color:var(--brand);}
+em{color:var(--ink-soft);}
+ul,ol{padding-left:1.3rem;} li{margin:.3rem 0;}
+code{font-family:'SFMono-Regular',Menlo,Consolas,monospace;font-size:.87em;
+background:var(--code-bg);padding:.12em .4em;border-radius:5px;color:#1c2540;}
+pre{background:#0f1729;border:1px solid #1e293b;border-radius:10px;
+padding:1rem 1.15rem;overflow-x:auto;line-height:1.45;}
+pre code{background:none;padding:0;font-size:.82rem;color:#d7e0f4;
+font-family:'SFMono-Regular',Menlo,Consolas,monospace;white-space:pre;}
+table{border-collapse:collapse;width:100%;margin:1.2rem 0;font-size:.9rem;
+display:block;overflow-x:auto;}
+th{background:var(--brand);color:#fff;text-align:left;padding:.55rem .8rem;font-weight:600;font-size:.8rem;}
+td{padding:.55rem .8rem;border-bottom:1px solid var(--line);vertical-align:top;color:#333c4d;}
+tr:nth-child(even) td{background:#fafbff;}
+blockquote{margin:1.4rem 0;padding:1rem 1.3rem;background:
+linear-gradient(135deg,rgba(79,70,229,.06),rgba(6,182,212,.05));
+border-left:4px solid var(--accent);border-radius:10px;color:#2b3343;}
+blockquote p{margin:.35rem 0;}
+hr{border:0;border-top:1px solid var(--line);margin:2rem 0;}
+@media(max-width:640px){main{padding:1.5rem 1.2rem;margin:1rem;border-radius:12px;}
+h1{font-size:1.6rem}h2{font-size:1.25rem}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="in"><a class="home" href="../../index.html">← Course home</a><nav class="proj"><a href="index.html">Overview</a><a href="part1-pure-gemm.html">Part 1 · GEMM</a><a href="part2-integrate-slm.html">Part 2 · Integrate</a><a href="part3-quantized-slm.html">Part 3 · int8</a><a class="cur">Background</a></nav></div></div>
+<main>
+<h1>A language model, from scratch: every step is a matrix × vector</h1>
+<p><em>Background reading for Parts 2–3. No machine-learning background assumed.</em></p>
+<p>No background assumed. By the end of this page you will know exactly what a small
+language model <em>computes</em> to write a story — and you will see that almost all of that
+computation is one operation repeated: <strong>a matrix times a vector.</strong> We finish by
+showing how running several tokens at once turns that matrix–<strong>vector</strong> product into a
+matrix–<strong>matrix</strong> product. That single change is the hinge the rest of this project
+turns on.</p>
+<p>Nothing here is about any particular hardware or tool. It is just the arithmetic.</p>
+<hr />
+<h2>0.1 What a language model actually does</h2>
+<p>Here is a story a 15-million-number model wrote:</p>
+<blockquote>
+<p><em>Once upon a time, there was a little girl named Lily. She loved to play outside in
+the sunshine. One day, she saw a big, red ball in the sky...</em></p>
+</blockquote>
+<p>It did <strong>not</strong> write the sentence all at once. It wrote it <strong>one piece at a time</strong>,
+like this:</p>
+<pre><code>&quot;Once&quot;  →  model  →  &quot;upon&quot;
+&quot;Once upon&quot;  →  model  →  &quot;a&quot;
+&quot;Once upon a&quot;  →  model  →  &quot;time&quot;
+&quot;Once upon a time&quot;  →  model  →  &quot;,&quot;
+...
+</code></pre>
+<p>Every step, the model looks at all the text <strong>so far</strong> and answers one question:
+<strong>what is the most likely next piece of text?</strong> It picks one, sticks it on the end,
+and asks again. That loop — predict next, append, repeat — is the <em>entire</em> job. This
+is called <strong>autoregressive</strong> generation ("auto" = self, "regressive" = feeding its
+own output back in).</p>
+<p>So the whole model is a function:</p>
+<pre><code>   text-so-far   →   [ a score for every possible next piece of text ]
+</code></pre>
+<p>and then we pick the highest-scoring piece. Everything below is how that arrow in the
+middle is computed.</p>
+<h2>0.2 Tokens: text is really a list of integers</h2>
+<p>Computers don't work on letters directly. First the text is chopped into <strong>tokens</strong> —
+common chunks of text, roughly word-sized (sometimes a whole word, sometimes a piece
+of one). Each distinct token has an integer id. Our model knows a fixed
+<strong>vocabulary</strong> of <strong>32000</strong> tokens, so every token is just a number from 0 to 31999.</p>
+<pre><code>&quot;Once upon a time&quot;   →   [ 9038 ,  2501 ,  263 ,  931 ]     (4 tokens, 4 integers)
+</code></pre>
+<p>The model's output — "a score for every possible next token" — is therefore a list of
+<strong>32000 numbers</strong>, one score per vocabulary entry. The biggest score is the token it
+thinks comes next. Those 32000 output scores are called the <strong>logits</strong>.</p>
+<h2>0.3 Embeddings: turn each token id into a vector of numbers</h2>
+<p>An integer id like <code>9038</code> carries no meaning a calculator can use. So the first thing
+the model does is look up each token in a big table and replace it with a <strong>vector</strong>
+of real numbers — a list of, in our model, <strong>288</strong> numbers:</p>
+<pre><code>token id 9038   →   [ 0.13, -0.42, 0.88, ... , 0.05 ]     (288 numbers)
+</code></pre>
+<p>That table (the <strong>embedding matrix</strong>) is just storage: 32000 rows, each row a
+288-number vector. Looking up a token is not arithmetic, just "go fetch row 9038."</p>
+<p>This 288-number vector is the token's <strong>hidden state</strong>: the model's working
+representation of "the meaning here, so far." From now on, <strong>the thing flowing through
+the model is a 288-number vector.</strong> Call this number, 288, the <strong>model width</strong> (<code>dim</code>).
+Hold onto that — it is the size of almost everything.</p>
+<h2>0.4 The one operation that does all the work: matrix × vector</h2>
+<p>Before we go further, the star of the show. Suppose you have a <strong>vector</strong> <code>x</code> of
+length <code>n</code>, and a <strong>matrix</strong> <code>W</code> with <code>d</code> rows and <code>n</code> columns. The <strong>matrix–vector
+product</strong> <code>y = W · x</code> is a new vector of length <code>d</code>, where each entry of <code>y</code> is the
+<strong>dot product</strong> of one row of <code>W</code> with <code>x</code>:</p>
+<pre><code>        W  (d rows × n cols)        x (n)          y (d)
+       ┌─────────────────┐         ┌───┐          ┌───┐
+row 0  │  w00  w01 … w0,n │         │x_0│          │y_0│   y_0 = w00·x0 + w01·x1 + … 
+row 1  │  w10  w11 … w1,n │    ·    │x_1│    =     │y_1│   y_1 = w10·x0 + w11·x1 + …
+  ⋮    │      …           │         │ ⋮ │          │ ⋮ │
+row d-1│  …               │         │x_n│          │y_d│
+       └─────────────────┘         └───┘          └───┘
+</code></pre>
+<p>A tiny concrete example — <code>d = 3</code>, <code>n = 2</code>:</p>
+<pre><code>W = ⎡1  2⎤        x = ⎡10⎤        y = W·x = ⎡1·10 + 2·1⎤   ⎡12⎤
+    ⎢0  3⎥            ⎣ 1⎦                  ⎢0·10 + 3·1⎥ = ⎢ 3⎥
+    ⎣4  5⎦                                  ⎣4·10 + 5·1⎦   ⎣45⎦
+</code></pre>
+<p>Three output numbers, each a dot product of a row of <code>W</code> with <code>x</code>. That's it. In the
+literature this is called a <strong>GEMV</strong> — <strong>GE</strong>neral <strong>M</strong>atrix–<strong>V</strong>ector multiply.</p>
+<p><strong>Every "learned transformation" in the model is exactly this:</strong> take the current
+288-number vector, multiply by a matrix of learned weights, get a new vector. The
+matrix is what the model "knows"; the multiply is how it "thinks." Different matrices
+have different row counts <code>d</code> (they change the vector's length), but the pattern never
+changes: <strong>output = weight-matrix · input-vector.</strong></p>
+<p>Keep a mental note of the <em>cost</em>: a <code>d × n</code> matrix–vector product does <code>d × n</code>
+multiply-adds and, crucially, <strong>reads all <code>d × n</code> weights to produce just <code>d</code> output
+numbers.</strong> We will come back to that lopsided ratio at the very end.</p>
+<h2>0.5 The overall shape: a stack of identical layers</h2>
+<p>Between the embedding (turns a token into a 288-vector) and the final scores (32000
+logits), the model is a <strong>stack of 6 identical layers</strong>. Each layer takes the
+288-vector in and produces an improved 288-vector out:</p>
+<pre><code> token → [embed] → 288-vec → [Layer 1] → [Layer 2] → … → [Layer 6] → [classifier] → 32000 logits
+                              └──────────── each keeps the width at 288 ───────────┘
+</code></pre>
+<p>Every layer does the same two things in order: an <strong>attention</strong> block (lets this token
+gather information from earlier tokens) and a <strong>feed-forward</strong> block (lets the model
+transform that information). Let's open one layer up. There are only a handful of
+GEMVs inside, and we'll label each with its matrix shape.</p>
+<h2>0.5.1 What actually flows between layers — and what "earlier tokens" means</h2>
+<p>Two things trip everyone up the first time. Both are worth pinning down before we open
+a layer, because the single-token walkthrough below can feel like it contradicts the
+idea that attention "looks at other tokens."</p>
+<p><strong>(a) Each layer has its own weights; the vector just flows on.</strong> Layer 1 outputs an
+improved 288-vector — and that <em>is</em> Layer 2's input. Layer 2 runs the same seven
+GEMVs, but with its <strong>own separate</strong> matrices (<code>Wq…W2</code> are different learned numbers in
+every layer), and hands its 288-vector to Layer 3. Six times, then the classifier. The
+width stays <strong>288 the whole way</strong> — that's <em>why</em> layers can stack — and the same vector
+is refined six times over. (This running 288-vector is often called the <strong>residual
+stream</strong>.) So "after the first layer" simply means "into the second layer," repeated.</p>
+<p><strong>(b) "Earlier tokens" means previous steps, remembered separately at each layer.</strong>
+You are following <strong>only the newest token's</strong> 288-vector down through the 6 layers —
+the earlier tokens are <em>not</em> flowing alongside it. Instead, back when each earlier
+token was processed, it computed its key <code>k</code> and value <code>v</code> <strong>at every layer</strong> and saved
+them in <strong>that layer's cache</strong>. So Layer 1 holds a cache of the layer-1 keys/values of
+all earlier tokens; Layer 2 holds a <em>separate</em> cache of the layer-2 keys/values; and so
+on — <strong>one cache per layer.</strong> When the current token reaches a layer's attention step,
+it compares against <em>that</em> layer's cache:</p>
+<pre><code>   current token's 288-vector
+        │
+   Layer 1 attention:  its q  vs.  { layer-1 k,v of all earlier tokens }   ← cache₁
+        │  (vector refined, still 288 wide)
+   Layer 2 attention:  its q  vs.  { layer-2 k,v of all earlier tokens }   ← cache₂
+        │
+       ⋮
+   Layer 6 attention:  its q  vs.  { layer-6 k,v of all earlier tokens }   ← cache₆
+        │
+   classifier → 32000 logits
+</code></pre>
+<p>So attention really is "looking at the other tokens" — but those other tokens live in
+the per-layer caches, while only the <strong>one</strong> current vector is actually being computed.
+That is how the model stays a single 288-vector (one token in flight) yet still mixes in
+the entire history. The very first token has an empty history, so it attends only to
+itself; by the time we reach <em>"Once upon a time → ?"</em>, the new token attends, at each
+layer, to what "Once", "upon", "a", "time" deposited in that layer earlier.</p>
+<p>With that settled, here is what one layer does to the vector.</p>
+<h2>0.6 Inside one layer — part A: attention</h2>
+<p>Attention is how a token looks back at the earlier tokens and pulls in what's
+relevant ("the ball" should pay attention to "red" and "sky"). It works in four steps.</p>
+<p><strong>Step 1 — make three vectors from the current one (three GEMVs).</strong> The model
+multiplies the 288-vector by three different learned matrices to get a <strong>query</strong>, a
+<strong>key</strong>, and a <strong>value</strong>, each also 288 numbers:</p>
+<pre><code>q = Wq · x        Wq is 288 × 288      (GEMV: 288 → 288)
+k = Wk · x        Wk is 288 × 288      (GEMV: 288 → 288)
+v = Wv · x        Wv is 288 × 288      (GEMV: 288 → 288)
+</code></pre>
+<p>Intuition: the <strong>query</strong> is "what am I looking for?", the <strong>key</strong> is "what do I offer?",
+the <strong>value</strong> is "what I'll hand over if you pick me."</p>
+<p><strong>Step 2 — remember k and v.</strong> The <code>k</code> and <code>v</code> for this token are saved in a cache, so
+future tokens can look back at it. (This cache is why the model doesn't recompute the
+whole past every step.)</p>
+<p><strong>Step 3 — score and combine (dot products, no learned matrix).</strong> The token compares
+its query <code>q</code> against the key of <strong>every earlier token</strong> with a dot product — a high
+score means "that token is relevant to me." The scores are squashed into weights that
+add up to 1 (a <strong>softmax</strong>), and the output is the weighted average of all the earlier
+<strong>value</strong> vectors. This step's size depends on how many tokens came before, not on a
+fixed weight matrix — so it's usually small compared to the GEMVs, and it uses no
+learned matrix. (There's a small position-encoding tweak called RoPE applied to <code>q</code>
+and <code>k</code> first; it's cheap and you can ignore it for the cost story.)</p>
+<p><strong>Step 4 — project the result back (one GEMV).</strong> The combined vector is multiplied by
+one more learned matrix to produce the block's output:</p>
+<pre><code>attn_out = Wo · (combined)      Wo is 288 × 288     (GEMV: 288 → 288)
+</code></pre>
+<p>Finally the layer <strong>adds</strong> this back onto the vector it started with (a "residual"
+connection — just element-wise addition, cheap):</p>
+<pre><code>x  =  x  +  attn_out
+</code></pre>
+<p><strong>Attention's tally: 4 GEMVs</strong> (<code>Wq, Wk, Wv, Wo</code>, each 288 → 288), plus the cheap
+score-and-combine step.</p>
+<h2>0.7 Inside one layer — part B: the feed-forward network (FFN)</h2>
+<p>The second block transforms each token's vector on its own. It briefly expands the
+vector to a <strong>wider</strong> size (768, the <em>hidden</em> width), does a cheap non-linear step,
+then shrinks it back to 288. Three GEMVs:</p>
+<pre><code>a = W1 · x        W1 is 768 × 288      (GEMV: 288 → 768)   ← widen
+g = W3 · x        W3 is 768 × 288      (GEMV: 288 → 768)   ← widen (a &quot;gate&quot;)
+h = silu(a) * g                        (cheap, element-wise: a gate that lets some
+                                        numbers through and damps others)
+y = W2 · h        W2 is 288 × 768      (GEMV: 768 → 288)   ← shrink back
+</code></pre>
+<p>Then another residual add: <code>x = x + y</code>. Intuition: attention <em>mixes information
+between tokens</em>; the FFN <em>does per-token processing</em> — it's where a lot of the model's
+"knowledge" lives. (There are also two cheap normalization steps per layer, called
+RMSNorm, one before each block. They rescale the vector; no matrix multiply worth
+counting.)</p>
+<p><strong>FFN's tally: 3 GEMVs</strong> (<code>W1, W3</code> at 288 → 768, and <code>W2</code> at 768 → 288).</p>
+<p>So <strong>one full layer = 4 + 3 = 7 GEMVs.</strong> Six layers = <strong>42 GEMVs</strong>.</p>
+<h2>0.8 The finish: scoring every possible next token (one big GEMV)</h2>
+<p>After the 6 layers, we have a final 288-number vector that summarizes "everything the
+model understands about what should come next." One last matrix turns it into a score
+for <strong>each</strong> of the 32000 vocabulary tokens:</p>
+<pre><code>logits = Wcls · x     Wcls is 32000 × 288    (GEMV: 288 → 32000)
+</code></pre>
+<p>This is the <strong>biggest</strong> matrix in the whole model — 32000 rows! — because the
+vocabulary is large. The 32000 output numbers are the scores. Pick the token with the
+highest score (or sample one at random in proportion to the scores, for variety),
+append it to the text, and <strong>go back to 0.1</strong> for the next token.</p>
+<h2>0.9 Add it up — a token is 43 matrix–vector products</h2>
+<p>Producing <strong>one</strong> token runs the whole network once:</p>
+<table>
+<thead>
+<tr>
+<th>Where</th>
+<th>Matrix</th>
+<th style="text-align: center;">Shape (<code>out ← in</code>)</th>
+<th style="text-align: center;">How many</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>attention</td>
+<td><code>Wq, Wk, Wv, Wo</code></td>
+<td style="text-align: center;">288 ← 288</td>
+<td style="text-align: center;">4 per layer</td>
+</tr>
+<tr>
+<td>FFN</td>
+<td><code>W1, W3</code></td>
+<td style="text-align: center;">768 ← 288</td>
+<td style="text-align: center;">2 per layer</td>
+</tr>
+<tr>
+<td>FFN</td>
+<td><code>W2</code></td>
+<td style="text-align: center;">288 ← 768</td>
+<td style="text-align: center;">1 per layer</td>
+</tr>
+<tr>
+<td><strong>per layer</strong></td>
+<td></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>7</strong></td>
+</tr>
+<tr>
+<td><strong>× 6 layers</strong></td>
+<td></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>42</strong></td>
+</tr>
+<tr>
+<td>classifier</td>
+<td><code>Wcls</code></td>
+<td style="text-align: center;">32000 ← 288</td>
+<td style="text-align: center;"><strong>1</strong></td>
+</tr>
+<tr>
+<td><strong>total per token</strong></td>
+<td></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>43</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>43 matrix–vector products per token, and essentially nothing else that costs
+anything.</strong> RMSNorm, the softmax, RoPE, the residual adds — all cheap element-wise
+work. If you wanted to make this model faster, you would make <strong>matrix × vector</strong>
+faster. Full stop.</p>
+<p>And notice <strong>why it's a matrix × <em>vector</em></strong> and not something bigger: the model
+generates <strong>one token at a time</strong>, so at each step exactly <strong>one</strong> 288-number vector
+is flowing through. One vector in, one vector out, at every matrix. That "1" is about
+to become the whole story.</p>
+<h2>0.10 From GEMV to GEMM: do many vectors at once</h2>
+<p>Here is the lopsided fact from §0.4, made concrete on the classifier: <code>Wcls</code> has
+<code>32000 × 288 ≈ 9.2 million</code> weights. A single token's classifier GEMV <strong>reads all 9.2
+million weights</strong> to produce <strong>32000</strong> output numbers — then throws the weights away
+and, next token, reads all 9.2 million again. You are spending almost all your effort
+<em>fetching weights</em>, and using each one for a single multiply.</p>
+<p>There is an obvious fix: <strong>multiply the same matrix by several vectors at once.</strong> If
+you have <code>N</code> different input vectors that all need to go through <code>Wcls</code>, stack them
+side by side as the <strong>columns</strong> of a matrix <code>X</code> (shape <code>288 × N</code>). Then</p>
+<pre><code>   Wcls · X   =   Y          (32000×288) · (288×N)  =  (32000×N)
+</code></pre>
+<p>produces all <code>N</code> results in one shot — and now each weight, fetched once, is used <code>N</code>
+times (once per column). This is a matrix–<strong>matrix</strong> product: a <strong>GEMM</strong> (<strong>GE</strong>neral
+<strong>M</strong>atrix–<strong>M</strong>atrix multiply). The GEMV you've seen all along is just GEMM with
+<code>N = 1</code>.</p>
+<p>Picture the difference:</p>
+<pre><code>   ONE vector  (N = 1)  — a GEMV              MANY vectors  (N = 4)  — a GEMM
+   ┌─────────┐  ┌─┐     ┌─┐                   ┌─────────┐  ┌───────┐   ┌───────┐
+   │    W    │· │x│  =  │y│                   │    W    │· │ x x x x│ = │ y y y y│
+   │  d × n  │  │n│     │d│                   │  d × n  │  │  n×N  │   │  d×N  │
+   └─────────┘  └─┘     └─┘                   └─────────┘  └───────┘   └───────┘
+   read d·n weights                           read d·n weights ONCE,
+   to make d numbers                          reuse each across N columns
+</code></pre>
+<p>The arithmetic per column is identical; what changes is that the <strong>cost of reading
+the weights is now shared across <code>N</code> results.</strong> That is why GEMM is the operation big,
+efficient systems are built around, and GEMV (N = 1) is the wasteful special case.</p>
+<h3>Where do the extra vectors come from?</h3>
+<p>Two natural sources, both real:</p>
+<ul>
+<li><strong>Prefill — the prompt.</strong> When you hand the model a prompt like <em>"Once upon a
+  time"</em> (4 tokens), all 4 tokens are already known up front. You don't need them one
+  at a time — you can push all <strong>4 vectors through every matrix together</strong>: <code>N = 4</code>,
+  a GEMM. (Only <em>after</em> the prompt, when the model starts inventing new tokens, is it
+  forced back to one-at-a-time.)</li>
+<li><strong>Batching — many stories at once.</strong> Generate <code>B</code> independent stories in parallel.
+  At each step you have <code>B</code> current vectors (one per story), so every matrix multiply
+  is <code>N = B</code>. You produce <code>B</code> tokens per step instead of 1 — the same weight-reads,
+  <code>B×</code> the useful output.</li>
+</ul>
+<p>In both cases the model's math is <em>unchanged</em>: the same 43 matrices, the same dot
+products. You have only changed <strong>how many vectors ride through at once</strong> — turning
+<code>N = 1</code> GEMVs into <code>N &gt; 1</code> GEMMs, and turning "read the weights, use them once" into
+"read the weights, use them <code>N</code> times."</p>
+<h2>0.11 What you now know</h2>
+<ol>
+<li>A language model writes text <strong>one token at a time</strong>: look at everything so far,
+   score all 32000 possible next tokens, pick one, repeat.</li>
+<li>The text becomes integers (<strong>tokens</strong>), each integer becomes a <strong>288-number
+   vector</strong> (an <strong>embedding</strong>), and that vector flows through <strong>6 layers</strong> and a final
+   <strong>classifier</strong>.</li>
+<li>Nearly all the work is <strong>matrix × vector</strong> (<strong>GEMV</strong>): each learned matrix turns
+   the current vector into a new one. There are <strong>43 of them per token</strong> (7 per layer
+   × 6, plus the classifier), and everything else is cheap.</li>
+<li>It's a <em>vector</em> (not a matrix) because the model runs <strong>one token at a time</strong>:
+   <code>N = 1</code>.</li>
+<li>Stacking several vectors side by side (from <strong>prefill</strong> or <strong>batching</strong>) makes the
+   input a matrix and turns each GEMV into a <strong>GEMM</strong> (<code>N &gt; 1</code>) — which lets every
+   weight, read once, do <code>N</code> multiplies instead of one.</li>
+</ol>
+<p>That's the whole model, and the whole reason GEMM matters. From here, the natural
+next questions are <em>how big are these matrices really, where does the time actually
+go,</em> and <em>how much does turning GEMV into GEMM buy you</em> — which is where the rest of
+the story picks up.</p>
+</main>
+</body>
+</html>

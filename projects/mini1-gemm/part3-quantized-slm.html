@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini-Project 1 · Part 3 · int8</title>
+<meta name="description" content="A three-part FPGA mini-project: build a fast GEMM (float and int8), then plug it into a TinyStories language model and measure the tokens-per-second climb.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#4f46e5;--brand-2:#06b6d4;--ink:#1d2330;--ink-soft:#5a6477;
+--line:#e6e9f2;--bg:#f4f6fb;--surface:#fff;--code-bg:#f1f3fb;--accent:#f59e0b;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+line-height:1.7;-webkit-font-smoothing:antialiased;}
+.topbar{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.85);
+backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line);}
+.topbar .in{max-width:860px;margin:0 auto;padding:.7rem 24px;display:flex;gap:1rem;
+justify-content:space-between;align-items:center;flex-wrap:wrap;}
+.topbar a{text-decoration:none;font-weight:600;font-size:.86rem;color:var(--brand);}
+.topbar .home{color:var(--ink-soft);}
+nav.proj{display:flex;gap:.9rem;flex-wrap:wrap;}
+nav.proj a.cur{color:var(--ink);border-bottom:2px solid var(--accent);}
+main{max-width:860px;margin:2rem auto 4rem;padding:2.5rem;background:var(--surface);
+border:1px solid var(--line);border-radius:16px;
+box-shadow:0 10px 30px -12px rgba(20,25,50,.15);}
+h1{font-family:'Fraunces',serif;font-size:2rem;line-height:1.15;letter-spacing:-.01em;margin:0 0 .4rem;}
+h2{font-family:'Fraunces',serif;font-size:1.45rem;letter-spacing:-.01em;
+margin:2.6rem 0 .9rem;padding-top:1.2rem;border-top:1px solid var(--line);color:#161b28;}
+h3{font-size:1.12rem;margin:1.8rem 0 .5rem;color:#232a3a;}
+p{margin:.9rem 0;color:#28303f;}
+a{color:var(--brand);}
+em{color:var(--ink-soft);}
+ul,ol{padding-left:1.3rem;} li{margin:.3rem 0;}
+code{font-family:'SFMono-Regular',Menlo,Consolas,monospace;font-size:.87em;
+background:var(--code-bg);padding:.12em .4em;border-radius:5px;color:#1c2540;}
+pre{background:#0f1729;border:1px solid #1e293b;border-radius:10px;
+padding:1rem 1.15rem;overflow-x:auto;line-height:1.45;}
+pre code{background:none;padding:0;font-size:.82rem;color:#d7e0f4;
+font-family:'SFMono-Regular',Menlo,Consolas,monospace;white-space:pre;}
+table{border-collapse:collapse;width:100%;margin:1.2rem 0;font-size:.9rem;
+display:block;overflow-x:auto;}
+th{background:var(--brand);color:#fff;text-align:left;padding:.55rem .8rem;font-weight:600;font-size:.8rem;}
+td{padding:.55rem .8rem;border-bottom:1px solid var(--line);vertical-align:top;color:#333c4d;}
+tr:nth-child(even) td{background:#fafbff;}
+blockquote{margin:1.4rem 0;padding:1rem 1.3rem;background:
+linear-gradient(135deg,rgba(79,70,229,.06),rgba(6,182,212,.05));
+border-left:4px solid var(--accent);border-radius:10px;color:#2b3343;}
+blockquote p{margin:.35rem 0;}
+hr{border:0;border-top:1px solid var(--line);margin:2rem 0;}
+@media(max-width:640px){main{padding:1.5rem 1.2rem;margin:1rem;border-radius:12px;}
+h1{font-size:1.6rem}h2{font-size:1.25rem}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="in"><a class="home" href="../../index.html">← Course home</a><nav class="proj"><a href="index.html">Overview</a><a href="part1-pure-gemm.html">Part 1 · GEMM</a><a href="part2-integrate-slm.html">Part 2 · Integrate</a><a class="cur">Part 3 · int8</a><a href="transformer-from-scratch.html">Background</a></nav></div></div>
+<main>
+<h1>Part 3 — Challenge 2: quantize the storyteller (int8) and measure the cost</h1>
+<p>Part 2 ended at a ceiling: tokens/sec is ultimately bounded by how fast the model's
+<strong>weights</strong> can be streamed — and the biggest of them, the classifier, is
+<code>32000 × 288 ≈ 9.2 million</code> numbers, re-read every batch. This challenge attacks that
+ceiling with the int8 GEMM you built in Part 1: <strong>4× smaller weights, more
+multiply-adds per unit of hardware</strong> — the technique that makes language models fit and
+run on real edge devices (LLM.int8, GPTQ, SmoothQuant). Then it asks a question only a
+storyteller model can answer: <strong>how far can you quantize before the story stops making
+sense?</strong></p>
+<hr />
+<h2>3.1 Why int8 raises the ceiling</h2>
+<p>The weight roof from Part 2 is a bytes-per-second limit. Quantizing weights from
+fp32 to int8 cuts the bytes <strong>4×</strong>: the classifier's weights drop from ~37 MB to
+~9 MB, the six FFN layers likewise. Fewer bytes to move per token means the streaming
+roof moves up. On top of that, integer multiply-adds are cheaper than floating-point
+ones, so the same hardware does more of them per second. You already proved the int8
+GEMM correct in Part 1 (<code>test_gemm_int8.sh</code>); here you put it to work.</p>
+<h2>3.2 The golden and the seam</h2>
+<p>The model engine ships in two forms: the float one you used in Part 2, and an int8 one
+(<code>runq</code>) built on <strong>Q8_0 group quantization</strong> — the exact scheme from Part 1 (<code>GS</code>
+elements per group, int8 values + one fp32 scale, int32 accumulate). <code>runq</code>'s own
+matrix-multiply is your <strong>golden reference</strong>: the int8 story it produces is the target
+your accelerated version must reproduce.</p>
+<p>Quantize the checkpoint once, then run it:</p>
+<pre><code class="language-bash">cd labs/tinystories/build/llama2.c
+python export.py stories15M_q80.bin --version 2 --checkpoint stories15M.bin   # make the int8 model
+./runq stories15M_q80.bin -t 0.0 -s 42 -i &quot;Once upon a time&quot;                  # int8 story + tok/s
+</code></pre>
+<p>(If <code>export.py</code> needs PyTorch, do that one-time step on a machine that has it and stage
+the ~15 MB <code>*_q80.bin</code> on shared storage.) The plug-in seam mirrors Part 2, one
+datatype down: an <code>int8_backend.c</code> routes <code>runq</code>'s quantized matmul to your
+<code>student_gemm_int8</code>, exactly as <code>slm_backend.c</code> did for float. You write that small
+seam file — it is a copy of the float one with the quantized argument types.</p>
+<h2>3.3 The experiment — "quantize until the story breaks"</h2>
+<p>This is the deliverable, and the reason a <em>storyteller</em> model was the right choice: its
+correctness is legible to a human. A wrong quantization doesn't throw an error — it
+writes nonsense. Sweep precision and record <strong>three axes at once</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Precision</th>
+<th style="text-align: center;">Weight bytes (classifier)</th>
+<th style="text-align: center;">tokens/sec</th>
+<th>Story quality (read it!)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>fp32 (Part 2)</td>
+<td style="text-align: center;">~37 MB</td>
+<td style="text-align: center;">baseline</td>
+<td>perfect — "Lily and the sun"</td>
+</tr>
+<tr>
+<td><strong>int8</strong>, GS=64</td>
+<td style="text-align: center;">~9 MB</td>
+<td style="text-align: center;"><em>measure</em></td>
+<td>still coherent?</td>
+</tr>
+<tr>
+<td>int8, GS=32</td>
+<td style="text-align: center;">~9 MB + more scales</td>
+<td style="text-align: center;"><em>measure</em></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>int4</strong> (if you dare)</td>
+<td style="text-align: center;">~4.6 MB</td>
+<td style="text-align: center;"><em>measure</em></td>
+<td>where does it fall apart?</td>
+</tr>
+</tbody>
+</table>
+<p>Somewhere down this table the model stops writing English. <strong>Find that edge and report
+it</strong> — the exact bit-width and group size where <em>"Once upon a time, there was a little
+girl named Lily…"</em> degrades into non-sequiturs. That boundary is quantization error
+made <em>visible</em> — a better lesson in numerical precision than any error norm, because you
+can read it.</p>
+<h2>3.4 What to report</h2>
+<ol>
+<li>The int8 story next to the fp32 story — do they tell the same tale?</li>
+<li><strong>tokens/sec vs precision</strong> and <strong>memory vs precision</strong>, on top of the Part 2 float
+   ceiling. How much did int8 raise the roof, and does your Part 1 int8 kernel deliver
+   it here?</li>
+<li>Your <code>student_gemm_int8</code> matching <code>runq</code>'s golden inside the model (correctness
+   before speed — the same discipline as Part 1).</li>
+<li>One paragraph: the <strong>accuracy / throughput / memory</strong> trade-off you would ship, and
+   why. There is no single right answer — defend yours with your three curves.</li>
+</ol>
+<hr />
+<h3>Where this leaves you</h3>
+<p>You have taken a real language model from a plain baseline, found that it is essentially
+a stack of GEMMs, accelerated those GEMMs with your own kernel, and quantized them to
+int8 — the full arc of making a model fast on custom hardware. The ceilings you hit
+along the way (Amdahl's law, the <code>N = 1</code> memory wall, the weight-streaming roof,
+quantization error) are exactly the ones that motivate everything that comes after:
+fusing operations so data never round-trips, keeping operands moving on-chip, and
+specializing precision to the task. Your storyteller is the first system where all of
+it has a number attached.</p>
+<h3>Checkpoint</h3>
+<ul>
+<li>[ ] <code>runq</code> generating an int8 story + its tokens/sec.</li>
+<li>[ ] <code>student_gemm_int8</code> matching the golden inside the model.</li>
+<li>[ ] The three-axis table filled — including the precision where the story breaks.</li>
+<li>[ ] Your shipped operating point, defended with the curves.</li>
+</ul>
+</main>
+</body>
+</html>

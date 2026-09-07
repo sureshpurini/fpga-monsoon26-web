@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini-Project 1 — GEMM to a language model on the FPGA</title>
+<meta name="description" content="A three-part FPGA mini-project: build a fast GEMM (float and int8), then plug it into a TinyStories language model and measure the tokens-per-second climb.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#4f46e5;--brand-2:#06b6d4;--ink:#1d2330;--ink-soft:#5a6477;
+--line:#e6e9f2;--bg:#f4f6fb;--surface:#fff;--code-bg:#f1f3fb;--accent:#f59e0b;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+line-height:1.7;-webkit-font-smoothing:antialiased;}
+.topbar{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.85);
+backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line);}
+.topbar .in{max-width:860px;margin:0 auto;padding:.7rem 24px;display:flex;gap:1rem;
+justify-content:space-between;align-items:center;flex-wrap:wrap;}
+.topbar a{text-decoration:none;font-weight:600;font-size:.86rem;color:var(--brand);}
+.topbar .home{color:var(--ink-soft);}
+nav.proj{display:flex;gap:.9rem;flex-wrap:wrap;}
+nav.proj a.cur{color:var(--ink);border-bottom:2px solid var(--accent);}
+main{max-width:860px;margin:2rem auto 4rem;padding:2.5rem;background:var(--surface);
+border:1px solid var(--line);border-radius:16px;
+box-shadow:0 10px 30px -12px rgba(20,25,50,.15);}
+h1{font-family:'Fraunces',serif;font-size:2rem;line-height:1.15;letter-spacing:-.01em;margin:0 0 .4rem;}
+h2{font-family:'Fraunces',serif;font-size:1.45rem;letter-spacing:-.01em;
+margin:2.6rem 0 .9rem;padding-top:1.2rem;border-top:1px solid var(--line);color:#161b28;}
+h3{font-size:1.12rem;margin:1.8rem 0 .5rem;color:#232a3a;}
+p{margin:.9rem 0;color:#28303f;}
+a{color:var(--brand);}
+em{color:var(--ink-soft);}
+ul,ol{padding-left:1.3rem;} li{margin:.3rem 0;}
+code{font-family:'SFMono-Regular',Menlo,Consolas,monospace;font-size:.87em;
+background:var(--code-bg);padding:.12em .4em;border-radius:5px;color:#1c2540;}
+pre{background:#0f1729;border:1px solid #1e293b;border-radius:10px;
+padding:1rem 1.15rem;overflow-x:auto;line-height:1.45;}
+pre code{background:none;padding:0;font-size:.82rem;color:#d7e0f4;
+font-family:'SFMono-Regular',Menlo,Consolas,monospace;white-space:pre;}
+table{border-collapse:collapse;width:100%;margin:1.2rem 0;font-size:.9rem;
+display:block;overflow-x:auto;}
+th{background:var(--brand);color:#fff;text-align:left;padding:.55rem .8rem;font-weight:600;font-size:.8rem;}
+td{padding:.55rem .8rem;border-bottom:1px solid var(--line);vertical-align:top;color:#333c4d;}
+tr:nth-child(even) td{background:#fafbff;}
+blockquote{margin:1.4rem 0;padding:1rem 1.3rem;background:
+linear-gradient(135deg,rgba(79,70,229,.06),rgba(6,182,212,.05));
+border-left:4px solid var(--accent);border-radius:10px;color:#2b3343;}
+blockquote p{margin:.35rem 0;}
+hr{border:0;border-top:1px solid var(--line);margin:2rem 0;}
+@media(max-width:640px){main{padding:1.5rem 1.2rem;margin:1rem;border-radius:12px;}
+h1{font-size:1.6rem}h2{font-size:1.25rem}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="in"><a class="home" href="../../index.html">← Course home</a><nav class="proj"><a class="cur">Overview</a><a href="part1-pure-gemm.html">Part 1 · GEMM</a><a href="part2-integrate-slm.html">Part 2 · Integrate</a><a href="part3-quantized-slm.html">Part 3 · int8</a><a href="transformer-from-scratch.html">Background</a></nav></div></div>
+<main>
+<h1>Mini-Project 1 — GEMM, and a language model that runs on it</h1>
+<p>You are going to build a fast matrix-multiply (GEMM) engine, and then — as two
+optional challenges — watch it power a real language model that writes children's
+stories, faster and faster. The project is in <strong>three parts</strong>, and the first stands
+completely on its own.</p>
+<blockquote>
+<p><strong>The glimpse.</strong> Almost everything a language model does when it generates text is
+matrix multiply. So "build a good GEMM" and "make a language model fast" are the
+same task at two zoom levels. <strong>Part 1 is pure GEMM</strong> — no model, nothing to
+install, just make the math fast. <strong>Parts 2 and 3 are the payoff</strong>: drop your GEMM
+into an actual storyteller model and measure the tokens per second climb. If the
+language-model side ever feels like too much, ignore it — Part 1 is the graded core
+and needs none of it.</p>
+</blockquote>
+<h2>The three parts</h2>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it is</th>
+<th style="text-align: center;">Self-contained?</th>
+<th>You measure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><a href="part1-pure-gemm.html">Part 1 — Pure GEMM</a></strong></td>
+<td>Implement &amp; optimize GEMM for a fixed set of shapes, in <strong>float32 and int8</strong></td>
+<td style="text-align: center;">✅ just a C compiler</td>
+<td>correctness + <strong>GFLOP/s</strong></td>
+</tr>
+<tr>
+<td><strong><a href="part2-integrate-slm.html">Part 2 — Challenge 1</a></strong></td>
+<td>Plug your GEMM into a real SLM (<code>llama2.c</code> / TinyStories) and run it</td>
+<td style="text-align: center;">needs the model + a node</td>
+<td><strong>tokens/sec</strong></td>
+</tr>
+<tr>
+<td><strong><a href="part3-quantized-slm.html">Part 3 — Challenge 2</a></strong></td>
+<td>Do it in int8 — 4× less weight memory</td>
+<td style="text-align: center;">needs the model</td>
+<td>tokens/sec + memory + story quality</td>
+</tr>
+</tbody>
+</table>
+<p>Background reading for Parts 2–3 (no ML assumed):
+<strong><a href="transformer-from-scratch.html">transformer-from-scratch.md</a></strong> — what a language model
+actually computes, and why it's 43 matrix–vector products per token that become GEMMs
+when you batch.</p>
+<h2>Verified numbers (so you know the targets are real)</h2>
+<p>Measured with the reference implementations (single CPU core; the U50 for the
+hardware run):</p>
+<ul>
+<li>The storyteller runs at <strong>71.6 tokens/s</strong> on one CPU core and writes coherent stories
+  ("<em>Once upon a time, there was a little girl named Lily…</em>").</li>
+<li><strong>Matrix multiply is 84% of its runtime.</strong> The per-shape split: <strong>classifier 60%</strong>,
+  FFN 27%, attention projections 13% — the output head dominates, not the FFN.</li>
+<li>Part 1's four shapes (<code>288→288</code>, <code>768→288</code>, <code>288→768</code>, <code>32000→288</code>) are exactly those
+  matmuls. The reference GEMM runs ~1.6 GFLOP/s single-threaded — your floor to beat.</li>
+</ul>
+<h2>Prerequisites</h2>
+<ul>
+<li><strong>Part 1:</strong> a C compiler. That's it. <code>scripts/synth_cases.sh</code> makes the test data.</li>
+<li><strong>Parts 2–3:</strong> the model (<code>scripts/setup.sh</code> fetches a 60 MB checkpoint) and a
+  compute node; the hardware run uses the U50 host (your course starter kit has the
+  machine-specific details).</li>
+</ul>
+<h2>Codebase map</h2>
+<p>Everything generated (the model clone, weights, binaries, <code>cases/</code>) lands in <code>build/</code>
+and <code>cases/</code> and is git-ignored. The tracked files are small:</p>
+<pre><code>labs/tinystories/
+├── README.md
+├── part1-pure-gemm.md · part2-integrate-slm.md · part3-quantized-slm.md
+├── transformer-from-scratch.md          background: how a transformer computes
+├── src/
+│   ├── student_gemm.h                    ← the float contract (you implement this)
+│   ├── student_gemm_ref.c                reference float GEMM (so it all runs today)
+│   ├── student_gemm_fpga.cpp             template: same contract, offloaded to your kernel
+│   ├── student_gemm_int8.h / _ref.c      ← the int8 contract + reference
+│   ├── gemm_test.c / gemm_test_int8.c    offline testers (float / int8)
+│   ├── synth_case.c                      makes synthetic GEMM test cases (Part 1)
+│   ├── slm_backend.c                     the SLM seam: model's matmul() → student_gemm()
+│   └── dump_backend.c                    captures REAL model matmuls to cases/*.bin
+└── scripts/
+    ├── synth_cases.sh · test_gemm.sh · test_gemm_int8.sh    Part 1: make data, test your GEMM
+    ├── setup.sh · profile.sh                                Parts 2–3: get the model, profile it
+    ├── dump_cases.sh                                        capture real matmuls for testing
+    ├── build_slm.sh · run_hw.sh                             plug your GEMM into the SLM (CPU / U50)
+</code></pre>
+<p><strong>The whole workflow:</strong> you write <code>student_gemm</code> (and, for Part 3,
+<code>student_gemm_int8</code>). Test them with <code>test_gemm.sh</code> / <code>test_gemm_int8.sh</code>; plug them in
+with <code>build_slm.sh</code> / <code>run_hw.sh</code>.</p>
+</main>
+</body>
+</html>
