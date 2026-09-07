@@ -72,7 +72,7 @@ first — it assumes no machine-learning background and builds the whole picture
 <blockquote>
 <p><em>Once upon a time, there was a little girl named Lily. She loved to play outside in
 the sunshine. One day, she saw a big, red ball in the sky. It was the sun!</em> …
-<code>achieved tok/s: 71.6</code></p>
+<code>achieved tok/s: …</code></p>
 </blockquote>
 <p>It writes <strong>one token (≈ one word-piece) at a time</strong>: look at all the text so far,
 score every possible next token, pick one, append, repeat. Each step runs the whole
@@ -124,27 +124,25 @@ offline path):</p>
 <pre><code class="language-bash">cd labs/tinystories
 ./scripts/setup.sh          # clones the engine, fetches the 60 MB checkpoint, prints a story
 </code></pre>
-<p>Now the important part — don't guess where the time goes, <strong>measure</strong> it. <code>profile.sh</code>
-times every matrix multiply by shape:</p>
-<pre><code class="language-bash">./scripts/profile.sh
+<p>Now the important part — <strong>don't guess where the time goes, measure it.</strong> <code>profile.sh</code>
+times every matrix multiply, by shape, over a 256-token run:</p>
+<pre><code class="language-bash">./scripts/profile.sh        # prints a per-shape matmul profile
 </code></pre>
-<p>Verified (256 tokens, one core):</p>
-<pre><code>=== matmul profile (by shape n-&gt;d) ===
-total matmul time: 2.98 s     (out of 3.53 s total → 84% of all runtime)
-    288 -&gt; 32000   60.2%   classifier / output head
-    288 -&gt;   768   17.4%   FFN w1, w3
-    288 -&gt;   288   13.2%   attn wq/wk/wv/wo
-    768 -&gt;   288    9.2%   FFN w2
-</code></pre>
-<p>Two facts to carry forward:</p>
+<p>Read <em>your</em> profile and answer these in your report — the numbers drive every decision
+that follows:</p>
 <ol>
-<li><strong>Matrix multiply is 84% of the entire runtime.</strong> The model <em>is</em> your GEMM. Make
-   GEMM faster and you make the model faster — nothing else is worth touching.</li>
-<li><strong>The classifier (60%) is the single biggest slice</strong>, not the FFN. That surprises
-   people — the usual saying is "the FFN dominates transformers." For a model this
-   small with a 32000-word vocabulary, the output head is the monster. <em>Profile, don't
-   assume</em> — the same discipline decides what's worth offloading.</li>
+<li><strong>What fraction of total runtime is matrix multiply?</strong> Everything else — the norms,
+   the attention softmax, the sampling loop — is the remainder. What does that fraction
+   imply about the <em>best</em> speedup you could ever get by accelerating only the GEMMs?
+   (Think Amdahl's law.)</li>
+<li><strong>Which shape dominates?</strong> The four shapes map to the classifier (<code>288→32000</code>), the
+   FFN (<code>w1/w3</code> at <code>288→768</code>, <code>w2</code> at <code>768→288</code>), and the attention projections
+   (<code>288→288</code>). The usual saying is "the FFN dominates transformers" — does <em>your</em>
+   measurement agree, for a model this small with a 32000-token vocabulary? <strong>Profile,
+   don't assume.</strong></li>
 </ol>
+<p>Carry those two findings — the matmul fraction and the shape ranking — into §2.5; they
+decide what is worth accelerating and how much it can possibly buy you.</p>
 <h2>2.3 The seam — plug your GEMM in with one link choice</h2>
 <p>The model's matrix-multiply routine has this signature (it computes <code>xout = W·x</code>):</p>
 <pre><code class="language-c">void matmul(float* xout, float* x, float* w, int n, int d);   // xout[d] = W[d×n]·x[n]
@@ -189,9 +187,10 @@ lesson lives, and it is not the one you expect.</p>
 <p><strong>First result — it may get <em>slower</em>.</strong> The model calls <code>matmul</code> 43 times per token,
 each a GEMV (<code>N = 1</code>). Two forces work against you:</p>
 <ul>
-<li><strong>Amdahl's law.</strong> Matrix multiply is 84% of runtime, so even an <em>infinitely</em> fast
-  GEMM caps the speedup at <code>1 / (1 − 0.84) ≈ 6.25×</code> — the other 16% (norms, softmax,
-  the sampling loop) never goes away.</li>
+<li><strong>Amdahl's law.</strong> Matrix multiply is the large majority of runtime (you measured the
+  exact fraction <em>f</em> in §2.2), so even an <em>infinitely</em> fast GEMM caps the speedup at
+  <code>1 / (1 − f)</code> — and the non-matmul remainder (norms, softmax, the sampling loop)
+  never goes away.</li>
 <li><strong><code>N = 1</code> is memory-bound.</strong> A GEMV reads the whole weight matrix to make one output
   vector — no reuse to exploit. This is exactly the case Part 1 warned you is hard.</li>
 </ul>
@@ -222,7 +221,8 @@ real inference systems batch, and why Part 1 made you care about the <code>N &gt
 <li><strong>tokens/sec vs <code>N</code></strong> — the single-stream number (possibly below baseline, with your
    explanation) and the curve as batching/prefill raise <code>N</code>.</li>
 <li>Which matmuls you accelerated (you can offload just the top of the profile — the
-   classifier and FFN are 87% of matmul time) and the tok/s step from each.</li>
+   few biggest shapes you identified in §2.2 are the large majority of matmul time)
+   and the tok/s step from each.</li>
 <li>Your throughput ceiling and what it would take to raise it — which leads straight
    into <strong><a href="part3-quantized-slm.html">Part 3</a></strong>.</li>
 </ol>

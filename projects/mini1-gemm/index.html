@@ -106,17 +106,6 @@ and needs none of it.</p>
 <strong><a href="transformer-from-scratch.html">transformer-from-scratch.md</a></strong> — what a language model
 actually computes, and why it's 43 matrix–vector products per token that become GEMMs
 when you batch.</p>
-<h2>Verified numbers (so you know the targets are real)</h2>
-<p>Measured with the reference implementations (single CPU core; the U50 for the
-hardware run):</p>
-<ul>
-<li>The storyteller runs at <strong>71.6 tokens/s</strong> on one CPU core and writes coherent stories
-  ("<em>Once upon a time, there was a little girl named Lily…</em>").</li>
-<li><strong>Matrix multiply is 84% of its runtime.</strong> The per-shape split: <strong>classifier 60%</strong>,
-  FFN 27%, attention projections 13% — the output head dominates, not the FFN.</li>
-<li>Part 1's four shapes (<code>288→288</code>, <code>768→288</code>, <code>288→768</code>, <code>32000→288</code>) are exactly those
-  matmuls. The reference GEMM runs ~1.6 GFLOP/s single-threaded — your floor to beat.</li>
-</ul>
 <h2>Prerequisites</h2>
 <ul>
 <li><strong>Part 1:</strong> a C compiler. That's it. <code>scripts/synth_cases.sh</code> makes the test data.</li>
