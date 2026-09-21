@@ -172,15 +172,19 @@ whether tokens/sec actually goes up:</p>
 <li><strong>Only the activation and result cross the bus per call</strong> — <code>K×N</code> in, <code>M×N</code> out,
    tens of KB — plus the runtime <code>M, K, N</code>.</li>
 </ol>
-<p>Open the card correctly: if the host has more than one accelerator, open the U50 by its
-PCIe address (BDF), not device index 0 — the wrong device fails to load the bitstream.
-(Your course starter kit lists the exact address for the lab machine.) Build your
-kernel's bitstream with your HLS flow, then run the model through it on the U50 host:</p>
-<pre><code class="language-bash"># build your kernel's bitstream with your HLS flow  (≈ 1 h place &amp; route)
-GEMM_XCLBIN=path/to/your.xclbin ./scripts/run_hw.sh    # builds run_fpga, runs on the U50
-</code></pre>
-<p><code>run_hw.sh</code> links <code>run_slm.c</code> + <code>slm_backend.c</code> + <code>student_gemm_fpga.cpp</code> against the
-runtime and runs on the card. Read the <code>achieved tok/s</code> — that is your real number.</p>
+<p><strong>You build the bitstream; you do not need the U50.</strong> Compiling the <code>.xclbin</code> is a pure
+Slurm job on the RCE cluster (≈ 1 h place &amp; route, no FPGA needed to <em>build</em>). Only
+<em>running</em> it needs the U50 on the lab node — which you never log in to. You submit the
+built bitstream, the course runs it on the card, and the <strong>generated story + achieved
+tok/s</strong> come back to you. <code>student_gemm_fpga.cpp</code> is the host seam you fill in (offload
+<code>student_gemm</code> to your kernel); the two rules above — weights resident, only activations
+crossing the bus — are the point, and that tok/s is your real result.</p>
+<blockquote>
+<p><strong>How to build and submit</strong> — the exact commands, the submission portal, and your
+personal access token are in the <strong>course hardware handout on Moodle</strong> (included in
+your starter kit). They are class-specific, so they live there rather than on this
+public page.</p>
+</blockquote>
 <h2>2.5 The challenge: make it write faster (tokens/sec)</h2>
 <p>Run your plugged-in model and read the <code>achieved tok/s</code>. Here is where the systems
 lesson lives, and it is not the one you expect.</p>
@@ -217,7 +221,8 @@ real inference systems batch, and why Part 1 made you care about the <code>N &gt
 <h2>2.6 What to report</h2>
 <ol>
 <li>Your model generating a story through <strong>your</strong> <code>student_gemm</code> (build_slm shows
-   <code>IDENTICAL</code>), and running on the accelerator via <code>run_hw.sh</code>.</li>
+   <code>IDENTICAL</code>), and running on the accelerator — the story + tok/s the portal reports
+   back from your submitted bitstream.</li>
 <li><strong>tokens/sec vs <code>N</code></strong> — the single-stream number (possibly below baseline, with your
    explanation) and the curve as batching/prefill raise <code>N</code>.</li>
 <li>Which matmuls you accelerated (you can offload just the top of the profile — the

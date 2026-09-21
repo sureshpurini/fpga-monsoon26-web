@@ -133,11 +133,14 @@ and <code>cases/</code> and is git-ignored. The tracked files are small:</p>
     ├── synth_cases.sh · test_gemm.sh · test_gemm_int8.sh    Part 1: make data, test your GEMM
     ├── setup.sh · profile.sh                                Parts 2–3: get the model, profile it
     ├── dump_cases.sh                                        capture real matmuls for testing
-    ├── build_slm.sh · run_hw.sh                             plug your GEMM into the SLM (CPU / U50)
+    ├── build_slm.sh                                         plug your GEMM into the SLM (CPU)
+    └── (Part 2 U50 helpers)                                 build + submit to the class hardware — see the Moodle handout
 </code></pre>
 <p><strong>The whole workflow:</strong> you write <code>student_gemm</code> (and, for Part 3,
 <code>student_gemm_int8</code>). Test them with <code>test_gemm.sh</code> / <code>test_gemm_int8.sh</code>; plug them in
-with <code>build_slm.sh</code> / <code>run_hw.sh</code>.</p>
+with <code>build_slm.sh</code> (CPU). Running on the U50 uses class-specific hardware — the build
+and submit steps are in the <strong>course hardware handout on Moodle</strong> (you need no account
+on the U50 host; you submit a bitstream and your tokens/sec comes back).</p>
 </main>
 </body>
 </html>
