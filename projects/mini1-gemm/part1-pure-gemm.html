@@ -145,7 +145,7 @@ you feed the kernel decides everything about throughput. Design for both now.</p
 <p><code>scripts/synth_cases.sh</code> generates random test matrices of the four shapes (with a
 double-precision golden), and <code>scripts/test_gemm.sh</code> runs your <code>student_gemm</code> on them,
 checks correctness (<code>1e-2</code> tolerance), and reports GFLOP/s:</p>
-<pre><code class="language-bash">cd labs/tinystories
+<pre><code class="language-bash">cd mini1-gemm
 ./scripts/synth_cases.sh                 # makes cases/synth_*  (N = 1 and 32 by default)
 ./scripts/test_gemm.sh                   # tests the reference impl
 GEMM_SRC=path/to/your_gemm.c ./scripts/test_gemm.sh    # tests YOURS

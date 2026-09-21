@@ -81,7 +81,7 @@ elements per group, int8 values + one fp32 scale, int32 accumulate). <code>runq<
 matrix-multiply is your <strong>golden reference</strong>: the int8 story it produces is the target
 your accelerated version must reproduce.</p>
 <p>Quantize the checkpoint once, then run it:</p>
-<pre><code class="language-bash">cd labs/tinystories/build/llama2.c
+<pre><code class="language-bash">cd mini1-gemm/build/llama2.c
 python export.py stories15M_q80.bin --version 2 --checkpoint stories15M.bin   # make the int8 model
 ./runq stories15M_q80.bin -t 0.0 -s 42 -i &quot;Once upon a time&quot;                  # int8 story + tok/s
 </code></pre>
