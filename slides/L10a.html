@@ -48,22 +48,27 @@
 <header>FPGA — High-Performance Kernels · Monsoon 2026</header>
 
 <h1 id="1--the-software-table">1 · The software table</h1>
-<h2 id="first-understand-exactly-what-one-cell-means">First understand exactly what one cell means</h2>
+<h2 id="match-2--mismatch-%E2%88%921--gap-%E2%88%922">Match +2 · mismatch −1 · gap −2</h2>
 <footer>IIIT · Suresh Purini</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="6" data-paginate="true" data-header="FPGA — High-Performance Kernels · Monsoon 2026" data-footer="IIIT · Suresh Purini" data-theme="fpga" lang="C" data-marpit-pagination="6" style="--paginate:true;--header:FPGA — High-Performance Kernels · Monsoon 2026;--footer:IIIT · Suresh Purini;--theme:fpga;" data-marpit-pagination-total="89">
 <header>FPGA — High-Performance Kernels · Monsoon 2026</header>
-<h2 id="alignment-places-symbols-in-columns">Alignment places symbols in columns</h2>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-text">A C G
-A - G
+<h2 id="different-alignments-receive-different-scores">Different alignments receive different scores</h2>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-text">Alignment 1                     Alignment 2
+
+A C                             A C -
+A G                             A - G
 </code></pre>
-<p>Score:</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-text">A/A match   +2
-C/− gap     −2
-G/G match   +2
-             ──
-total        +2
+<p>Score each column independently:</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-text">Alignment 1                     Alignment 2
+
+A/A match       +2              A/A match       +2
+C/G mismatch    −1              C/− gap         −2
+                 ──             −/G gap         −2
+total           +1                               ──
+                                total           −2
 </code></pre>
+<p>The algorithm chooses the highest-scoring complete alignment: here, the mismatch is better than opening two gaps.</p>
 <footer>IIIT · Suresh Purini</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-paginate="true" data-header="FPGA — High-Performance Kernels · Monsoon 2026" data-footer="IIIT · Suresh Purini" data-theme="fpga" lang="C" data-marpit-pagination="7" style="--paginate:true;--header:FPGA — High-Performance Kernels · Monsoon 2026;--footer:IIIT · Suresh Purini;--theme:fpga;" data-marpit-pagination-total="89">
